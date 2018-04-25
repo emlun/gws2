@@ -21,4 +21,6 @@ mod commands;
 
 fn main() {
     println!("Hello, world!");
+
+    ::commands::version::command();
 }
