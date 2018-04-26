@@ -16,11 +16,36 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+extern crate clap;
+
+mod crate_info;
 mod commands;
+
+use crate_info::crate_author;
+use crate_info::crate_description;
+use crate_info::crate_name;
+use crate_info::crate_version;
+
+use clap::App;
+use clap::Arg;
+use clap::SubCommand;
 
 
 fn main() {
-    println!("Hello, world!");
+    let matches = App::new(crate_name())
+        .version(crate_version())
+        .about(crate_description())
+        .author(crate_author())
 
-    ::commands::version::command();
+        .subcommand(
+            SubCommand::with_name("status")
+                .about("Print status for all repositories in the workspace")
+                .arg(
+                    Arg::with_name("only-changes")
+                        .help("Only print out-of-sync repositories and branches")
+                )
+        )
+
+        .get_matches();
+    println!("{:?}", matches);
 }

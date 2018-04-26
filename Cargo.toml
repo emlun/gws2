@@ -1,6 +1,8 @@
 [package]
 name = "gws2"
 version = "0.1.0"
+description = "gws is a helper to manage workspaces which contain git repositories."
 authors = ["Emil Lundberg <emil@emlun.se>"]
 
 [dependencies]
+clap = { version = "2.31", features = ["yaml"] }

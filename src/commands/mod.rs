@@ -5,5 +5,4 @@ pub mod status;
 pub mod fetch;
 pub mod ff;
 pub mod check;
-pub mod version;
 pub mod help;
