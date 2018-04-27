@@ -1,8 +1,8 @@
-pub mod init;
+pub mod check;
 pub mod clone;
-pub mod update;
-pub mod status;
 pub mod fetch;
 pub mod ff;
-pub mod check;
 pub mod help;
+pub mod init;
+pub mod status;
+pub mod update;
