@@ -18,8 +18,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 extern crate clap;
 
-mod crate_info;
+mod cli;
 mod commands;
+mod crate_info;
 
 use crate_info::crate_author;
 use crate_info::crate_description;
@@ -27,8 +28,6 @@ use crate_info::crate_name;
 use crate_info::crate_version;
 
 use clap::App;
-use clap::Arg;
-use clap::SubCommand;
 
 
 fn main() {
@@ -37,14 +36,7 @@ fn main() {
         .about(crate_description())
         .author(crate_author())
 
-        .subcommand(
-            SubCommand::with_name("status")
-                .about("Print status for all repositories in the workspace")
-                .arg(
-                    Arg::with_name("only-changes")
-                        .help("Only print out-of-sync repositories and branches")
-                )
-        )
+        .subcommand(cli::status::subcommand_def())
 
         .get_matches();
     println!("{:?}", matches);
