@@ -20,6 +20,7 @@ extern crate clap;
 
 mod cli;
 mod commands;
+mod config;
 mod crate_info;
 
 use crate_info::crate_author;
