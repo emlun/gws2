@@ -12,7 +12,14 @@ impl FromStr for Workspace {
     fn from_str(config: &str) -> Result<Self, Self::Err> {
         let mut projects: Vec<Project> = Vec::new();
 
-        for line in config.trim().lines() {
+        let nonempty_lines = config
+            .trim()
+            .lines()
+            .flat_map(|s| s.split('#').next())
+            .map(&str::trim)
+            .filter(|s| !s.is_empty());
+
+        for line in nonempty_lines {
             projects.push(try!(line.parse()));
         }
 
@@ -34,8 +41,13 @@ impl FromStr for Project {
     type Err = String;
 
     fn from_str(line: &str) -> Result<Self, Self::Err> {
-        let mut segments = line
-            .trim()
+        let mut segments =
+            try!(line
+                .trim()
+                .split('#')
+                .next()
+                .ok_or("Failed to remove line comment")
+            )
             .split('|')
             .map(&str::trim);
 
@@ -181,6 +193,24 @@ mod tests {
     }
 
     #[test]
+    fn line_comment_is_ignored() {
+        assert_eq!(
+            Project::from_str("foo | git@github.com:foo/foo.git # | https:/github.com/foo/foo.git ignored"),
+            Ok(
+                Project {
+                    path: String::from("foo"),
+                    remotes: vec![
+                        Remote {
+                            url: String::from("git@github.com:foo/foo.git"),
+                            name: String::from("origin"),
+                        }
+                    ],
+                }
+            )
+        );
+    }
+
+    #[test]
     fn two_unnamed_remotes() {
         assert_eq!(
             Project::from_str("foo | git@github.com:foo/foo.git | git@github.com:bar/foo.git"),
@@ -278,6 +308,10 @@ mod tests {
         let config = "
             foo/bar | https://github.com/foo/bar.git
             boo | git@github.com:foo/boo.git | http://coool myone | testurl upstream
+
+            # Just a comment
+
+            moo | git@github.com:foo/moo.git # | http://coool myone | testurl upstream
         ";
 
         let workspace: Result<Workspace, _> = config.parse();
@@ -309,6 +343,15 @@ mod tests {
                             Remote {
                                 name: "upstream".to_string(),
                                 url: "testurl".to_string(),
+                            },
+                        ],
+                    },
+                    Project {
+                        path: "moo".to_string(),
+                        remotes: vec![
+                            Remote {
+                                name: "origin".to_string(),
+                                url: "git@github.com:foo/moo.git".to_string(),
                             },
                         ],
                     },
