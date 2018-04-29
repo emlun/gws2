@@ -35,6 +35,7 @@ impl FromStr for Project {
 
     fn from_str(line: &str) -> Result<Self, Self::Err> {
         let mut segments = line
+            .trim()
             .split('|')
             .map(&str::trim);
 
