@@ -1,5 +1,27 @@
 use ::std::str::FromStr;
 
+#[derive(Debug)]
+#[derive(PartialEq)]
+pub struct Workspace {
+    projects: Vec<Project>,
+}
+
+impl FromStr for Workspace {
+    type Err = String;
+
+    fn from_str(config: &str) -> Result<Self, Self::Err> {
+        let mut projects: Vec<Project> = Vec::new();
+
+        for line in config.trim().lines() {
+            projects.push(try!(line.parse()));
+        }
+
+        Ok(Workspace {
+            projects,
+        })
+    }
+}
+
 
 #[derive(Debug)]
 #[derive(PartialEq)]
