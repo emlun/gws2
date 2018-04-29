@@ -1,10 +1,9 @@
 use ::std::str::FromStr;
 
-#[derive(Debug)]
-#[derive(PartialEq)]
-pub struct Workspace {
-    projects: Vec<Project>,
-}
+use config::data::MaybeNamedRemote;
+use config::data::Project;
+use config::data::Remote;
+use config::data::Workspace;
 
 impl FromStr for Workspace {
     type Err = String;
@@ -27,14 +26,6 @@ impl FromStr for Workspace {
             projects,
         })
     }
-}
-
-
-#[derive(Debug)]
-#[derive(PartialEq)]
-pub struct Project {
-    path: String,
-    remotes: Vec<Remote>,
 }
 
 impl FromStr for Project {
@@ -87,25 +78,6 @@ impl FromStr for Project {
     }
 }
 
-pub struct MaybeNamedRemote {
-    url: String,
-    name: Option<String>,
-}
-impl MaybeNamedRemote {
-    fn to_named(self) -> Result<Remote, String> {
-        Ok(Remote {
-            url: self.url,
-            name: try!(self.name.ok_or("Cannot create a named remote from a remote without a name.")),
-        })
-    }
-
-    fn to_named_or(self, default_name: &str) -> Remote {
-        Remote {
-            url: self.url,
-            name: self.name.unwrap_or(default_name.to_string()),
-        }
-    }
-}
 impl FromStr for MaybeNamedRemote {
     type Err = String;
 
@@ -126,20 +98,12 @@ impl FromStr for MaybeNamedRemote {
 }
 
 
-#[derive(Debug)]
-#[derive(PartialEq)]
-pub struct Remote {
-    url: String,
-    name: String,
-}
-
-
 #[cfg(test)]
 mod tests {
     use ::std::str::FromStr;
-    use config::legacy::Project;
-    use config::legacy::Remote;
-    use config::legacy::Workspace;
+    use super::Project;
+    use super::Remote;
+    use super::Workspace;
 
     #[test]
     fn project_must_have_path() {
