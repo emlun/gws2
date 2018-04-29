@@ -127,6 +127,7 @@ mod tests {
     use ::std::str::FromStr;
     use config::legacy::Project;
     use config::legacy::Remote;
+    use config::legacy::Workspace;
 
     #[test]
     fn project_must_have_path() {
@@ -270,6 +271,50 @@ mod tests {
             Project::from_str(line).is_err(),
             format!("This line should result in an error: {}", line)
         );
+    }
+
+    #[test]
+    fn example_config_is_parsed_correctly() {
+        let config = "
+            foo/bar | https://github.com/foo/bar.git
+            boo | git@github.com:foo/boo.git | http://coool myone | testurl upstream
+        ";
+
+        let workspace: Result<Workspace, _> = config.parse();
+
+        assert_eq!(
+            workspace,
+            Ok(Workspace {
+                projects: vec![
+                    Project {
+                        path: "foo/bar".to_string(),
+                        remotes: vec![
+                            Remote {
+                                name: "origin".to_string(),
+                                url: "https://github.com/foo/bar.git".to_string(),
+                            },
+                        ],
+                    },
+                    Project {
+                        path: "boo".to_string(),
+                        remotes: vec![
+                            Remote {
+                                name: "origin".to_string(),
+                                url: "git@github.com:foo/boo.git".to_string(),
+                            },
+                            Remote {
+                                name: "myone".to_string(),
+                                url: "http://coool".to_string(),
+                            },
+                            Remote {
+                                name: "upstream".to_string(),
+                                url: "testurl".to_string(),
+                            },
+                        ],
+                    },
+                ],
+            })
+        )
     }
 
 }
