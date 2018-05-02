@@ -6,6 +6,9 @@ use config::data::Remote;
 use config::data::Workspace;
 use config::error::ConfigError;
 
+pub fn parse(input: &str) -> Result<Workspace, ConfigError> {
+    input.parse()
+}
 
 impl FromStr for Workspace {
     type Err = ConfigError;

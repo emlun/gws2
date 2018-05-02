@@ -1,0 +1,6 @@
+foo/bar | https://github.com/foo/bar.git
+boo | git@github.com:foo/boo.git | http://coool myone | testurl upstream
+
+# Just a comment
+
+moo | git@github.com:foo/moo.git # | http://coool myone | testurl upstream
