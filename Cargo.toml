@@ -6,3 +6,4 @@ authors = ["Emil Lundberg <emil@emlun.se>"]
 
 [dependencies]
 clap = { version = "2.31", features = ["yaml"] }
+git2 = "0.7"
