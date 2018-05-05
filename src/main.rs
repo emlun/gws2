@@ -17,6 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 extern crate clap;
+extern crate git2;
 
 mod cli;
 mod commands;
@@ -40,5 +41,15 @@ fn main() {
         .subcommand(cli::status::subcommand_def())
 
         .get_matches();
+
     println!("{:?}", matches);
+
+    let subcommand = match matches.subcommand {
+        None => cli::status::subcommand_def().get_matches(),
+        Some(sc) => sc.matches,
+    };
+
+    println!("subcommand: {:?}", subcommand);
+
+    commands::status::run();
 }
