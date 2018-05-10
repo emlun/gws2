@@ -177,7 +177,7 @@ fn ellipsisize(s: &str, length: usize) -> String {
 
 pub fn run() -> Result<(), ::git2::Error> {
 
-    let ws_file_path = Path::new("/home/emlun/dev/.projects.gws");
+    let ws_file_path = Path::new(".projects.gws");
     let ws = read_workspace_file(ws_file_path).unwrap();
 
     for project in ws.projects {
