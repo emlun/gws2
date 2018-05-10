@@ -3,6 +3,9 @@ use std::collections::BTreeSet;
 
 extern crate core;
 
+use ansi_term::ANSIString;
+use ansi_term::Colour;
+use ansi_term::Style;
 use git2::Branch;
 use git2::Commit;
 use git2::BranchType;
@@ -79,24 +82,33 @@ struct BranchStatus {
     in_sync: Option<bool>,
 }
 
+struct Palette {
+    branch: Style,
+    clean: Style,
+    dirty: Style,
+    error: Style,
+    missing: Style,
+    repo: Style,
+}
+
 impl BranchStatus {
-    fn describe_sync_status(&self) -> String {
+    fn describe_sync_status(&self, palette: &Palette) -> ANSIString {
         match self.in_sync {
-            Some(true) => "Clean".to_string(),
-            Some(false) => format!("Not in sync with {}", self.upstream_name),
-            None => format!("No remote branch {}", self.upstream_name),
+            Some(true) => palette.clean.paint("Clean".to_string()),
+            Some(false) => palette.dirty.paint(format!("Not in sync with {}", self.upstream_name)),
+            None => palette.missing.paint(format!("No remote branch {}", self.upstream_name)),
         }
     }
 
-    fn describe_status(&self) -> String {
+    fn describe_status(&self, palette: &Palette) -> ANSIString {
         if self.is_head {
             match self.dirty {
-                DirtyState::Clean => self.describe_sync_status(),
-                DirtyState::UncommittedChanges => "Dirty (Uncommitted changes)".to_string(),
-                DirtyState::UntrackedFiles => "Dirty (Untracked files)".to_string(),
+                DirtyState::Clean => self.describe_sync_status(palette),
+                DirtyState::UncommittedChanges => palette.dirty.paint("Dirty (Uncommitted changes)".to_string()),
+                DirtyState::UntrackedFiles => palette.dirty.paint("Dirty (Untracked files)".to_string()),
             }
         } else {
-            self.describe_sync_status()
+            self.describe_sync_status(palette)
         }
     }
 }
@@ -180,8 +192,17 @@ pub fn run() -> Result<(), ::git2::Error> {
     let ws_file_path = Path::new(".projects.gws");
     let ws = read_workspace_file(ws_file_path).unwrap();
 
+    let palette = Palette {
+        branch: Colour::Fixed(13).normal(),
+        clean: Colour::Fixed(10).normal(),
+        dirty: Colour::Fixed(9).normal(),
+        error: Colour::Fixed(9).normal(),
+        missing: Colour::Fixed(11).normal(),
+        repo: Colour::Fixed(12).normal(),
+    };
+
     for project in ws.projects {
-        println!("{}:", project.path);
+        println!("{}:", palette.repo.paint(project.path.clone()));
 
         match Repository::open(
             ws_file_path
@@ -194,16 +215,16 @@ pub fn run() -> Result<(), ::git2::Error> {
             Ok(repo) => {
                 for b in try!(repo_status(&repo)) {
                     println!(
-                        "    {: <25} {}",
-                        format!("{} :", ellipsisize(&b.name, 23)),
-                        b.describe_status()
+                        "    {} {}",
+                        palette.branch.paint(format!("{: <25}", format!("{} :", ellipsisize(&b.name, 23)))),
+                        b.describe_status(&palette)
                     );
                 }
             },
             Err(err) => {
                 match err.code() {
-                    ::git2::ErrorCode::NotFound => println!("    {: <25 } {}", "", "Missing repository"),
-                    _ => println!("Failed to open repo: {}", err),
+                    ::git2::ErrorCode::NotFound => println!("{}", palette.missing.paint(format!("    {: <25 } {}", "", "Missing repository"))),
+                    _ => println!("{}", palette.error.paint(format!("Failed to open repo: {}", err))),
                 }
             }
         }

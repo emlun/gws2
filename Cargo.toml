@@ -5,5 +5,6 @@ description = "gws is a helper to manage workspaces which contain git repositori
 authors = ["Emil Lundberg <emil@emlun.se>"]
 
 [dependencies]
+ansi_term = "0.11"
 clap = { version = "2.31", features = ["yaml"] }
 git2 = "0.7"
