@@ -32,7 +32,7 @@ use crate_info::crate_version;
 use clap::App;
 
 
-fn main() {
+fn real_main() -> i32 {
     let matches = App::new(crate_name())
         .version(crate_version())
         .about(crate_description())
@@ -51,5 +51,12 @@ fn main() {
 
     println!("subcommand: {:?}", subcommand);
 
-    commands::status::run();
+    match commands::status::run() {
+        Ok(()) => 0,
+        Err(_) => 1,
+    }
+}
+
+fn main() {
+    std::process::exit(real_main());
 }
