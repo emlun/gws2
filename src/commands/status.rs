@@ -13,6 +13,7 @@ use git2::Reference;
 use git2::Repository;
 use git2::Status;
 
+use config::data::Project;
 use config::read::read_workspace_file;
 
 
@@ -138,7 +139,7 @@ enum DirtyState {
 
 type RepositoryStatus = BTreeSet<BranchStatus>;
 
-fn repo_status(repo: &Repository) -> Result<RepositoryStatus, ::git2::Error> {
+fn repo_status(project: &Project, repo: &Repository) -> Result<RepositoryStatus, ::git2::Error> {
     let dirty_status =
         if any_file(&repo, is_dirty) {
             if any_file(&repo, is_modified) {
@@ -166,7 +167,7 @@ fn repo_status(repo: &Repository) -> Result<RepositoryStatus, ::git2::Error> {
                     .ok()
                     .and_then(|s| s)
                     .map(|s| s.to_string())
-                    .unwrap_or(format!("origin/{}", b_name))
+                    .unwrap_or(format!("{}/{}", project.remotes[0].name, b_name))
                 ,
                 dirty: dirty_status.clone(),
                 is_head: is_head_branch,
@@ -208,12 +209,12 @@ pub fn run() -> Result<(), ::git2::Error> {
             ws_file_path
                 .parent()
                 .unwrap()
-                .join(project.path)
+                .join(&project.path)
                 .as_path()
             )
         {
             Ok(repo) => {
-                for b in try!(repo_status(&repo)) {
+                for b in try!(repo_status(&project, &repo)) {
                     println!(
                         "  {} {} {}",
                         if b.is_head { "*" } else { " " },
