@@ -215,7 +215,8 @@ pub fn run() -> Result<(), ::git2::Error> {
             Ok(repo) => {
                 for b in try!(repo_status(&repo)) {
                     println!(
-                        "    {} {}",
+                        "  {} {} {}",
+                        if b.is_head { "*" } else { " " },
                         palette.branch.paint(format!("{: <25}", format!("{} :", ellipsisize(&b.name, 23)))),
                         b.describe_status(&palette)
                     );
