@@ -29,14 +29,14 @@ mod data;
 
 use std::path::Path;
 
+use clap::App;
+use clap::Arg;
+
 use color::palette::Palette;
 use crate_info::crate_author;
 use crate_info::crate_description;
 use crate_info::crate_name;
 use crate_info::crate_version;
-
-use clap::App;
-use clap::Arg;
 
 
 fn real_main() -> i32 {
