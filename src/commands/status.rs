@@ -55,12 +55,10 @@ fn ellipsisize(s: &str, length: usize) -> String {
     }
 }
 
-pub fn run() -> Result<(), ::git2::Error> {
+pub fn run(palette: &Palette) -> Result<(), ::git2::Error> {
 
     let ws_file_path = Path::new(".projects.gws");
     let ws = read_workspace_file(ws_file_path).unwrap();
-
-    let palette = Palette::default();
 
     for project in ws.projects {
         println!("{}:", palette.repo.paint(project.path.clone()));

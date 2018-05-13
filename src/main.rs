@@ -29,6 +29,7 @@ mod data;
 
 use std::path::Path;
 
+use color::palette::Palette;
 use crate_info::crate_author;
 use crate_info::crate_description;
 use crate_info::crate_name;
@@ -77,7 +78,9 @@ fn real_main() -> i32 {
 
     println!("subcommand: {:?}", subcommand);
 
-    match commands::status::run() {
+    let palette = Palette::default();
+
+    match commands::status::run(&palette) {
         Ok(()) => 0,
         Err(_) => 1,
     }
