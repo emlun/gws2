@@ -13,6 +13,7 @@ use data::status::RepositoryMethods;
 trait BranchStatusPrinting {
     fn describe_sync_status(&self, palette: &Palette) -> ANSIString;
     fn describe_status(&self, palette: &Palette) -> ANSIString;
+    fn describe_full(&self, palette: &Palette) -> String;
 }
 
 impl BranchStatusPrinting for BranchStatus {
@@ -34,6 +35,15 @@ impl BranchStatusPrinting for BranchStatus {
         } else {
             self.describe_sync_status(palette)
         }
+    }
+
+    fn describe_full(&self, palette: &Palette) -> String {
+        format!(
+            "{} {} {}",
+            if self.is_head { "*" } else { " " },
+            palette.branch.paint(format!("{: <25}", format!("{} :", ellipsisize(&self.name, 23)))),
+            self.describe_status(&palette)
+        )
     }
 }
 
@@ -65,12 +75,7 @@ pub fn run() -> Result<(), ::git2::Error> {
         {
             Ok(repo) => {
                 for b in try!(repo.project_status(&project)) {
-                    println!(
-                        "  {} {} {}",
-                        if b.is_head { "*" } else { " " },
-                        palette.branch.paint(format!("{: <25}", format!("{} :", ellipsisize(&b.name, 23)))),
-                        b.describe_status(&palette)
-                    );
+                    println!("  {}", b.describe_full(&palette));
                 }
             },
             Err(err) => {
