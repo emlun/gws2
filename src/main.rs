@@ -19,10 +19,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 extern crate ansi_term;
 extern crate clap;
 extern crate git2;
+extern crate libgws;
 
 mod cli;
 mod commands;
-mod config;
 mod crate_info;
 
 use std::path::Path;
