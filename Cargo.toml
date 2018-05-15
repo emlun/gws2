@@ -8,8 +8,3 @@ authors = ["Emil Lundberg <emil@emlun.se>"]
 ansi_term = "0.11"
 clap = { version = "2.31", features = ["yaml"] }
 git2 = "0.7"
-libgws = { path = "libgws" }
-
-[[test]]
-name = "libgws"
-path = "libgws/src/lib.rs"
