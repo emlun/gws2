@@ -4,8 +4,6 @@ use std::collections::BTreeSet;
 extern crate core;
 
 use ansi_term::ANSIString;
-use ansi_term::Colour;
-use ansi_term::Style;
 use git2::Branch;
 use git2::Commit;
 use git2::BranchType;
@@ -15,6 +13,7 @@ use git2::Status;
 
 use config::data::Project;
 use config::read::read_workspace_file;
+use color::palette::Palette;
 
 
 type RepositoryStatus = BTreeSet<BranchStatus>;
@@ -206,28 +205,12 @@ fn ellipsisize(s: &str, length: usize) -> String {
     }
 }
 
-struct Palette {
-    branch: Style,
-    clean: Style,
-    dirty: Style,
-    error: Style,
-    missing: Style,
-    repo: Style,
-}
-
 pub fn run() -> Result<(), ::git2::Error> {
 
     let ws_file_path = Path::new(".projects.gws");
     let ws = read_workspace_file(ws_file_path).unwrap();
 
-    let palette = Palette {
-        branch: Colour::Fixed(13).normal(),
-        clean: Colour::Fixed(10).normal(),
-        dirty: Colour::Fixed(9).normal(),
-        error: Colour::Fixed(9).normal(),
-        missing: Colour::Fixed(11).normal(),
-        repo: Colour::Fixed(12).normal(),
-    };
+    let palette = Palette::default();
 
     for project in ws.projects {
         println!("{}:", palette.repo.paint(project.path.clone()));

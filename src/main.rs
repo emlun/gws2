@@ -21,6 +21,7 @@ extern crate clap;
 extern crate git2;
 
 mod cli;
+mod color;
 mod commands;
 mod config;
 mod crate_info;
