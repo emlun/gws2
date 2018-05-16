@@ -25,6 +25,7 @@ mod color;
 mod commands;
 mod config;
 mod crate_info;
+mod data;
 
 use std::path::Path;
 
