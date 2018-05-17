@@ -1,7 +1,7 @@
 extern crate ansi_term;
 extern crate git2;
 
-mod color;
+pub mod color;
 mod commands;
 pub mod config;
 pub mod data;
