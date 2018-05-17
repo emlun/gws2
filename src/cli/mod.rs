@@ -4,5 +4,6 @@
 // pub mod ff;
 // pub mod help;
 // pub mod init;
-pub mod status;
+mod status;
+pub mod main;
 // pub mod update;
