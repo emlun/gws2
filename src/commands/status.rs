@@ -7,6 +7,7 @@ use config::read::read_workspace_file;
 use data::status::BranchStatus;
 use data::status::DirtyState;
 use data::status::ProjectStatusMethods;
+use super::common::print_project_header;
 
 
 trait BranchStatusPrinting {
@@ -60,7 +61,7 @@ pub fn run(palette: &Palette) -> Result<(), ::git2::Error> {
     let ws = read_workspace_file(ws_file_path).unwrap();
 
     for project in ws.projects {
-        println!("{}:", palette.repo.paint(project.path.clone()));
+        print_project_header(&project, &palette);
 
         match project.status() {
             Ok(Some(status)) => {
