@@ -1,5 +1,7 @@
 use std::collections::BTreeSet;
 
+use std::path::Path;
+
 use git2::Branch;
 use git2::BranchType;
 use git2::Commit;
@@ -16,6 +18,10 @@ trait BranchMethods<'repo> {
     fn branch_name<'a>(&'a self) -> Result<&'a str, ::git2::Error>;
     fn is_up_to_date_with_upstream(&'repo self) -> Result<Option<bool>, ::git2::Error>;
     fn upstream_name(&self) -> Result<Option<String>, ::git2::Error>;
+}
+
+pub trait ProjectStatusMethods {
+    fn status(&self) -> Result<Option<RepositoryStatus>, ::git2::Error>;
 }
 
 pub trait RepositoryMethods {
@@ -57,6 +63,19 @@ impl <'repo> BranchMethods<'repo> for Branch<'repo> {
             .and_then(|ups| ups.name().map(|ups| ups.map(&str::to_string)))
     }
 
+}
+
+impl ProjectStatusMethods for Project {
+    fn status(&self) -> Result<Option<RepositoryStatus>, ::git2::Error> {
+        if Path::new(&self.path).exists() {
+            Ok(Some(
+                Repository::open(&self.path)?
+                    .project_status(&self)?
+            ))
+        } else {
+            Ok(None)
+        }
+    }
 }
 
 impl RepositoryMethods for Repository {

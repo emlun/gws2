@@ -1,13 +1,12 @@
 use std::path::Path;
 
 use ansi_term::ANSIString;
-use git2::Repository;
 
 use color::palette::Palette;
 use config::read::read_workspace_file;
 use data::status::BranchStatus;
 use data::status::DirtyState;
-use data::status::RepositoryMethods;
+use data::status::ProjectStatusMethods;
 
 
 trait BranchStatusPrinting {
@@ -63,27 +62,19 @@ pub fn run(palette: &Palette) -> Result<(), ::git2::Error> {
     for project in ws.projects {
         println!("{}:", palette.repo.paint(project.path.clone()));
 
-        match Repository::open(
-            ws_file_path
-                .parent()
-                .unwrap()
-                .join(&project.path)
-                .as_path()
-            )
-        {
-            Ok(repo) => {
-                for b in try!(repo.project_status(&project)) {
+        match project.status() {
+            Ok(Some(status)) => {
+                for b in status {
                     println!("  {}", b.describe_full(&palette));
                 }
             },
+            Ok(None) => {
+                println!("{}", palette.missing.paint(format!("    {: <25 } {}", "", "Missing repository")));
+            },
             Err(err) => {
-                match err.code() {
-                    ::git2::ErrorCode::NotFound => println!("{}", palette.missing.paint(format!("    {: <25 } {}", "", "Missing repository"))),
-                    _ => println!("{}", palette.error.paint(format!("Failed to open repo: {}", err))),
-                }
+                println!("{}", palette.error.paint(format!("Failed to compute status: {}", err)));
             }
         }
-
     }
 
     Ok(())
