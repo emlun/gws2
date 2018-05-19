@@ -50,7 +50,7 @@ impl BranchStatusPrinting for BranchStatus {
 
 fn ellipsisize(s: &str, length: usize) -> String {
     if s.len() >= length {
-        format!("{}…", &s[0..(length - 1)]).to_string()
+        format!("{}…", &s[0..(length - 1)])
     } else {
         s.to_string()
     }
