@@ -10,7 +10,7 @@ use git2::Status;
 use config::data::Project;
 
 
-type RepositoryStatus = BTreeSet<BranchStatus>;
+pub type RepositoryStatus = BTreeSet<BranchStatus>;
 
 trait BranchMethods<'repo> {
     fn branch_name<'a>(&'a self) -> Result<&'a str, ::git2::Error>;
@@ -136,6 +136,7 @@ impl StatusMethods for Status {
     }
 }
 
+#[derive(Debug)]
 #[derive(Eq)]
 #[derive(Ord)]
 pub struct BranchStatus {
@@ -159,6 +160,7 @@ impl PartialOrd for BranchStatus {
 }
 
 #[derive(Clone)]
+#[derive(Debug)]
 #[derive(Eq)]
 #[derive(PartialEq)]
 #[derive(Ord)]
