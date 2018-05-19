@@ -1,13 +1,14 @@
-use std::path::Path;
-
 use clap::App;
 use clap::Arg;
+
+use std::path::Path;
 
 use color::palette::Palette;
 use crate_info::crate_author;
 use crate_info::crate_description;
 use crate_info::crate_name;
 use crate_info::crate_version;
+use super::exit_codes;
 
 
 pub fn main() -> i32 {
@@ -26,16 +27,12 @@ pub fn main() -> i32 {
 
         .arg(chdir_arg)
 
+        .subcommand(super::clone::subcommand_def())
         .subcommand(super::status::subcommand_def())
 
         .get_matches();
 
     println!("{:?}", matches);
-
-    let subcommand = match matches.subcommand {
-        None => super::status::subcommand_def().get_matches(),
-        Some(sc) => sc.matches,
-    };
 
     if let Some(chdir_arg) = matches.args.get("dir") {
         ::std::env::set_current_dir(
@@ -47,12 +44,18 @@ pub fn main() -> i32 {
         ).unwrap();
     }
 
-    println!("subcommand: {:?}", subcommand);
-
     let palette = Palette::default();
 
-    match ::commands::status::run(&palette) {
-        Ok(()) => 0,
-        Err(_) => 1,
+    let subcommand_run: fn(&Palette) -> Result<i32, _> = match &matches.subcommand {
+        None => ::commands::status::run,
+        Some(sc) => match sc.name.as_ref() {
+            "status" => ::commands::status::run,
+            _ => panic!("Unknown subcommand: {}", sc.name),
+        },
+    };
+
+    match subcommand_run(&palette) {
+        Ok(status) => status,
+        Err(_) => exit_codes::UNKNOWN_ERROR,
     }
 }

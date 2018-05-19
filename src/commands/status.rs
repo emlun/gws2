@@ -2,6 +2,7 @@ use std::path::Path;
 
 use ansi_term::ANSIString;
 
+use cli::exit_codes;
 use color::palette::Palette;
 use config::read::read_workspace_file;
 use data::status::BranchStatus;
@@ -55,10 +56,12 @@ fn ellipsisize(s: &str, length: usize) -> String {
     }
 }
 
-pub fn run(palette: &Palette) -> Result<(), ::git2::Error> {
+pub fn run(palette: &Palette) -> Result<i32, ::git2::Error> {
 
     let ws_file_path = Path::new(".projects.gws");
     let ws = read_workspace_file(ws_file_path).unwrap();
+
+    let mut exit_code: exit_codes::ExitCode = exit_codes::OK;
 
     for project in ws.projects {
         print_project_header(&project, &palette);
@@ -73,10 +76,11 @@ pub fn run(palette: &Palette) -> Result<(), ::git2::Error> {
                 println!("{}", palette.missing.paint(format!("    {: <25 } {}", "", "Missing repository")));
             },
             Err(err) => {
-                println!("{}", palette.error.paint(format!("Failed to compute status: {}", err)));
+                eprintln!("{}", palette.error.paint(format!("Failed to compute status: {}", err)));
+                exit_code = exit_codes::STATUS_PROJECT_FAILED;
             }
         }
     }
 
-    Ok(())
+    Ok(exit_code)
 }
