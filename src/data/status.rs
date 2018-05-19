@@ -1,7 +1,5 @@
 use std::collections::BTreeSet;
 
-use std::path::Path;
-
 use git2::Branch;
 use git2::BranchType;
 use git2::Commit;
@@ -67,14 +65,10 @@ impl <'repo> BranchMethods<'repo> for Branch<'repo> {
 
 impl ProjectStatusMethods for Project {
     fn status(&self) -> Option<Result<RepositoryStatus, ::git2::Error>> {
-        if Path::new(&self.path).exists() {
-            Some(
-                Repository::open(&self.path)
-                    .and_then(|repo| repo.project_status(&self))
+        self.open_repository()
+            .map(|repo_result|
+                repo_result.and_then(|repo| repo.project_status(&self))
             )
-        } else {
-            None
-        }
     }
 }
 

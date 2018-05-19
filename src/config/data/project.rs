@@ -1,3 +1,7 @@
+use std::path:: Path;
+
+use git2::Repository;
+
 use super::Remote;
 
 
@@ -6,4 +10,16 @@ use super::Remote;
 pub struct Project {
     pub path: String,
     pub remotes: Vec<Remote>,
+}
+
+impl Project {
+
+    pub fn open_repository(&self) -> Option<Result<Repository, ::git2::Error>> {
+        if Path::new(&self.path).exists() {
+            Some(Repository::open(&self.path))
+        } else {
+            None
+        }
+    }
+
 }
