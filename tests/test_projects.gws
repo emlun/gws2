@@ -1,0 +1,5 @@
+clean                 | https://github.com/StreakyCobra/gws | https://github.com/StreakyCobra/gws remote2
+new_commit/local      | https://github.com/StreakyCobra/gws | https://github.com/StreakyCobra/gws remote2
+new_commit/remote     | https://github.com/StreakyCobra/gws | https://github.com/StreakyCobra/gws remote2
+changes/new_files     | https://github.com/StreakyCobra/gws | https://github.com/StreakyCobra/gws remote2
+changes/changed_files | https://github.com/StreakyCobra/gws | https://github.com/StreakyCobra/gws remote2
