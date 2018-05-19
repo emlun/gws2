@@ -62,9 +62,14 @@ project_changed_files() {
   echo "flrglgrgldrgl" >> "${PROJECT_CHANGED_FILES}/README.md"
 }
 
+project_missing_repository() {
+  true
+}
+
 mirror_clone
 project_clean
 project_new_local_commit
 project_new_remote_commit
 project_new_files
 project_changed_files
+project_missing_repository

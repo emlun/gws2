@@ -158,6 +158,8 @@ fn status_produces_correct_data_structure() {
                         in_sync: Some(true),
                     }
                 ])),
+
+                None
             ]
         );
     });
