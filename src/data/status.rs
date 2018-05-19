@@ -24,7 +24,7 @@ pub trait ProjectStatusMethods {
     fn status(&self) -> Result<Option<RepositoryStatus>, ::git2::Error>;
 }
 
-pub trait RepositoryMethods {
+trait RepositoryMethods {
     fn any_file(&self, pred: fn(&Status) -> bool) -> bool;
     fn is_head(&self, branch: &Branch) -> Result<bool, ::git2::Error>;
     fn project_status(&self, project: &Project) -> Result<RepositoryStatus, ::git2::Error>;

@@ -6,13 +6,13 @@ use std::collections::BTreeSet;
 use std::path::Path;
 use std::path::PathBuf;
 
-use git2::Repository;
 use tempdir::TempDir;
 
 use gws2::config::read::read_workspace_file;
 use gws2::data::status::BranchStatus;
 use gws2::data::status::DirtyState;
-use gws2::data::status::RepositoryMethods;
+use gws2::data::status::ProjectStatusMethods;
+use gws2::data::status::RepositoryStatus;
 
 
 fn in_example_workspace<R>(test: fn() -> R) {
@@ -49,130 +49,116 @@ fn in_example_workspace_inner<R>(test: fn() -> R) -> Result<R, std::io::Error> {
     Ok(test())
 }
 
+fn set<I, T>(items: I) -> BTreeSet<T>
+    where I: IntoIterator<Item=T>,
+          T: Ord,
+{
+    items.into_iter().collect()
+}
 
 #[test]
 fn status_produces_correct_data_structure() {
     in_example_workspace(|| {
         let workspace = read_workspace_file(Path::new(".projects.gws")).unwrap();
 
-        // clean
-        assert_eq!(
-            Repository::open(&workspace.projects[0].path)
-                .unwrap()
-                .project_status(&workspace.projects[0])
-                .unwrap(),
-            vec![
-                BranchStatus {
-                    name: "master".to_string(),
-                    upstream_name: "origin/master".to_string(),
-                    dirty: DirtyState::Clean,
-                    is_head: true,
-                    in_sync: Some(true),
-                },
-                BranchStatus {
-                    name: "master2".to_string(),
-                    upstream_name: "remote2/master".to_string(),
-                    dirty: DirtyState::Clean,
-                    is_head: false,
-                    in_sync: Some(true),
-                }
-            ].into_iter().collect::<BTreeSet<BranchStatus>>()
-        );
+        let project_stati: Vec<Option<RepositoryStatus>> = workspace.projects.iter()
+            .map(ProjectStatusMethods::status)
+            .map(|r| r.unwrap())
+            .collect();
 
-        // new_commit/local
         assert_eq!(
-            Repository::open(&workspace.projects[1].path)
-                .unwrap()
-                .project_status(&workspace.projects[1])
-                .unwrap(),
+            project_stati,
             vec![
-                BranchStatus {
-                    name: "master".to_string(),
-                    upstream_name: "origin/master".to_string(),
-                    dirty: DirtyState::Clean,
-                    is_head: true,
-                    in_sync: Some(false),
-                },
-                BranchStatus {
-                    name: "master2".to_string(),
-                    upstream_name: "remote2/master".to_string(),
-                    dirty: DirtyState::Clean,
-                    is_head: false,
-                    in_sync: Some(true),
-                }
-            ].into_iter().collect::<BTreeSet<BranchStatus>>()
-        );
+                // clean
+                Some(set(vec![
+                    BranchStatus {
+                        name: "master".to_string(),
+                        upstream_name: "origin/master".to_string(),
+                        dirty: DirtyState::Clean,
+                        is_head: true,
+                        in_sync: Some(true),
+                    },
+                    BranchStatus {
+                        name: "master2".to_string(),
+                        upstream_name: "remote2/master".to_string(),
+                        dirty: DirtyState::Clean,
+                        is_head: false,
+                        in_sync: Some(true),
+                    }
+                ])),
 
-        // new_commit/remote
-        assert_eq!(
-            Repository::open(&workspace.projects[1].path)
-                .unwrap()
-                .project_status(&workspace.projects[1])
-                .unwrap(),
-            vec![
-                BranchStatus {
-                    name: "master".to_string(),
-                    upstream_name: "origin/master".to_string(),
-                    dirty: DirtyState::Clean,
-                    is_head: true,
-                    in_sync: Some(false),
-                },
-                BranchStatus {
-                    name: "master2".to_string(),
-                    upstream_name: "remote2/master".to_string(),
-                    dirty: DirtyState::Clean,
-                    is_head: false,
-                    in_sync: Some(true),
-                }
-            ].into_iter().collect::<BTreeSet<BranchStatus>>()
-        );
+                // new_commit/local
+                Some(set(vec![
+                    BranchStatus {
+                        name: "master".to_string(),
+                        upstream_name: "origin/master".to_string(),
+                        dirty: DirtyState::Clean,
+                        is_head: true,
+                        in_sync: Some(false),
+                    },
+                    BranchStatus {
+                        name: "master2".to_string(),
+                        upstream_name: "remote2/master".to_string(),
+                        dirty: DirtyState::Clean,
+                        is_head: false,
+                        in_sync: Some(true),
+                    }
+                ])),
 
-        // changes/new_files
-        assert_eq!(
-            Repository::open(&workspace.projects[1].path)
-                .unwrap()
-                .project_status(&workspace.projects[1])
-                .unwrap(),
-            vec![
-                BranchStatus {
-                    name: "master".to_string(),
-                    upstream_name: "origin/master".to_string(),
-                    dirty: DirtyState::UntrackedFiles,
-                    is_head: true,
-                    in_sync: Some(true),
-                },
-                BranchStatus {
-                    name: "master2".to_string(),
-                    upstream_name: "remote2/master".to_string(),
-                    dirty: DirtyState::Clean,
-                    is_head: false,
-                    in_sync: Some(true),
-                }
-            ].into_iter().collect::<BTreeSet<BranchStatus>>()
-        );
+                // new_commit/remote
+                Some(set(vec![
+                    BranchStatus {
+                        name: "master".to_string(),
+                        upstream_name: "origin/master".to_string(),
+                        dirty: DirtyState::Clean,
+                        is_head: true,
+                        in_sync: Some(false),
+                    },
+                    BranchStatus {
+                        name: "master2".to_string(),
+                        upstream_name: "remote2/master".to_string(),
+                        dirty: DirtyState::Clean,
+                        is_head: false,
+                        in_sync: Some(true),
+                    }
+                ])),
 
-        // changes/changed_files
-        assert_eq!(
-            Repository::open(&workspace.projects[1].path)
-                .unwrap()
-                .project_status(&workspace.projects[1])
-                .unwrap(),
-            vec![
-                BranchStatus {
-                    name: "master".to_string(),
-                    upstream_name: "origin/master".to_string(),
-                    dirty: DirtyState::UncommittedChanges,
-                    is_head: true,
-                    in_sync: Some(true),
-                },
-                BranchStatus {
-                    name: "master2".to_string(),
-                    upstream_name: "remote2/master".to_string(),
-                    dirty: DirtyState::Clean,
-                    is_head: false,
-                    in_sync: Some(true),
-                }
-            ].into_iter().collect::<BTreeSet<BranchStatus>>()
+                // changes/new_files
+                Some(set(vec![
+                    BranchStatus {
+                        name: "master".to_string(),
+                        upstream_name: "origin/master".to_string(),
+                        dirty: DirtyState::UntrackedFiles,
+                        is_head: true,
+                        in_sync: Some(true),
+                    },
+                    BranchStatus {
+                        name: "master2".to_string(),
+                        upstream_name: "remote2/master".to_string(),
+                        dirty: DirtyState::Clean,
+                        is_head: false,
+                        in_sync: Some(true),
+                    }
+                ])),
+
+                // changes/changed_files
+                Some(set(vec![
+                    BranchStatus {
+                        name: "master".to_string(),
+                        upstream_name: "origin/master".to_string(),
+                        dirty: DirtyState::UncommittedChanges,
+                        is_head: true,
+                        in_sync: Some(true),
+                    },
+                    BranchStatus {
+                        name: "master2".to_string(),
+                        upstream_name: "remote2/master".to_string(),
+                        dirty: DirtyState::Clean,
+                        is_head: false,
+                        in_sync: Some(true),
+                    }
+                ])),
+            ]
         );
     });
 }
