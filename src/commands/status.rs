@@ -67,18 +67,18 @@ pub fn run(palette: &Palette) -> Result<i32, ::git2::Error> {
         print_project_header(&project, &palette);
 
         match project.status() {
-            Ok(Some(status)) => {
+            Some(Ok(status)) => {
                 for b in status {
                     println!("  {}", b.describe_full(&palette));
                 }
             },
-            Ok(None) => {
-                println!("{}", palette.missing.paint(format!("    {: <25 } {}", "", "Missing repository")));
-            },
-            Err(err) => {
+            Some(Err(err)) => {
                 eprintln!("{}", palette.error.paint(format!("Failed to compute status: {}", err)));
                 exit_code = exit_codes::STATUS_PROJECT_FAILED;
             }
+            None => {
+                println!("{}", palette.missing.paint(format!("    {: <25 } {}", "", "Missing repository")));
+            },
         }
     }
 

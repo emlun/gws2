@@ -21,7 +21,7 @@ trait BranchMethods<'repo> {
 }
 
 pub trait ProjectStatusMethods {
-    fn status(&self) -> Result<Option<RepositoryStatus>, ::git2::Error>;
+    fn status(&self) -> Option<Result<RepositoryStatus, ::git2::Error>>;
 }
 
 trait RepositoryMethods {
@@ -66,14 +66,14 @@ impl <'repo> BranchMethods<'repo> for Branch<'repo> {
 }
 
 impl ProjectStatusMethods for Project {
-    fn status(&self) -> Result<Option<RepositoryStatus>, ::git2::Error> {
+    fn status(&self) -> Option<Result<RepositoryStatus, ::git2::Error>> {
         if Path::new(&self.path).exists() {
-            Ok(Some(
-                Repository::open(&self.path)?
-                    .project_status(&self)?
-            ))
+            Some(
+                Repository::open(&self.path)
+                    .and_then(|repo| repo.project_status(&self))
+            )
         } else {
-            Ok(None)
+            None
         }
     }
 }

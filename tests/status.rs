@@ -23,7 +23,7 @@ fn status_produces_correct_data_structure() {
 
         let project_stati: Vec<Option<RepositoryStatus>> = workspace.projects.iter()
             .map(ProjectStatusMethods::status)
-            .map(|r| r.unwrap())
+            .map(|r| r.map(|result| result.unwrap()))
             .collect();
 
         assert_eq!(
