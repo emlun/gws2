@@ -6,3 +6,5 @@ pub const NO_PROJECTS_FILE: ExitCode = 2;
 pub const BAD_PROJECTS_FILE: ExitCode = 3;
 
 pub const STATUS_PROJECT_FAILED: ExitCode = 4;
+
+pub const CLONE_FAILED: ExitCode = 5;
