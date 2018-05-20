@@ -4,6 +4,8 @@ use clap::Arg;
 use std::path::Path;
 
 use color::palette::Palette;
+use config::data::Workspace;
+use config::read::read_workspace_file;
 use crate_info::crate_author;
 use crate_info::crate_description;
 use crate_info::crate_name;
@@ -46,7 +48,7 @@ pub fn main() -> i32 {
 
     let palette = Palette::default();
 
-    let subcommand_run: fn(&Palette) -> Result<i32, _> = match &matches.subcommand {
+    let subcommand_run: fn(Workspace, &Palette) -> Result<i32, _> = match &matches.subcommand {
         None => ::commands::status::run,
         Some(sc) => match sc.name.as_ref() {
             "status" => ::commands::status::run,
@@ -54,8 +56,18 @@ pub fn main() -> i32 {
         },
     };
 
-    match subcommand_run(&palette) {
-        Ok(status) => status,
-        Err(_) => exit_codes::UNKNOWN_ERROR,
+    let ws_file_path = Path::new(".projects.gws");
+    if ws_file_path.exists() {
+        match read_workspace_file(ws_file_path) {
+            Ok(ws) => {
+                match subcommand_run(ws, &palette) {
+                    Ok(status) => status,
+                    Err(_) => exit_codes::UNKNOWN_ERROR,
+                }
+            },
+            Err(_) => exit_codes::BAD_PROJECTS_FILE,
+        }
+    } else {
+        exit_codes::NO_PROJECTS_FILE
     }
 }

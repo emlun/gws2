@@ -1,10 +1,8 @@
-use std::path::Path;
-
 use ansi_term::ANSIString;
 
 use cli::exit_codes;
 use color::palette::Palette;
-use config::read::read_workspace_file;
+use config::data::Workspace;
 use data::status::BranchStatus;
 use data::status::DirtyState;
 use data::status::ProjectStatusMethods;
@@ -50,14 +48,10 @@ impl BranchStatusPrinting for BranchStatus {
     }
 }
 
-pub fn run(palette: &Palette) -> Result<i32, ::git2::Error> {
-
-    let ws_file_path = Path::new(".projects.gws");
-    let ws = read_workspace_file(ws_file_path).unwrap();
-
+pub fn run(workspace: Workspace, palette: &Palette) -> Result<i32, ::git2::Error> {
     let mut exit_code: exit_codes::ExitCode = exit_codes::OK;
 
-    for project in ws.projects {
+    for project in workspace.projects {
         println!("{}", format_project_header(&project, &palette));
 
         match project.status() {
