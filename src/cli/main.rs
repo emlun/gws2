@@ -31,6 +31,7 @@ pub fn main() -> i32 {
 
         .subcommand(super::clone::subcommand_def())
         .subcommand(super::status::subcommand_def())
+        .subcommand(super::update::subcommand_def())
 
         .get_matches();
 
@@ -51,6 +52,7 @@ pub fn main() -> i32 {
         Some(sc) => match sc.name.as_ref() {
             "clone" => Box::new(super::clone::make_command(&sc.matches)),
             "status" => Box::new(super::status::make_command(&sc.matches)),
+            "update" => Box::new(super::update::make_command(&sc.matches)),
             _ => panic!("Unknown subcommand: {}", sc.name),
         },
     };

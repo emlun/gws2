@@ -7,4 +7,4 @@ pub mod exit_codes;
 // pub mod init;
 mod status;
 pub mod main;
-// pub mod update;
+pub mod update;
