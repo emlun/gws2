@@ -8,7 +8,9 @@ use config::read::read_workspace_file;
 use data::status::BranchStatus;
 use data::status::DirtyState;
 use data::status::ProjectStatusMethods;
-use super::common::print_project_header;
+use super::common::format_branch_line;
+use super::common::format_message_line;
+use super::common::format_project_header;
 
 
 trait BranchStatusPrinting {
@@ -39,20 +41,12 @@ impl BranchStatusPrinting for BranchStatus {
     }
 
     fn describe_full(&self, palette: &Palette) -> String {
-        format!(
-            "{} {} {}",
-            if self.is_head { "*" } else { " " },
-            palette.branch.paint(format!("{: <25}", format!("{} :", ellipsisize(&self.name, 23)))),
-            self.describe_status(&palette)
+        format_branch_line(
+            &palette,
+            self.is_head,
+            &self.name,
+            &self.describe_status(&palette)
         )
-    }
-}
-
-fn ellipsisize(s: &str, length: usize) -> String {
-    if s.len() >= length {
-        format!("{}…", &s[0..(length - 1)])
-    } else {
-        s.to_string()
     }
 }
 
@@ -64,12 +58,12 @@ pub fn run(palette: &Palette) -> Result<i32, ::git2::Error> {
     let mut exit_code: exit_codes::ExitCode = exit_codes::OK;
 
     for project in ws.projects {
-        print_project_header(&project, &palette);
+        println!("{}", format_project_header(&project, &palette));
 
         match project.status() {
             Some(Ok(status)) => {
                 for b in status {
-                    println!("  {}", b.describe_full(&palette));
+                    println!("{}", b.describe_full(&palette));
                 }
             },
             Some(Err(err)) => {
@@ -77,7 +71,7 @@ pub fn run(palette: &Palette) -> Result<i32, ::git2::Error> {
                 exit_code = exit_codes::STATUS_PROJECT_FAILED;
             }
             None => {
-                println!("{}", palette.missing.paint(format!("    {: <25 } {}", "", "Missing repository")));
+                println!("{}", palette.missing.paint(format_message_line("Missing repository")));
             },
         }
     }
