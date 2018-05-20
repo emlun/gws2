@@ -1,3 +1,5 @@
+pub mod exit_codes;
+
 use ansi_term::ANSIString;
 
 use color::palette::Palette;

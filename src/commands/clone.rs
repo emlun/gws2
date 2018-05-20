@@ -3,11 +3,11 @@ use std::path::Path;
 
 use git2::Repository;
 
-use cli::exit_codes;
 use color::palette::Palette;
 use config::data::Workspace;
 use data::status::ProjectStatusMethods;
 use super::common::Command;
+use super::common::exit_codes;
 use super::common::format_message_line;
 use super::common::format_project_header;
 

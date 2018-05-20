@@ -5,12 +5,12 @@ use std::path::Path;
 
 use color::palette::Palette;
 use commands::common::Command;
+use commands::common::exit_codes;
 use config::read::read_workspace_file;
 use crate_info::crate_author;
 use crate_info::crate_description;
 use crate_info::crate_name;
 use crate_info::crate_version;
-use super::exit_codes;
 
 
 pub fn main() -> i32 {

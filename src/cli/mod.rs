@@ -1,6 +1,5 @@
 // pub mod check;
 pub mod clone;
-pub mod exit_codes;
 // pub mod fetch;
 // pub mod ff;
 // pub mod help;
