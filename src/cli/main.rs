@@ -34,8 +34,6 @@ pub fn main() -> i32 {
 
         .get_matches();
 
-    println!("{:?}", matches);
-
     if let Some(chdir_arg) = matches.args.get("dir") {
         ::std::env::set_current_dir(
             Path::new(
