@@ -5,6 +5,6 @@ pub mod exit_codes;
 // pub mod ff;
 // pub mod help;
 // pub mod init;
-mod status;
 pub mod main;
+mod status;
 pub mod update;
