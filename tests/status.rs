@@ -4,9 +4,6 @@ extern crate tempdir;
 
 mod util;
 
-use std::path::Path;
-
-use gws2::config::read::read_workspace_file;
 use gws2::data::status::BranchStatus;
 use gws2::data::status::DirtyState;
 use gws2::data::status::ProjectStatusMethods;
@@ -18,9 +15,7 @@ use util::set;
 
 #[test]
 fn status_produces_correct_data_structure() {
-    in_example_workspace(|| {
-        let workspace = read_workspace_file(Path::new(".projects.gws")).unwrap();
-
+    in_example_workspace(|workspace| {
         let project_stati: Vec<Option<RepositoryStatus>> = workspace.projects.iter()
             .map(ProjectStatusMethods::status)
             .map(|r| r.map(|result| result.unwrap()))

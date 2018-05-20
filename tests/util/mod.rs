@@ -7,17 +7,21 @@ use std::env::current_dir;
 use std::env::set_current_dir;
 use std::fs::copy;
 use std::io::Error;
+use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 
 use tempdir::TempDir;
 
+use gws2::config::data::Workspace;
+use gws2::config::read::read_workspace_file;
 
-pub fn in_example_workspace<R>(test: fn() -> R) {
+
+pub fn in_example_workspace<R>(test: fn(Workspace) -> R) {
     in_example_workspace_inner(test).unwrap();
 }
 
-fn in_example_workspace_inner<R>(test: fn() -> R) -> Result<R, Error> {
+fn in_example_workspace_inner<R>(test: fn(Workspace) -> R) -> Result<R, Error> {
     let tmpdir = TempDir::new("gws2-test")?;
 
     let projects_gws_path: PathBuf = current_dir()?
@@ -44,7 +48,8 @@ fn in_example_workspace_inner<R>(test: fn() -> R) -> Result<R, Error> {
 
     set_current_dir(tmpdir.path())?;
 
-    Ok(test())
+    let workspace = read_workspace_file(Path::new(".projects.gws")).unwrap();
+    Ok(test(workspace))
 }
 
 pub fn set<I, T>(items: I) -> BTreeSet<T>
