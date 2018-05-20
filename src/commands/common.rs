@@ -2,7 +2,12 @@ use ansi_term::ANSIString;
 
 use color::palette::Palette;
 use config::data::Project;
+use config::data::Workspace;
 
+
+pub trait Command {
+    fn run(&self, workspace: Workspace, palette: &Palette) -> Result<i32, ::git2::Error>;
+}
 
 fn ellipsisize(s: &str, length: usize) -> String {
     if s.len() >= length {

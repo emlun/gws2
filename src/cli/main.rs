@@ -4,7 +4,7 @@ use clap::Arg;
 use std::path::Path;
 
 use color::palette::Palette;
-use config::data::Workspace;
+use commands::common::Command;
 use config::read::read_workspace_file;
 use crate_info::crate_author;
 use crate_info::crate_description;
@@ -29,7 +29,6 @@ pub fn main() -> i32 {
 
         .arg(chdir_arg)
 
-        .subcommand(super::clone::subcommand_def())
         .subcommand(super::status::subcommand_def())
 
         .get_matches();
@@ -48,10 +47,10 @@ pub fn main() -> i32 {
 
     let palette = Palette::default();
 
-    let subcommand_run: fn(Workspace, &Palette) -> Result<i32, _> = match &matches.subcommand {
-        None => ::commands::status::run,
+    let subcommand: Box<Command> = match &matches.subcommand {
+        None => Box::new(super::status::make_command(&matches)),
         Some(sc) => match sc.name.as_ref() {
-            "status" => ::commands::status::run,
+            "status" => Box::new(super::status::make_command(&sc.matches)),
             _ => panic!("Unknown subcommand: {}", sc.name),
         },
     };
@@ -60,7 +59,7 @@ pub fn main() -> i32 {
     if ws_file_path.exists() {
         match read_workspace_file(ws_file_path) {
             Ok(ws) => {
-                match subcommand_run(ws, &palette) {
+                match subcommand.run(ws, &palette) {
                     Ok(status) => status,
                     Err(_) => exit_codes::UNKNOWN_ERROR,
                 }

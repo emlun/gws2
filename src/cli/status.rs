@@ -1,6 +1,9 @@
 use clap::App;
 use clap::Arg;
+use clap::ArgMatches;
 use clap::SubCommand;
+
+use commands::status::Status;
 
 
 pub fn subcommand_def<'a>() -> App<'a, 'a> {
@@ -11,4 +14,10 @@ pub fn subcommand_def<'a>() -> App<'a, 'a> {
                 .long("only-changes")
                 .help("Only print out-of-sync repositories and branches")
         )
+}
+
+pub fn make_command(matches: &ArgMatches) -> Status {
+    Status {
+        only_changes: matches.is_present("only-changes"),
+    }
 }

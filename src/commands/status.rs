@@ -6,6 +6,7 @@ use config::data::Workspace;
 use data::status::BranchStatus;
 use data::status::DirtyState;
 use data::status::ProjectStatusMethods;
+use super::common::Command;
 use super::common::format_branch_line;
 use super::common::format_message_line;
 use super::common::format_project_header;
@@ -48,27 +49,33 @@ impl BranchStatusPrinting for BranchStatus {
     }
 }
 
-pub fn run(workspace: Workspace, palette: &Palette) -> Result<i32, ::git2::Error> {
-    let mut exit_code: exit_codes::ExitCode = exit_codes::OK;
+pub struct Status {
+    pub only_changes: bool,
+}
 
-    for project in workspace.projects {
-        println!("{}", format_project_header(&project, &palette));
+impl Command for Status {
+    fn run(&self, workspace: Workspace, palette: &Palette) -> Result<i32, ::git2::Error> {
+        let mut exit_code: exit_codes::ExitCode = exit_codes::OK;
 
-        match project.status() {
-            Some(Ok(status)) => {
-                for b in status {
-                    println!("{}", b.describe_full(&palette));
+        for project in workspace.projects {
+            println!("{}", format_project_header(&project, &palette));
+
+            match project.status() {
+                Some(Ok(status)) => {
+                    for b in status {
+                        println!("{}", b.describe_full(&palette));
+                    }
+                },
+                Some(Err(err)) => {
+                    eprintln!("{}", palette.error.paint(format!("Failed to compute status: {}", err)));
+                    exit_code = exit_codes::STATUS_PROJECT_FAILED;
                 }
-            },
-            Some(Err(err)) => {
-                eprintln!("{}", palette.error.paint(format!("Failed to compute status: {}", err)));
-                exit_code = exit_codes::STATUS_PROJECT_FAILED;
+                None => {
+                    println!("{}", palette.missing.paint(format_message_line("Missing repository")));
+                },
             }
-            None => {
-                println!("{}", palette.missing.paint(format_message_line("Missing repository")));
-            },
         }
-    }
 
-    Ok(exit_code)
+        Ok(exit_code)
+    }
 }
