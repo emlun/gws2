@@ -71,12 +71,11 @@ impl FromStr for Project {
         let second_remote: Option<Remote> = maybe_remotes_iter.next()
             .map(|r| r.to_named_or("upstream"));
 
-        let mut all_remotes: Vec<Remote> = Vec::new();
-        all_remotes.push(first_remote);
-        second_remote.into_iter().for_each(|r| all_remotes.push(r));
+        let mut extra_remotes: Vec<Remote> = Vec::new();
+        second_remote.into_iter().for_each(|r| extra_remotes.push(r));
 
         for r in maybe_remotes_iter {
-            all_remotes.push(
+            extra_remotes.push(
                 try!(
                     r.to_named()
                     .map_err(|_|
@@ -86,7 +85,8 @@ impl FromStr for Project {
 
         Ok(Project {
             path,
-            remotes: all_remotes,
+            main_remote: first_remote,
+            extra_remotes: extra_remotes,
         })
     }
 }
@@ -143,12 +143,11 @@ mod tests {
             Ok(
                 Project {
                     path: String::from("foo"),
-                    remotes: vec![
-                        Remote {
-                            url: String::from("git@github.com:foo/foo.git"),
-                            name: String::from("origin"),
-                        }
-                    ],
+                    main_remote: Remote {
+                        url: String::from("git@github.com:foo/foo.git"),
+                        name: String::from("origin"),
+                    },
+                    extra_remotes: vec![],
                 }
             )
         );
@@ -161,12 +160,11 @@ mod tests {
             Ok(
                 Project {
                     path: String::from("foo"),
-                    remotes: vec![
-                        Remote {
-                            url: String::from("git@github.com:foo/foo.git"),
-                            name: String::from("github"),
-                        }
-                    ],
+                    main_remote: Remote {
+                        url: String::from("git@github.com:foo/foo.git"),
+                        name: String::from("github"),
+                    },
+                    extra_remotes: vec![],
                 }
             )
         );
@@ -179,12 +177,11 @@ mod tests {
             Ok(
                 Project {
                     path: String::from("foo"),
-                    remotes: vec![
-                        Remote {
-                            url: String::from("git@github.com:foo/foo.git"),
-                            name: String::from("origin"),
-                        }
-                    ],
+                    main_remote: Remote {
+                        url: String::from("git@github.com:foo/foo.git"),
+                        name: String::from("origin"),
+                    },
+                    extra_remotes: vec![],
                 }
             )
         );
@@ -197,11 +194,11 @@ mod tests {
             Ok(
                 Project {
                     path: String::from("foo"),
-                    remotes: vec![
-                        Remote {
-                            url: String::from("git@github.com:foo/foo.git"),
-                            name: String::from("origin"),
-                        },
+                    main_remote: Remote {
+                        url: String::from("git@github.com:foo/foo.git"),
+                        name: String::from("origin"),
+                    },
+                    extra_remotes: vec![
                         Remote {
                             url: String::from("git@github.com:bar/foo.git"),
                             name: String::from("upstream"),
@@ -224,11 +221,11 @@ mod tests {
             Ok(
                 Project {
                     path: String::from("foo"),
-                    remotes: vec![
-                        Remote {
-                            url: String::from("git@github.com:foo/foo.git"),
-                            name: String::from("github-foo"),
-                        },
+                    main_remote: Remote {
+                        url: String::from("git@github.com:foo/foo.git"),
+                        name: String::from("github-foo"),
+                    },
+                    extra_remotes: vec![
                         Remote {
                             url: String::from("git@github.com:bar/foo.git"),
                             name: String::from("github-bar"),
@@ -246,11 +243,11 @@ mod tests {
             Ok(
                 Project {
                     path: String::from("foo"),
-                    remotes: vec![
-                        Remote {
-                            url: String::from("git@github.com:foo/foo.git"),
-                            name: String::from("github-foo"),
-                        },
+                    main_remote: Remote {
+                        url: String::from("git@github.com:foo/foo.git"),
+                        name: String::from("github-foo"),
+                    },
+                    extra_remotes: vec![
                         Remote {
                             url: String::from("git@github.com:bar/foo.git"),
                             name: String::from("github-bar"),
@@ -302,20 +299,19 @@ mod tests {
                 projects: vec![
                     Project {
                         path: "foo/bar".to_string(),
-                        remotes: vec![
-                            Remote {
-                                name: "origin".to_string(),
-                                url: "https://github.com/foo/bar.git".to_string(),
-                            },
-                        ],
+                        main_remote: Remote {
+                            name: "origin".to_string(),
+                            url: "https://github.com/foo/bar.git".to_string(),
+                        },
+                        extra_remotes: vec![],
                     },
                     Project {
                         path: "boo".to_string(),
-                        remotes: vec![
-                            Remote {
-                                name: "origin".to_string(),
-                                url: "git@github.com:foo/boo.git".to_string(),
-                            },
+                        main_remote: Remote {
+                            name: "origin".to_string(),
+                            url: "git@github.com:foo/boo.git".to_string(),
+                        },
+                        extra_remotes: vec![
                             Remote {
                                 name: "myone".to_string(),
                                 url: "http://coool".to_string(),
@@ -328,12 +324,11 @@ mod tests {
                     },
                     Project {
                         path: "moo".to_string(),
-                        remotes: vec![
-                            Remote {
-                                name: "origin".to_string(),
-                                url: "git@github.com:foo/moo.git".to_string(),
-                            },
-                        ],
+                        main_remote: Remote {
+                            name: "origin".to_string(),
+                            url: "git@github.com:foo/moo.git".to_string(),
+                        },
+                        extra_remotes: vec![],
                     },
                 ],
             })

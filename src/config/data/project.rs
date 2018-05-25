@@ -9,7 +9,8 @@ use super::Remote;
 #[derive(PartialEq)]
 pub struct Project {
     pub path: String,
-    pub remotes: Vec<Remote>,
+    pub main_remote: Remote,
+    pub extra_remotes: Vec<Remote>,
 }
 
 impl Project {

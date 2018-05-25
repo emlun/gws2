@@ -42,20 +42,19 @@ mod tests {
                 projects: vec![
                     Project {
                         path: "foo/bar".to_string(),
-                        remotes: vec![
-                            Remote {
-                                name: "origin".to_string(),
-                                url: "https://github.com/foo/bar.git".to_string(),
-                            },
-                        ],
+                        main_remote: Remote {
+                            name: "origin".to_string(),
+                            url: "https://github.com/foo/bar.git".to_string(),
+                        },
+                        extra_remotes: vec![],
                     },
                     Project {
                         path: "boo".to_string(),
-                        remotes: vec![
-                            Remote {
-                                name: "origin".to_string(),
-                                url: "git@github.com:foo/boo.git".to_string(),
-                            },
+                        main_remote: Remote {
+                            name: "origin".to_string(),
+                            url: "git@github.com:foo/boo.git".to_string(),
+                        },
+                        extra_remotes: vec![
                             Remote {
                                 name: "myone".to_string(),
                                 url: "http://coool".to_string(),
@@ -68,12 +67,11 @@ mod tests {
                     },
                     Project {
                         path: "moo".to_string(),
-                        remotes: vec![
-                            Remote {
-                                name: "origin".to_string(),
-                                url: "git@github.com:foo/moo.git".to_string(),
-                            },
-                        ],
+                        main_remote: Remote {
+                            name: "origin".to_string(),
+                            url: "git@github.com:foo/moo.git".to_string(),
+                        },
+                        extra_remotes: vec![],
                     },
                 ],
             })

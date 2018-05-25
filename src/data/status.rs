@@ -116,7 +116,7 @@ impl RepositoryMethods for Repository {
                         .ok()
                         .and_then(|s| s)
                         .map(|s| s.to_string())
-                        .unwrap_or(format!("{}/{}", project.remotes[0].name, b_name))
+                        .unwrap_or(format!("{}/{}", project.main_remote.name, b_name))
                     ,
                     dirty: dirty_status.clone(),
                     is_head: is_head_branch,
