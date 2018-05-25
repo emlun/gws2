@@ -3,9 +3,11 @@ extern crate gws2;
 extern crate tempdir;
 
 use std::collections::BTreeSet;
+use std::collections::HashSet;
 use std::env::current_dir;
 use std::env::set_current_dir;
 use std::fs::copy;
+use std::hash::Hash;
 use std::io::Error;
 use std::path::Path;
 use std::path::PathBuf;
@@ -52,7 +54,14 @@ fn in_example_workspace_inner<R>(test: fn(Workspace) -> R) -> Result<R, Error> {
     Ok(test(workspace))
 }
 
-pub fn set<I, T>(items: I) -> BTreeSet<T>
+pub fn hash_set<I, T>(items: I) -> HashSet<T>
+    where I: IntoIterator<Item=T>,
+          T: Eq + Hash,
+{
+    items.into_iter().collect()
+}
+
+pub fn tree_set<I, T>(items: I) -> BTreeSet<T>
     where I: IntoIterator<Item=T>,
           T: Ord,
 {

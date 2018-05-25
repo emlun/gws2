@@ -10,7 +10,7 @@ use gws2::data::status::ProjectStatusMethods;
 use gws2::data::status::RepositoryStatus;
 
 use util::in_example_workspace;
-use util::set;
+use util::tree_set;
 
 
 #[test]
@@ -25,7 +25,7 @@ fn status_produces_correct_data_structure() {
             project_stati,
             vec![
                 // clean
-                Some(set(vec![
+                Some(tree_set(vec![
                     BranchStatus {
                         name: "master".to_string(),
                         upstream_name: "origin/master".to_string(),
@@ -43,7 +43,7 @@ fn status_produces_correct_data_structure() {
                 ])),
 
                 // new_commit/local
-                Some(set(vec![
+                Some(tree_set(vec![
                     BranchStatus {
                         name: "master".to_string(),
                         upstream_name: "origin/master".to_string(),
@@ -61,7 +61,7 @@ fn status_produces_correct_data_structure() {
                 ])),
 
                 // new_commit/remote
-                Some(set(vec![
+                Some(tree_set(vec![
                     BranchStatus {
                         name: "master".to_string(),
                         upstream_name: "origin/master".to_string(),
@@ -79,7 +79,7 @@ fn status_produces_correct_data_structure() {
                 ])),
 
                 // changes/new_files
-                Some(set(vec![
+                Some(tree_set(vec![
                     BranchStatus {
                         name: "master".to_string(),
                         upstream_name: "origin/master".to_string(),
@@ -97,7 +97,7 @@ fn status_produces_correct_data_structure() {
                 ])),
 
                 // changes/changed_files
-                Some(set(vec![
+                Some(tree_set(vec![
                     BranchStatus {
                         name: "master".to_string(),
                         upstream_name: "origin/master".to_string(),
