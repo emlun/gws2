@@ -17,7 +17,7 @@ pub struct Clone {
 }
 
 impl Command for Clone {
-    fn run(&self, workspace: Workspace, palette: &Palette) -> Result<i32, ::git2::Error> {
+    fn run(&self, working_dir: &Path, workspace: Workspace, palette: &Palette) -> Result<i32, ::git2::Error> {
         let mut exit_code = exit_codes::OK;
 
         for project in workspace.projects.into_iter()
@@ -27,7 +27,7 @@ impl Command for Clone {
         {
             println!("{}", format_project_header(&project, &palette));
 
-            match project.status() {
+            match project.status(working_dir) {
                 Some(_) => {
                     println!("{}", palette.clean.paint(format_message_line("Already exists")));
                 },
@@ -35,7 +35,7 @@ impl Command for Clone {
                     println!("{}", palette.cloning.paint(format_message_line("Cloning…")));
                     match Repository::clone(
                         &project.main_remote.url,
-                        Path::new(&project.path)
+                        working_dir.join(&project.path).as_path()
                     ) {
                         Ok(_) => println!("{}", palette.clean.paint(format_message_line("Cloned."))),
                         Err(err) => {

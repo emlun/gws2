@@ -4,8 +4,6 @@ extern crate tempdir;
 
 use std::collections::BTreeSet;
 use std::collections::HashSet;
-use std::env::current_dir;
-use std::env::set_current_dir;
 use std::fs::copy;
 use std::hash::Hash;
 use std::io::Error;
@@ -19,22 +17,17 @@ use gws2::config::data::Workspace;
 use gws2::config::read::read_workspace_file;
 
 
-pub fn in_example_workspace<R>(test: fn(Workspace) -> R) {
+pub fn in_example_workspace<R>(test: fn(&Path, Workspace) -> R) {
     in_example_workspace_inner(test).unwrap();
 }
 
-fn in_example_workspace_inner<R>(test: fn(Workspace) -> R) -> Result<R, Error> {
+fn in_example_workspace_inner<R>(test: fn(&Path, Workspace) -> R) -> Result<R, Error> {
     let tmpdir = TempDir::new("gws2-test")?;
 
-    let projects_gws_path: PathBuf = current_dir()?
-        .join("tests")
-        .join("test_projects.gws")
-    ;
+    println!("tmpdir: {:?}", tmpdir.path());
 
-    let setup_script_path: PathBuf = current_dir()?
-        .join("tests")
-        .join("setup-workspace.sh")
-    ;
+    let projects_gws_path: PathBuf = Path::new("tests").join("test_projects.gws");
+    let setup_script_path: PathBuf = Path::new("tests").join("setup-workspace.sh");
 
     copy(projects_gws_path.as_path(), tmpdir.path().join(".projects.gws").as_path())?;
 
@@ -48,10 +41,9 @@ fn in_example_workspace_inner<R>(test: fn(Workspace) -> R) -> Result<R, Error> {
         panic!("Failed to set up workspace:\n{}", String::from_utf8(setup_output.stderr).unwrap());
     }
 
-    set_current_dir(tmpdir.path())?;
-
-    let workspace = read_workspace_file(Path::new(".projects.gws")).unwrap();
-    Ok(test(workspace))
+    let workspace = read_workspace_file(tmpdir.path().join(".projects.gws").as_path()).unwrap();
+    let result = test(tmpdir.path(), workspace);
+    Ok(result)
 }
 
 pub fn hash_set<I, T>(items: I) -> HashSet<T>

@@ -1,4 +1,5 @@
 use std::collections::BTreeSet;
+use std::path::Path;
 
 use git2::Branch;
 use git2::BranchType;
@@ -19,7 +20,7 @@ trait BranchMethods<'repo> {
 }
 
 pub trait ProjectStatusMethods {
-    fn status(&self) -> Option<Result<RepositoryStatus, ::git2::Error>>;
+    fn status(&self, working_dir: &Path) -> Option<Result<RepositoryStatus, ::git2::Error>>;
 }
 
 trait RepositoryMethods {
@@ -64,8 +65,8 @@ impl <'repo> BranchMethods<'repo> for Branch<'repo> {
 }
 
 impl ProjectStatusMethods for Project {
-    fn status(&self) -> Option<Result<RepositoryStatus, ::git2::Error>> {
-        self.open_repository()
+    fn status(&self, working_dir: &Path) -> Option<Result<RepositoryStatus, ::git2::Error>> {
+        self.open_repository(working_dir)
             .map(|repo_result|
                 repo_result.and_then(|repo| repo.project_status(&self))
             )

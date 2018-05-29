@@ -35,15 +35,15 @@ pub fn main() -> i32 {
 
         .get_matches();
 
-    if let Some(chdir_arg) = matches.args.get("dir") {
-        ::std::env::set_current_dir(
+    let working_dir: &Path = match matches.args.get("dir") {
+        Some(chdir_arg) =>
             Path::new(
                 chdir_arg.vals[0]
                     .to_str()
                     .expect("Did not understand <dir> argument")
-            )
-        ).unwrap();
-    }
+            ),
+        None => Path::new("."),
+    };
 
     let palette = Palette::default();
 
@@ -57,11 +57,11 @@ pub fn main() -> i32 {
         },
     };
 
-    let ws_file_path = Path::new(".projects.gws");
+    let ws_file_path = working_dir.join(".projects.gws");
     if ws_file_path.exists() {
-        match read_workspace_file(ws_file_path) {
+        match read_workspace_file(ws_file_path.as_path()) {
             Ok(ws) => {
-                match subcommand.run(ws, &palette) {
+                match subcommand.run(working_dir, ws, &palette) {
                     Ok(status) => status,
                     Err(_) => exit_codes::UNKNOWN_ERROR,
                 }

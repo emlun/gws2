@@ -1,5 +1,7 @@
 use ansi_term::ANSIString;
 
+use std::path::Path;
+
 use color::palette::Palette;
 use config::data::Workspace;
 use data::status::BranchStatus;
@@ -54,13 +56,13 @@ pub struct Status {
 }
 
 impl Command for Status {
-    fn run(&self, workspace: Workspace, palette: &Palette) -> Result<i32, ::git2::Error> {
+    fn run(&self, working_dir: &Path, workspace: Workspace, palette: &Palette) -> Result<i32, ::git2::Error> {
         let mut exit_code: exit_codes::ExitCode = exit_codes::OK;
 
         for project in workspace.projects {
             println!("{}", format_project_header(&project, &palette));
 
-            match project.status() {
+            match project.status(working_dir) {
                 Some(Ok(status)) => {
                     for b in status {
                         println!("{}", b.describe_full(&palette));

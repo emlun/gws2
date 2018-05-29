@@ -15,9 +15,9 @@ use util::tree_set;
 
 #[test]
 fn status_produces_correct_data_structure() {
-    in_example_workspace(|workspace| {
+    in_example_workspace(|working_dir, workspace| {
         let project_stati: Vec<Option<RepositoryStatus>> = workspace.projects.iter()
-            .map(ProjectStatusMethods::status)
+            .map(|p| p.status(working_dir))
             .map(|r| r.map(|result| result.unwrap()))
             .collect();
 
