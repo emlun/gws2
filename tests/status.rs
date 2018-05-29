@@ -86,7 +86,7 @@ fn status_produces_correct_data_structure() {
                     }
                 ])),
 
-                // new_commit_unfetched/remote
+                // new_commit/unfetched_remote
                 Some(tree_set(vec![
                     BranchStatus {
                         name: "master".to_string(),
