@@ -18,7 +18,9 @@ pub struct Clone {
 
 impl Command for Clone {
     fn run(&self, working_dir: &Path, workspace: Workspace, palette: &Palette) -> Result<i32, ::git2::Error> {
-        let mut exit_code = exit_codes::OK;
+
+        let mut clone_failed: bool = false;
+        let mut add_remote_failed: bool = false;
 
         for project in workspace.projects.into_iter()
             .filter(|proj|
@@ -37,10 +39,21 @@ impl Command for Clone {
                         &project.main_remote.url,
                         working_dir.join(&project.path)
                     ) {
-                        Ok(_) => println!("{}", palette.clean.paint(format_message_line("Cloned."))),
+                        Ok(repo) => {
+                            for extra_remote in project.extra_remotes {
+                                match repo.remote(&extra_remote.name, &extra_remote.url) {
+                                    Ok(_) => {},
+                                    Err(err) => {
+                                        add_remote_failed = true;
+                                        eprintln!("Failed to add remote {}: {}", extra_remote.name, err);
+                                    },
+                                }
+                            }
+                            println!("{}", palette.clean.paint(format_message_line("Cloned.")));
+                        },
                         Err(err) => {
-                            exit_code = exit_codes::CLONE_FAILED;
-                            eprintln!("{}", err);
+                            clone_failed = true;
+                            eprintln!("Failed to clone project {}: {}", project.path, err);
                             println!("{}", palette.error.paint(format_message_line("Error")));
                         }
                     }
@@ -48,6 +61,14 @@ impl Command for Clone {
             }
         }
 
-        Ok(exit_code)
+        Ok(
+            if clone_failed {
+                exit_codes::CLONE_FAILED
+            } else if add_remote_failed {
+                exit_codes::CLONE_ADD_REMOTE_FAILED
+            } else {
+                exit_codes::OK
+            }
+        )
     }
 }

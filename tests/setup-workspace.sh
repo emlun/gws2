@@ -7,18 +7,26 @@ UPSTREAM="https://github.com/StreakyCobra/gws.git"
 WORKSPACE_DIR="$1"
 
 LOCAL_MIRROR="/tmp/gws2-integration-tests/local-mirror"
+LOCAL_MIRROR_AHEAD="/tmp/gws2-integration-tests/local-mirror-ahead"
 REMOTE2="file://${LOCAL_MIRROR}"
 
 PROJECT_CLEAN="${WORKSPACE_DIR}/clean"
 PROJECT_NEW_LOCAL_COMMIT="${WORKSPACE_DIR}/new_commit/local"
 PROJECT_NEW_REMOTE_COMMIT="${WORKSPACE_DIR}/new_commit/remote"
+PROJECT_NEW_UNFETCHED_REMOTE_COMMIT="${WORKSPACE_DIR}/new_commit_unfetched/remote"
 PROJECT_NEW_FILES="${WORKSPACE_DIR}/changes/new_files"
 PROJECT_CHANGED_FILES="${WORKSPACE_DIR}/changes/changed_files"
 
 
 mirror_clone() {
   if ! git -C "${LOCAL_MIRROR}" status; then
-    git clone "${UPSTREAM}" "${LOCAL_MIRROR}" --depth=10
+    git clone "${UPSTREAM}" "${LOCAL_MIRROR}"
+  fi
+
+  if ! git -C "${LOCAL_MIRROR_AHEAD}" status; then
+    git clone "${LOCAL_MIRROR}" "${LOCAL_MIRROR_AHEAD}"
+    git -C "${LOCAL_MIRROR_AHEAD}" config commit.gpgSign false
+    git -C "${LOCAL_MIRROR_AHEAD}" commit --allow-empty -m "More work"
   fi
 }
 
@@ -46,6 +54,14 @@ project_new_remote_commit() {
   git -C "${PROJECT_NEW_REMOTE_COMMIT}" reset --hard HEAD~
 }
 
+project_new_unfetched_remote_commit() {
+  git clone "${LOCAL_MIRROR}" "${PROJECT_NEW_UNFETCHED_REMOTE_COMMIT}"
+  git -C "${PROJECT_NEW_UNFETCHED_REMOTE_COMMIT}" remote add remote2 "${REMOTE2}"
+  git -C "${PROJECT_NEW_UNFETCHED_REMOTE_COMMIT}" fetch remote2
+  git -C "${PROJECT_NEW_UNFETCHED_REMOTE_COMMIT}" checkout -b master2 remote2/master
+  git -C "${PROJECT_NEW_UNFETCHED_REMOTE_COMMIT}" reset --hard HEAD~
+}
+
 project_new_files() {
   git clone "${LOCAL_MIRROR}" "${PROJECT_NEW_FILES}"
   git -C "${PROJECT_NEW_FILES}" remote add remote2 "${REMOTE2}"
@@ -66,10 +82,16 @@ project_missing_repository() {
   true
 }
 
+project_missing_repository_2() {
+  true
+}
+
 mirror_clone
 project_clean
 project_new_local_commit
 project_new_remote_commit
+project_new_unfetched_remote_commit
 project_new_files
 project_changed_files
 project_missing_repository
+project_missing_repository_2

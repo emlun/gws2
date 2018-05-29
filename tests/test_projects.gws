@@ -1,6 +1,8 @@
-clean                 | https://github.com/StreakyCobra/gws | https://github.com/StreakyCobra/gws remote2
-new_commit/local      | https://github.com/StreakyCobra/gws | https://github.com/StreakyCobra/gws remote2
-new_commit/remote     | https://github.com/StreakyCobra/gws | https://github.com/StreakyCobra/gws remote2
-changes/new_files     | https://github.com/StreakyCobra/gws | https://github.com/StreakyCobra/gws remote2
-changes/changed_files | https://github.com/StreakyCobra/gws | https://github.com/StreakyCobra/gws remote2
-missing_repository    | https://github.com/StreakyCobra/gws | https://github.com/StreakyCobra/gws remote2
+clean                       | file:///tmp/gws2-integration-tests/local-mirror | file:///tmp/gws2-integration-tests/local-mirror-ahead remote2
+new_commit/local            | file:///tmp/gws2-integration-tests/local-mirror | file:///tmp/gws2-integration-tests/local-mirror-ahead remote2
+new_commit/remote           | file:///tmp/gws2-integration-tests/local-mirror | file:///tmp/gws2-integration-tests/local-mirror-ahead remote2
+new_commit_unfetched/remote | file:///tmp/gws2-integration-tests/local-mirror | file:///tmp/gws2-integration-tests/local-mirror-ahead remote2
+changes/new_files           | file:///tmp/gws2-integration-tests/local-mirror | file:///tmp/gws2-integration-tests/local-mirror-ahead remote2
+changes/changed_files       | file:///tmp/gws2-integration-tests/local-mirror | file:///tmp/gws2-integration-tests/local-mirror-ahead remote2
+missing_repository          | file:///tmp/gws2-integration-tests/local-mirror | file:///tmp/gws2-integration-tests/local-mirror-ahead remote2
+missing_repository_2        | file:///tmp/gws2-integration-tests/local-mirror | file:///tmp/gws2-integration-tests/local-mirror-ahead remote2

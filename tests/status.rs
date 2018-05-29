@@ -78,6 +78,24 @@ fn status_produces_correct_data_structure() {
                     }
                 ])),
 
+                // new_commit_unfetched/remote
+                Some(tree_set(vec![
+                    BranchStatus {
+                        name: "master".to_string(),
+                        upstream_name: "origin/master".to_string(),
+                        dirty: DirtyState::Clean,
+                        is_head: true,
+                        in_sync: Some(true),
+                    },
+                    BranchStatus {
+                        name: "master2".to_string(),
+                        upstream_name: "remote2/master".to_string(),
+                        dirty: DirtyState::Clean,
+                        is_head: false,
+                        in_sync: Some(true),
+                    }
+                ])),
+
                 // changes/new_files
                 Some(tree_set(vec![
                     BranchStatus {
@@ -114,7 +132,11 @@ fn status_produces_correct_data_structure() {
                     }
                 ])),
 
-                None
+                // missing_repository
+                None,
+
+                // missing_repository_2
+                None,
             ]
         );
     });

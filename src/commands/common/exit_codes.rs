@@ -8,3 +8,4 @@ pub const BAD_PROJECTS_FILE: ExitCode = 3;
 pub const STATUS_PROJECT_FAILED: ExitCode = 4;
 
 pub const CLONE_FAILED: ExitCode = 5;
+pub const CLONE_ADD_REMOTE_FAILED: ExitCode = 6;
