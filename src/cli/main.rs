@@ -59,7 +59,7 @@ pub fn main() -> i32 {
 
     let ws_file_path = working_dir.join(".projects.gws");
     if ws_file_path.exists() {
-        match read_workspace_file(ws_file_path.as_path()) {
+        match read_workspace_file(ws_file_path) {
             Ok(ws) => {
                 match subcommand.run(working_dir, ws, &palette) {
                     Ok(status) => status,

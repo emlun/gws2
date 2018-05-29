@@ -15,10 +15,10 @@ pub struct Project {
 
 impl Project {
 
-    pub fn open_repository(&self, working_dir: &Path) -> Option<Result<Repository, ::git2::Error>> {
-        let repo_dir = working_dir.join(&self.path);
+    pub fn open_repository<P: AsRef<Path>>(&self, working_dir: P) -> Option<Result<Repository, ::git2::Error>> {
+        let repo_dir = working_dir.as_ref().join(&self.path);
         if repo_dir.exists() {
-            Some(Repository::open(repo_dir.as_path()))
+            Some(Repository::open(repo_dir))
         } else {
             None
         }

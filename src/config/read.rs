@@ -7,7 +7,7 @@ use super::error::ConfigError;
 use super::parse::legacy;
 
 
-pub fn read_workspace_file(file_path: &Path) -> Result<Workspace, ConfigError> {
+pub fn read_workspace_file<P: AsRef<Path>>(file_path: P) -> Result<Workspace, ConfigError> {
     let mut contents: String = String::new();
 
     let mut file = try!(
@@ -36,7 +36,7 @@ mod tests {
     fn good_file_is_parsed_correctly() {
         println!("{:?}", Path::new("foo.txt"));
         assert_eq!(
-            read_workspace_file(Path::new("tests").join("example_projects.gws").as_path()),
+            read_workspace_file(Path::new("tests").join("example_projects.gws")),
 
             Ok(Workspace {
                 projects: vec![

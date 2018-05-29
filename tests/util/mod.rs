@@ -29,7 +29,7 @@ fn in_example_workspace_inner<R>(test: fn(&Path, Workspace) -> R) -> Result<R, E
     let projects_gws_path: PathBuf = Path::new("tests").join("test_projects.gws");
     let setup_script_path: PathBuf = Path::new("tests").join("setup-workspace.sh");
 
-    copy(projects_gws_path.as_path(), tmpdir.path().join(".projects.gws").as_path())?;
+    copy(projects_gws_path, tmpdir.path().join(".projects.gws"))?;
 
     let setup_output = Command::new("sh")
         .arg(setup_script_path.as_os_str())
@@ -41,7 +41,7 @@ fn in_example_workspace_inner<R>(test: fn(&Path, Workspace) -> R) -> Result<R, E
         panic!("Failed to set up workspace:\n{}", String::from_utf8(setup_output.stderr).unwrap());
     }
 
-    let workspace = read_workspace_file(tmpdir.path().join(".projects.gws").as_path()).unwrap();
+    let workspace = read_workspace_file(tmpdir.path().join(".projects.gws")).unwrap();
     let result = test(tmpdir.path(), workspace);
     Ok(result)
 }
