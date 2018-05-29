@@ -21,8 +21,6 @@ pub fn in_example_workspace<R>(test: fn(&Path, Workspace) -> R) {
 fn in_example_workspace_inner<R>(test: fn(&Path, Workspace) -> R) -> Result<R, Error> {
     let tmpdir = TempDir::new("gws2-test")?;
 
-    println!("tmpdir: {:?}", tmpdir.path());
-
     let projects_gws_path: PathBuf = Path::new("tests").join("test_projects.gws");
     let setup_script_path: PathBuf = Path::new("tests").join("setup-workspace.sh");
 
