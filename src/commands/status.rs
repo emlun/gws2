@@ -60,20 +60,31 @@ impl Command for Status {
         let mut exit_code: exit_codes::ExitCode = exit_codes::OK;
 
         for project in workspace.projects {
-            println!("{}", format_project_header(&project, &palette));
-
             match project.status(working_dir) {
                 Some(Ok(status)) => {
-                    for b in status {
-                        println!("{}", b.describe_full(&palette));
+                    if self.only_changes == false || status.iter()
+                        .any(|b|
+                            b.dirty != DirtyState::Clean
+                                || b.in_sync.unwrap_or(true) == false
+                        )
+                    {
+                        println!("{}", format_project_header(&project, &palette));
+
+                        for b in status {
+                            println!("{}", b.describe_full(&palette));
+                        }
                     }
                 },
                 Some(Err(err)) => {
+                    println!("{}", format_project_header(&project, &palette));
                     eprintln!("{}", palette.error.paint(format!("Failed to compute status: {}", err)));
                     exit_code = exit_codes::STATUS_PROJECT_FAILED;
                 }
                 None => {
-                    println!("{}", palette.missing.paint(format_message_line("Missing repository")));
+                    if self.only_changes == false {
+                        println!("{}", format_project_header(&project, &palette));
+                        println!("{}", palette.missing.paint(format_message_line("Missing repository")));
+                    }
                 },
             }
         }
