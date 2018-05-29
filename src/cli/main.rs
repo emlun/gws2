@@ -59,16 +59,20 @@ pub fn main() -> i32 {
 
     let ws_file_path = working_dir.join(".projects.gws");
     if ws_file_path.exists() {
-        match read_workspace_file(ws_file_path) {
+        match read_workspace_file(&ws_file_path) {
             Ok(ws) => {
                 match subcommand.run(working_dir, ws, &palette) {
                     Ok(status) => status,
                     Err(_) => exit_codes::UNKNOWN_ERROR,
                 }
             },
-            Err(_) => exit_codes::BAD_PROJECTS_FILE,
+            Err(_) => {
+                eprintln!("Failed to parse projects file: {:?}", ws_file_path);
+                exit_codes::BAD_PROJECTS_FILE
+            },
         }
     } else {
+        eprintln!("Projects file not found: {:?}", ws_file_path);
         exit_codes::NO_PROJECTS_FILE
     }
 }
