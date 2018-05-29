@@ -35,7 +35,8 @@ impl Command for Clone {
                 },
                 None => {
                     println!("{}", palette.cloning.paint(format_message_line("Cloning…")));
-                    match Repository::clone(
+
+                    match Repository::clone_recurse(
                         &project.main_remote.url,
                         working_dir.join(&project.path)
                     ) {

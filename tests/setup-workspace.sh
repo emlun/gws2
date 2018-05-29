@@ -3,7 +3,7 @@
 # Exit on error
 set -e
 
-UPSTREAM="https://github.com/StreakyCobra/gws.git"
+UPSTREAM="https://github.com/emlun/gws2.git"
 WORKSPACE_DIR="$1"
 
 LOCAL_MIRROR="/tmp/gws2-integration-tests/local-mirror"
