@@ -2,10 +2,7 @@ extern crate git2;
 extern crate gws2;
 extern crate tempdir;
 
-use std::collections::BTreeSet;
-use std::collections::HashSet;
 use std::fs::copy;
-use std::hash::Hash;
 use std::io::Error;
 use std::path::Path;
 use std::path::PathBuf;
@@ -44,18 +41,4 @@ fn in_example_workspace_inner<R>(test: fn(&Path, Workspace) -> R) -> Result<R, E
     let workspace = read_workspace_file(tmpdir.path().join(".projects.gws")).unwrap();
     let result = test(tmpdir.path(), workspace);
     Ok(result)
-}
-
-pub fn hash_set<I, T>(items: I) -> HashSet<T>
-    where I: IntoIterator<Item=T>,
-          T: Eq + Hash,
-{
-    items.into_iter().collect()
-}
-
-pub fn tree_set<I, T>(items: I) -> BTreeSet<T>
-    where I: IntoIterator<Item=T>,
-          T: Ord,
-{
-    items.into_iter().collect()
 }

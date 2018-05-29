@@ -5,6 +5,7 @@ extern crate tempdir;
 mod util;
 
 use std::collections::HashSet;
+use std::hash::Hash;
 
 use git2::Repository;
 
@@ -14,8 +15,14 @@ use gws2::commands::common::Command;
 use gws2::config::data::Workspace;
 
 use util::in_example_workspace;
-use util::hash_set;
 
+
+pub fn hash_set<I, T>(items: I) -> HashSet<T>
+    where I: IntoIterator<Item=T>,
+          T: Eq + Hash,
+{
+    items.into_iter().collect()
+}
 
 #[test]
 fn clone_creates_repo() {

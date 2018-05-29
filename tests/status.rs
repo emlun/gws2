@@ -4,14 +4,22 @@ extern crate tempdir;
 
 mod util;
 
+use std::collections::BTreeSet;
+
 use gws2::data::status::BranchStatus;
 use gws2::data::status::DirtyState;
 use gws2::data::status::ProjectStatusMethods;
 use gws2::data::status::RepositoryStatus;
 
 use util::in_example_workspace;
-use util::tree_set;
 
+
+pub fn tree_set<I, T>(items: I) -> BTreeSet<T>
+    where I: IntoIterator<Item=T>,
+          T: Ord,
+{
+    items.into_iter().collect()
+}
 
 #[test]
 fn status_produces_correct_data_structure() {
