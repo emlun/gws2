@@ -5,6 +5,11 @@ set -e
 
 WORKSPACE_DIR="$1"
 
+if [[ -z "${WORKSPACE_DIR}" ]] || [[ "${WORKSPACE_DIR}" == "/" ]]; then
+  echo 'FATAL: First commandline argument must not be empty!' >&2
+  exit 1
+fi
+
 LOCAL_MIRROR="/tmp/gws2-integration-tests/local-mirror"
 REMOTE2="file://${LOCAL_MIRROR}"
 

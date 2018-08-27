@@ -4,7 +4,6 @@
 set -e
 
 UPSTREAM="https://github.com/emlun/gws2.git"
-WORKSPACE_DIR="$1"
 
 LOCAL_MIRROR="/tmp/gws2-integration-tests/local-mirror"
 LOCAL_MIRROR_AHEAD="/tmp/gws2-integration-tests/local-mirror-ahead"
@@ -18,12 +17,18 @@ mirror_clone() {
   else
     touch "${LOCAL_MIRROR_LOCK}"
 
-    if ! git -C "${LOCAL_MIRROR}" status; then
+    if [[ -d "${LOCAL_MIRROR}/.git" ]]; then
+      echo "Mirror already exists in ${LOCAL_MIRROR}" >&2
+      exit 1
+    else
       rm -rf "${LOCAL_MIRROR}"
       git clone --branch master "${UPSTREAM}" "${LOCAL_MIRROR}"
     fi
 
-    if ! git -C "${LOCAL_MIRROR_AHEAD}" status; then
+    if [[ -d "${LOCAL_MIRROR_AHEAD}/.git" ]]; then
+      echo "Mirror already exists in ${LOCAL_MIRROR_AHEAD}" >&2
+      exit 1
+    else
       rm -rf "${LOCAL_MIRROR_AHEAD}"
       git clone --branch master "${LOCAL_MIRROR}" "${LOCAL_MIRROR_AHEAD}"
       git -C "${LOCAL_MIRROR_AHEAD}" config commit.gpgSign false
