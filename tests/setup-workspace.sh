@@ -50,7 +50,7 @@ project_new_unfetched_remote_commit() {
   git -C "${PROJECT_NEW_UNFETCHED_REMOTE_COMMIT}" remote add remote2 "${LOCAL_MIRROR}"
   git -C "${PROJECT_NEW_UNFETCHED_REMOTE_COMMIT}" fetch remote2
   git -C "${PROJECT_NEW_UNFETCHED_REMOTE_COMMIT}" checkout -b master2 remote2/master
-  git -C "${PROJECT_NEW_UNFETCHED_REMOTE_COMMIT}" remote set-url remote2 "${REMOTE2}"
+  git -C "${PROJECT_NEW_UNFETCHED_REMOTE_COMMIT}" remote set-url remote2 "${LOCAL_MIRROR_AHEAD}"
 }
 
 project_new_files() {

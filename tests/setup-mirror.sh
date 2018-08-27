@@ -30,7 +30,7 @@ mirror_clone() {
       exit 1
     else
       rm -rf "${LOCAL_MIRROR_AHEAD}"
-      git clone --branch master "${LOCAL_MIRROR}" "${LOCAL_MIRROR_AHEAD}"
+      git clone --branch master "${UPSTREAM}" "${LOCAL_MIRROR_AHEAD}"
       git -C "${LOCAL_MIRROR_AHEAD}" config commit.gpgSign false
       git -C "${LOCAL_MIRROR_AHEAD}" commit --allow-empty -m "More work"
     fi
