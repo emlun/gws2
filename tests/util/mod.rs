@@ -33,7 +33,11 @@ fn in_example_workspace_inner<R>(test: fn(&Path, Workspace) -> R) -> Result<R, E
         .expect("Failed to set up workspace");
 
     if !setup_output.status.success() {
-        panic!("Failed to set up workspace:\n{}", String::from_utf8(setup_output.stderr).unwrap());
+        panic!(
+          "Failed to set up workspace:\n{}\n{}",
+          String::from_utf8(setup_output.stdout).unwrap(),
+          String::from_utf8(setup_output.stderr).unwrap()
+        );
     }
 
     let workspace = read_workspace_file(tmpdir.path().join(".projects.gws")).unwrap();
