@@ -14,11 +14,11 @@ use gws2::config::data::Workspace;
 use gws2::config::read::read_workspace_file;
 
 
-pub fn in_example_workspace<R>(test: fn(&Path, Workspace) -> R) {
-    in_example_workspace_inner(test).unwrap();
+pub fn in_example_workspace<T>(test: fn(&Path, Workspace) -> Result<T, Error>) {
+    assert!(in_example_workspace_inner(test).is_ok());
 }
 
-fn in_example_workspace_inner<R>(test: fn(&Path, Workspace) -> R) -> Result<R, Error> {
+fn in_example_workspace_inner<T>(test: fn(&Path, Workspace) -> Result<T, Error>) -> Result<T, Error> {
     let tmpdir = TempDir::new("gws2-test")?;
 
     let projects_gws_path: PathBuf = Path::new("tests").join("test_projects.gws");
@@ -42,5 +42,5 @@ fn in_example_workspace_inner<R>(test: fn(&Path, Workspace) -> R) -> Result<R, E
 
     let workspace = read_workspace_file(tmpdir.path().join(".projects.gws")).unwrap();
     let result = test(tmpdir.path(), workspace);
-    Ok(result)
+    result.map_err(|e| Error::new(::std::io::ErrorKind::Other, e))
 }
