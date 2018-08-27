@@ -147,5 +147,7 @@ fn status_produces_correct_data_structure() {
                 None,
             ]
         );
+
+        Ok(())
     });
 }

@@ -37,6 +37,8 @@ fn clone_creates_repo() {
             .expect("Clone command failed");
         assert!(working_dir.join("missing_repository").exists());
         assert_eq!(false, working_dir.join("missing_repository_2").exists());
+
+        Ok(())
     });
 }
 
@@ -54,6 +56,8 @@ fn clone_supports_multiple_arguments() {
             .expect("Clone command failed");
         assert!(working_dir.join("missing_repository").exists());
         assert!(working_dir.join("missing_repository_2").exists());
+
+        Ok(())
     });
 }
 
@@ -84,5 +88,7 @@ fn clone_creates_extra_remotes() {
                 .collect::<HashSet<&str>>(),
             hash_set(vec!["origin", "remote2"])
         );
+
+        Ok(())
     });
 }
