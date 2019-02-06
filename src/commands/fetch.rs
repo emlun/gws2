@@ -1,11 +1,9 @@
 use std::collections::HashSet;
 use std::path::Path;
 
-use git2::Repository;
 
 use color::palette::Palette;
 use config::data::Workspace;
-use data::status::ProjectStatusMethods;
 use super::common::Command;
 use super::common::exit_codes;
 use super::common::format_message_line;
@@ -48,7 +46,7 @@ impl Command for Fetch {
                   None
                 )?;
               },
-              Err(err) => {
+              Err(_) => {
                 eprintln!("Remote {} not found in repository.", remote_config.name);
               }
             }
