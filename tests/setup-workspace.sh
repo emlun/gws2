@@ -11,6 +11,7 @@ if [[ -z "${WORKSPACE_DIR}" ]] || [[ "${WORKSPACE_DIR}" == "/" ]]; then
 fi
 
 LOCAL_MIRROR="/tmp/gws2-integration-tests/local-mirror"
+LOCAL_MIRROR_AHEAD="/tmp/gws2-integration-tests/local-mirror-ahead"
 REMOTE2="file://${LOCAL_MIRROR}"
 
 PROJECT_CLEAN="${WORKSPACE_DIR}/clean"
