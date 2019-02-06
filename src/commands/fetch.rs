@@ -32,8 +32,21 @@ impl Command for Fetch {
 
           for remote_config in project.remotes() {
             match repo.find_remote(&remote_config.name) {
-              Ok(remote) => {
-                println!("Remote {} found!", remote_config.name);
+              Ok(mut remote) => {
+                let refspecs: Vec<String> = remote
+                  .refspecs()
+                  .flat_map(|refspec| refspec.str().map(String::from))
+                  .collect();
+                let rs2: Vec<&str> = refspecs
+                  .iter()
+                  .map(String::as_str)
+                  .collect();
+
+                remote.fetch(
+                  &rs2,
+                  None,
+                  None
+                )?;
               },
               Err(err) => {
                 eprintln!("Remote {} not found in repository.", remote_config.name);
