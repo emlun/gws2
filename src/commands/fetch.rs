@@ -17,16 +17,11 @@ pub struct Fetch {
 }
 
 fn get_current_heads(repo: &git2::Repository) -> Result<HashMap<String, git2::Oid>, git2::Error> {
-  let branches: &Vec<git2::Branch> = &repo
-    .branches(Some(git2::BranchType::Remote))?
-    .flatten()
-    .map(|(branch, _)| branch)
-    .collect();
-
   Ok(
-    branches
-      .iter()
-      .map(|branch|
+    repo
+      .branches(Some(git2::BranchType::Remote))?
+      .flatten()
+      .map(|(branch, _)|
           (
             String::from(branch.name().unwrap().unwrap()),
             branch.get().peel_to_commit().unwrap().id(),
@@ -36,14 +31,14 @@ fn get_current_heads(repo: &git2::Repository) -> Result<HashMap<String, git2::Oi
   )
 }
 
-fn do_fetch(project: &Project, repo: git2::Repository, palette: &Palette) -> Result<(HashMap<String, git2::Oid>, HashMap<String, git2::Oid>), git2::Error> {
+fn do_fetch(project: &Project, repo: git2::Repository, palette: &Palette) -> Result<(), git2::Error> {
   let mut all_heads_before: HashMap<String, git2::Oid> = HashMap::new();
   let mut all_heads_after: HashMap<String, git2::Oid> = HashMap::new();
 
   for remote_config in project.remotes() {
     match repo.find_remote(&remote_config.name) {
       Ok(mut remote) => {
-        let heads_before: HashMap<String, git2::Oid> = get_current_heads(&repo)?;
+        all_heads_before.extend(get_current_heads(&repo)?);
 
         let refspec_strings: Vec<String> = remote
           .refspecs()
@@ -60,9 +55,7 @@ fn do_fetch(project: &Project, repo: git2::Repository, palette: &Palette) -> Res
           None
         )?;
 
-        let heads_after: HashMap<String, git2::Oid> = get_current_heads(&repo)?;
-        all_heads_before.extend(heads_before.into_iter());
-        all_heads_after.extend(heads_after.into_iter());
+        all_heads_after.extend(get_current_heads(&repo)?);
       },
       Err(_) => {
         eprintln!("Remote {} not found in repository.", remote_config.name);
@@ -76,7 +69,7 @@ fn do_fetch(project: &Project, repo: git2::Repository, palette: &Palette) -> Res
     println!("{}", palette.clean.paint(format_message_line("Clean")));
   }
 
-  Ok((all_heads_before, all_heads_after))
+  Ok(())
 }
 
 impl Command for Fetch {
