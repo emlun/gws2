@@ -6,6 +6,8 @@ use super::Remote;
 
 
 #[derive(Debug)]
+#[derive(Eq)]
+#[derive(Hash)]
 #[derive(PartialEq)]
 pub struct Project {
   pub path: String,

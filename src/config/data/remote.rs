@@ -1,4 +1,6 @@
 #[derive(Debug)]
+#[derive(Eq)]
+#[derive(Hash)]
 #[derive(PartialEq)]
 pub struct Remote {
   pub url: String,
