@@ -47,7 +47,7 @@ fn fetch_gets_refs_from_named_remotes() {
     let master_reference_before: Commit = resolve_ref("origin/master", &repo)?;
     let master2_reference_before: Commit = resolve_ref("remote2/master", &repo)?;
 
-    command.run(working_dir, workspace, &Palette::default())
+    command.run(working_dir, &workspace, &Palette::default())
       .expect("Fetch command failed");
 
     let master_reference_after: Commit = resolve_ref("origin/master", &repo)?;

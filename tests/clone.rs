@@ -33,7 +33,7 @@ fn clone_creates_repo() {
     };
 
     assert_eq!(false, working_dir.join("missing_repository").exists());
-    command.run(working_dir, workspace, &Palette::default())
+    command.run(working_dir, &workspace, &Palette::default())
       .expect("Clone command failed");
     assert!(working_dir.join("missing_repository").exists());
     assert_eq!(false, working_dir.join("missing_repository_2").exists());
@@ -52,7 +52,7 @@ fn clone_supports_multiple_arguments() {
 
     assert_eq!(false, working_dir.join("missing_repository").exists());
     assert_eq!(false, working_dir.join("missing_repository_2").exists());
-    command.run(working_dir, workspace, &Palette::default())
+    command.run(working_dir, &workspace, &Palette::default())
       .expect("Clone command failed");
     assert!(working_dir.join("missing_repository").exists());
     assert!(working_dir.join("missing_repository_2").exists());
@@ -75,7 +75,7 @@ fn clone_creates_extra_remotes() {
       .path
       .clone();
 
-    command.run(working_dir, workspace, &Palette::default())
+    command.run(working_dir, &workspace, &Palette::default())
       .expect("Clone command failed");
 
     assert_eq!(

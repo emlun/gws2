@@ -57,7 +57,7 @@ pub struct Status {
 }
 
 impl Status {
-  fn run_project(&self, working_dir: &Path, project: Project, palette: &Palette) -> i32 {
+  fn run_project(&self, working_dir: &Path, project: &Project, palette: &Palette) -> i32 {
     match project.status(working_dir) {
       Some(Ok(status)) => {
         if self.only_changes == false || status.iter()
@@ -91,10 +91,10 @@ impl Status {
 }
 
 impl Command for Status {
-  fn run(&self, working_dir: &Path, workspace: Workspace, palette: &Palette) -> Result<i32, ::git2::Error> {
+  fn run(&self, working_dir: &Path, workspace: &Workspace, palette: &Palette) -> Result<i32, ::git2::Error> {
     Ok(
       workspace.projects
-        .into_iter()
+        .iter()
         .map(|project|
           self.run_project(working_dir, project, palette)
         )

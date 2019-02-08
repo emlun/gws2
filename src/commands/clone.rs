@@ -17,12 +17,12 @@ pub struct Clone {
 }
 
 impl Command for Clone {
-  fn run(&self, working_dir: &Path, workspace: Workspace, palette: &Palette) -> Result<i32, ::git2::Error> {
+  fn run(&self, working_dir: &Path, workspace: &Workspace, palette: &Palette) -> Result<i32, ::git2::Error> {
 
     let mut clone_failed: bool = false;
     let mut add_remote_failed: bool = false;
 
-    for project in workspace.projects.into_iter()
+    for project in workspace.projects.iter()
       .filter(|proj|
         self.projects.contains(&proj.path)
       )
@@ -41,7 +41,7 @@ impl Command for Clone {
             working_dir.join(&project.path)
           ) {
             Ok(repo) => {
-              for extra_remote in project.extra_remotes {
+              for extra_remote in &project.extra_remotes {
                 match repo.remote(&extra_remote.name, &extra_remote.url) {
                   Ok(_) => {},
                   Err(err) => {

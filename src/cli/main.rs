@@ -63,7 +63,7 @@ pub fn main() -> i32 {
   if ws_file_path.exists() {
     match read_workspace_file(&ws_file_path) {
       Ok(ws) => {
-        match subcommand.run(working_dir, ws, &palette) {
+        match subcommand.run(working_dir, &ws, &palette) {
           Ok(status) => status,
           Err(_) => exit_codes::UNKNOWN_ERROR,
         }

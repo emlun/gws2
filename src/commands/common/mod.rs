@@ -10,7 +10,7 @@ use config::data::Workspace;
 
 
 pub trait Command {
-  fn run(&self, working_dir: &Path, workspace: Workspace, palette: &Palette) -> Result<i32, ::git2::Error>;
+  fn run(&self, working_dir: &Path, workspace: &Workspace, palette: &Palette) -> Result<i32, ::git2::Error>;
 }
 
 fn ellipsisize(s: &str, length: usize) -> String {

@@ -73,11 +73,10 @@ fn do_fetch(project: &Project, repo: git2::Repository, palette: &Palette) -> Res
 }
 
 impl Command for Fetch {
-  fn run(&self, working_dir: &Path, workspace: Workspace, palette: &Palette) -> Result<i32, ::git2::Error> {
-
-    for project in workspace.projects.into_iter()
+  fn run(&self, working_dir: &Path, workspace: &Workspace, palette: &Palette) -> Result<i32, ::git2::Error> {
+    for project in workspace.projects.iter()
       .filter(|proj|
-        self.projects.contains(&proj.path)
+              self.projects.contains(&proj.path)
       )
     {
       println!("{}", format_project_header(&project, &palette));
