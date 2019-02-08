@@ -16,6 +16,21 @@ pub struct Fetch {
   pub projects: HashSet<String>,
 }
 
+enum FetchProjectResult {
+  Ok(HashSet<String>),
+  Git2Error(git2::Error),
+  RepositoryMissing,
+}
+
+struct FetchResult<'ws> {
+  pub results: HashMap<&'ws Project, FetchProjectResult>,
+}
+impl<'ws> FetchResult<'ws> {
+  fn new() -> FetchResult<'ws> {
+    FetchResult { results: HashMap::new() }
+  }
+}
+
 fn get_current_heads(repo: &git2::Repository) -> Result<HashMap<String, git2::Oid>, git2::Error> {
   Ok(
     repo
@@ -31,7 +46,7 @@ fn get_current_heads(repo: &git2::Repository) -> Result<HashMap<String, git2::Oi
   )
 }
 
-fn do_fetch(project: &Project, repo: git2::Repository, palette: &Palette) -> Result<(), git2::Error> {
+fn do_fetch(project: &Project, repo: git2::Repository, palette: &Palette) -> Result<HashSet<String>, git2::Error> {
   let mut all_heads_before: HashMap<String, git2::Oid> = HashMap::new();
   let mut all_heads_after: HashMap<String, git2::Oid> = HashMap::new();
 
@@ -63,37 +78,60 @@ fn do_fetch(project: &Project, repo: git2::Repository, palette: &Palette) -> Res
     }
   }
 
-  if all_heads_before != all_heads_after {
-    println!("{}", palette.cloning.paint(format_message_line("Fetched from origin")));
-  } else {
-    println!("{}", palette.clean.paint(format_message_line("Clean")));
-  }
+  let updated_names: HashSet<String> = all_heads_after
+    .into_iter()
+    .filter(|(k, v_after)|
+            all_heads_before.get(k).map(|v_before| v_before != v_after).unwrap_or(false)
+    )
+    .map(|(k, _)| k)
+    .collect();
 
-  Ok(())
+  Ok(updated_names)
+}
+
+fn print_output(workspace: &Workspace, palette: &Palette, result: FetchResult) {
+  for project in &workspace.projects {
+    println!("{}", format_project_header(&project, &palette));
+
+    match result.results.get(&project).unwrap() {
+      FetchProjectResult::Ok(updated) => {
+        if updated.is_empty() {
+          println!("{}", palette.clean.paint(format_message_line("Clean")));
+        } else {
+          println!("{}", palette.cloning.paint(format_message_line("Fetched from origin")));
+        }
+      },
+      FetchProjectResult::Git2Error(err) => {
+        eprintln!("Failed to open repository: {}", err);
+        println!("{}", palette.error.paint(format_message_line("Error")));
+      },
+      FetchProjectResult::RepositoryMissing => {
+        println!("{}", palette.missing.paint(format_message_line("Missing repository")));
+      }
+    }
+  }
 }
 
 impl Command for Fetch {
   fn run(&self, working_dir: &Path, workspace: &Workspace, palette: &Palette) -> Result<i32, ::git2::Error> {
-    for project in workspace.projects.iter()
-      .filter(|proj|
-              self.projects.contains(&proj.path)
-      )
-    {
-      println!("{}", format_project_header(&project, &palette));
+    let mut result = FetchResult::new();
 
-      match project.open_repository(working_dir) {
-        Some(Ok(repo)) => {
-          do_fetch(&project, repo, palette)?;
-        },
-        Some(Err(err)) => {
-          eprintln!("Failed to open repository: {}", err);
-          println!("{}", palette.error.paint(format_message_line("Error")));
-        },
-        None => {
-          println!("{}", palette.missing.paint(format_message_line("Missing repository")));
-        }
-      }
-    }
+    result.results = workspace.projects.iter()
+      .map(|project|
+           (project, match project.open_repository(working_dir) {
+             Some(Ok(repo)) =>
+               do_fetch(&project, repo, palette)
+                 .map(FetchProjectResult::Ok)
+                 .unwrap_or_else(FetchProjectResult::Git2Error),
+             Some(Err(err)) =>
+               FetchProjectResult::Git2Error(err),
+             None =>
+               FetchProjectResult::RepositoryMissing,
+           })
+      )
+      .collect();
+
+    print_output(workspace, palette, result);
 
     Ok(
       exit_codes::OK
