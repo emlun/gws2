@@ -1,7 +1,9 @@
 #[derive(Debug)]
 #[derive(Eq)]
 #[derive(Hash)]
+#[derive(Ord)]
 #[derive(PartialEq)]
+#[derive(PartialOrd)]
 pub struct Remote {
   pub url: String,
   pub name: String,
