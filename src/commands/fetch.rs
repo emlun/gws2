@@ -20,15 +20,15 @@ pub struct Fetch {
 }
 
 struct FetchedProject {
-  pub branches: BTreeSet<String>,
-  pub updated_branches: BTreeSet<String>,
+  pub branches: BTreeSet<Branch>,
+  pub updated_branches: BTreeSet<Branch>,
 }
 
 fn do_fetch_remote(
   project: &Project,
   repo: &git2::Repository,
   remote: &mut git2::Remote
-) -> Result<BTreeSet<String>, Error> {
+) -> Result<BTreeSet<Branch>, Error> {
   let heads_before: BTreeMap<Branch, git2::Oid> = project.current_upstream_heads(repo)?;
 
   let refspec_strings: Vec<String> = remote
@@ -48,13 +48,12 @@ fn do_fetch_remote(
 
   let heads_after: BTreeMap<Branch, git2::Oid> = project.current_upstream_heads(repo)?;
 
-  let updated_branches: BTreeSet<String> = heads_after
+  let updated_branches: BTreeSet<Branch> = heads_after
     .into_iter()
     .filter(|(k, v_after)|
             heads_before.get(k).map(|v_before| v_before != v_after).unwrap_or(false)
     )
     .map(|(k, _)| k)
-    .flat_map(|b| b.name)
     .collect();
 
   Ok(updated_branches)
@@ -65,7 +64,7 @@ fn do_fetch(
   repo: &git2::Repository
 ) -> FetchedProject {
   FetchedProject {
-    branches: project.local_branches(repo).unwrap().into_iter().flat_map(|b| b.name).collect(),
+    branches: project.local_branches(repo).unwrap(),
     updated_branches: project.remotes()
       .into_iter()
       .flat_map(|remote_config|
@@ -100,7 +99,16 @@ fn print_output(
             } else {
               palette.clean.paint("No update")
             };
-          println!("{}", format_branch_line(palette, false, branch, &msg));
+          println!("{}", format_branch_line(
+            palette,
+            false,
+            branch
+              .name
+              .as_ref()
+              .map(String::as_str)
+              .unwrap_or("<Unprintable name>"),
+            &msg
+          ));
         }
       },
       Err(Error::Git2Error(err)) => {
