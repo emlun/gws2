@@ -1,6 +1,7 @@
 pub mod check;
 pub mod clone;
 pub mod common;
+pub mod error;
 pub mod fetch;
 pub mod ff;
 pub mod help;

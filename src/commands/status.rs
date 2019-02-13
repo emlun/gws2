@@ -13,6 +13,7 @@ use super::common::exit_codes;
 use super::common::format_branch_line;
 use super::common::format_message_line;
 use super::common::format_project_header;
+use super::error::Error;
 
 
 trait BranchStatusPrinting {
@@ -91,7 +92,7 @@ impl Status {
 }
 
 impl Command for Status {
-  fn run(&self, working_dir: &Path, workspace: &Workspace, palette: &Palette) -> Result<i32, ::git2::Error> {
+  fn run(&self, working_dir: &Path, workspace: &Workspace, palette: &Palette) -> Result<i32, Error> {
     Ok(
       workspace.projects
         .iter()

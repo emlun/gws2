@@ -12,16 +12,11 @@ use super::common::exit_codes;
 use super::common::format_branch_line;
 use super::common::format_message_line;
 use super::common::format_project_header;
+use super::error::Error;
 
 
 pub struct Fetch {
   pub projects: HashSet<String>,
-}
-
-enum FetchProjectResult {
-  Ok(FetchedProject),
-  Git2Error(git2::Error),
-  RepositoryMissing,
 }
 
 struct FetchedProject {
@@ -29,7 +24,7 @@ struct FetchedProject {
   pub updated_branches: BTreeSet<String>,
 }
 
-fn do_fetch_remote(project: &Project, repo: &git2::Repository, remote: &mut git2::Remote) -> Result<BTreeSet<String>, git2::Error> {
+fn do_fetch_remote(project: &Project, repo: &git2::Repository, remote: &mut git2::Remote) -> Result<BTreeSet<String>, Error> {
   let heads_before: BTreeMap<Branch, git2::Oid> = project.current_upstream_heads(repo)?;
 
   let refspec_strings: Vec<String> = remote
@@ -81,12 +76,12 @@ fn do_fetch<'proj>(project: &'proj Project, repo: &git2::Repository) -> FetchedP
   }
 }
 
-fn print_output(workspace: &Workspace, palette: &Palette, result: BTreeMap<&Project, FetchProjectResult>) {
+fn print_output(workspace: &Workspace, palette: &Palette, result: BTreeMap<&Project, Result<FetchedProject, Error>>) {
   for project in &workspace.projects {
     println!("{}", format_project_header(&project, &palette));
 
     match result.get(&project).unwrap() {
-      FetchProjectResult::Ok(project_result) => {
+      Ok(project_result) => {
         for branch in &project_result.branches {
           let msg =
             if project_result.updated_branches.contains(branch) {
@@ -97,11 +92,11 @@ fn print_output(workspace: &Workspace, palette: &Palette, result: BTreeMap<&Proj
           println!("{}", format_branch_line(palette, false, branch, &msg));
         }
       },
-      FetchProjectResult::Git2Error(err) => {
+      Err(Error::Git2Error(err)) => {
         eprintln!("Failed to open repository: {}", err);
         println!("{}", palette.error.paint(format_message_line("Error")));
       },
-      FetchProjectResult::RepositoryMissing => {
+      Err(Error::RepositoryMissing) => {
         println!("{}", palette.missing.paint(format_message_line("Missing repository")));
       }
     }
@@ -109,16 +104,16 @@ fn print_output(workspace: &Workspace, palette: &Palette, result: BTreeMap<&Proj
 }
 
 impl Command for Fetch {
-  fn run(&self, working_dir: &Path, workspace: &Workspace, palette: &Palette) -> Result<i32, ::git2::Error> {
+  fn run(&self, working_dir: &Path, workspace: &Workspace, palette: &Palette) -> Result<i32, Error> {
     let results = workspace.projects.iter()
       .map(|project|
            (project, match project.open_repository(working_dir) {
              Some(Ok(repo)) =>
-               FetchProjectResult::Ok(do_fetch(&project, &repo)),
+               Ok(do_fetch(&project, &repo)),
              Some(Err(err)) =>
-               FetchProjectResult::Git2Error(err),
+               Err(Error::Git2Error(err)),
              None =>
-               FetchProjectResult::RepositoryMissing,
+               Err(Error::RepositoryMissing),
            })
       )
       .collect();
