@@ -1,0 +1,4 @@
+[submodule "lib/git2-rs"]
+	path = lib/git2-rs
+	url = https://github.com/emlun/git2-rs.git
+	branch = relax-branch-upstream-self-borrow-lifetime
