@@ -70,18 +70,6 @@ impl Project {
       )
   }
 
-  pub fn current_heads(&self, repo: &git2::Repository) -> Result<BTreeMap<Branch, git2::Oid>, git2::Error> {
-    self.local_branches_internal(repo)
-      .map(|branches|
-           branches
-           .into_iter()
-           .map(|(branch, gbranch, _)|
-                (branch, gbranch.get().peel_to_commit().unwrap().id()),
-           )
-           .collect()
-      )
-  }
-
   pub fn current_upstream_heads(&self, repo: &git2::Repository) -> Result<BTreeMap<Branch, git2::Oid>, git2::Error> {
     self.local_branches_internal(repo)
       .map(|branches|
