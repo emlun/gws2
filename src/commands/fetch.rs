@@ -60,8 +60,8 @@ fn do_fetch_remote(
   Ok(updated_branches)
 }
 
-fn do_fetch<'proj>(
-  project: &'proj Project,
+fn do_fetch(
+  project: &Project,
   repo: &git2::Repository
 ) -> FetchedProject {
   FetchedProject {
