@@ -24,7 +24,11 @@ struct FetchedProject {
   pub updated_branches: BTreeSet<String>,
 }
 
-fn do_fetch_remote(project: &Project, repo: &git2::Repository, remote: &mut git2::Remote) -> Result<BTreeSet<String>, Error> {
+fn do_fetch_remote(
+  project: &Project,
+  repo: &git2::Repository,
+  remote: &mut git2::Remote
+) -> Result<BTreeSet<String>, Error> {
   let heads_before: BTreeMap<Branch, git2::Oid> = project.current_upstream_heads(repo)?;
 
   let refspec_strings: Vec<String> = remote
@@ -56,7 +60,10 @@ fn do_fetch_remote(project: &Project, repo: &git2::Repository, remote: &mut git2
   Ok(updated_branches)
 }
 
-fn do_fetch<'proj>(project: &'proj Project, repo: &git2::Repository) -> FetchedProject {
+fn do_fetch<'proj>(
+  project: &'proj Project,
+  repo: &git2::Repository
+) -> FetchedProject {
   FetchedProject {
     branches: project.local_branches(repo).unwrap().into_iter().flat_map(|b| b.name).collect(),
     updated_branches: project.remotes()
@@ -76,7 +83,11 @@ fn do_fetch<'proj>(project: &'proj Project, repo: &git2::Repository) -> FetchedP
   }
 }
 
-fn print_output(workspace: &Workspace, palette: &Palette, result: BTreeMap<&Project, Result<FetchedProject, Error>>) {
+fn print_output(
+  workspace: &Workspace,
+  palette: &Palette,
+  result: BTreeMap<&Project, Result<FetchedProject, Error>>
+) {
   for project in &workspace.projects {
     println!("{}", format_project_header(&project, &palette));
 
