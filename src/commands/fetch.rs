@@ -109,7 +109,8 @@ fn print_output(
       },
       Err(Error::RepositoryMissing) => {
         println!("{}", palette.missing.paint(format_message_line("Missing repository")));
-      }
+      },
+      Err(_) => unreachable!(),
     }
   }
 }
@@ -118,14 +119,13 @@ impl Command for Fetch {
   fn run(&self, working_dir: &Path, workspace: &Workspace, palette: &Palette) -> Result<i32, Error> {
     let results = workspace.projects.iter()
       .map(|project|
-           (project, match project.open_repository(working_dir) {
-             Some(Ok(repo)) =>
-               Ok(do_fetch(&project, &repo)),
-             Some(Err(err)) =>
-               Err(Error::Git2Error(err)),
-             None =>
-               Err(Error::RepositoryMissing),
-           })
+           (
+             project,
+             project.open_repository(working_dir)
+               .map(|repo|
+                    do_fetch(&project, &repo)
+               )
+           )
       )
       .collect();
 

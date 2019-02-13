@@ -31,10 +31,10 @@ impl Command for Clone {
       println!("{}", format_project_header(&project, &palette));
 
       match project.status(working_dir) {
-        Some(_) => {
+        Ok(_) => {
           println!("{}", palette.clean.paint(format_message_line("Already exists")));
         },
-        None => {
+        Err(Error::RepositoryMissing) => {
           println!("{}", palette.cloning.paint(format_message_line("Cloning…")));
 
           match Repository::clone_recurse(
@@ -59,6 +59,11 @@ impl Command for Clone {
               println!("{}", palette.error.paint(format_message_line("Error")));
             }
           }
+        },
+        Err(err) => {
+          clone_failed = true;
+          eprintln!("Error: {}", err);
+          println!("{}", palette.error.paint(format_message_line("Error")));
         },
       }
     }

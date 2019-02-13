@@ -60,7 +60,7 @@ pub struct Status {
 impl Status {
   fn run_project(&self, working_dir: &Path, project: &Project, palette: &Palette) -> i32 {
     match project.status(working_dir) {
-      Some(Ok(status)) => {
+      Ok(status) => {
         if self.only_changes == false || status.iter()
           .any(|b|
             b.dirty != DirtyState::Clean
@@ -75,18 +75,18 @@ impl Status {
         }
         exit_codes::OK
       },
-      Some(Err(err)) => {
-        println!("{}", format_project_header(&project, &palette));
-        eprintln!("{}", palette.error.paint(format!("Failed to compute status: {}", err)));
-        exit_codes::STATUS_PROJECT_FAILED
-      }
-      None => {
+      Err(Error::RepositoryMissing) => {
         if self.only_changes == false {
           println!("{}", format_project_header(&project, &palette));
           println!("{}", palette.missing.paint(format_message_line("Missing repository")));
         }
         exit_codes::OK
       },
+      Err(err) => {
+        println!("{}", format_project_header(&project, &palette));
+        eprintln!("{}", palette.error.paint(format!("Failed to compute status: {}", err)));
+        exit_codes::STATUS_PROJECT_FAILED
+      }
     }
   }
 }

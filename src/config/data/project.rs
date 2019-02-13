@@ -2,6 +2,7 @@ use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::path::Path;
 
+use commands::error::Error;
 use super::Branch;
 use super::Remote;
 
@@ -20,12 +21,13 @@ pub struct Project {
 
 impl Project {
 
-  pub fn open_repository<P: AsRef<Path>>(&self, working_dir: P) -> Option<Result<git2::Repository, ::git2::Error>> {
+  pub fn open_repository<P: AsRef<Path>>(&self, working_dir: P) -> Result<git2::Repository, Error> {
     let repo_dir = working_dir.as_ref().join(&self.path);
     if repo_dir.exists() {
-      Some(git2::Repository::open(repo_dir))
+      git2::Repository::open(repo_dir)
+        .map_err(Error::from)
     } else {
-      None
+      Err(Error::RepositoryMissing)
     }
   }
 

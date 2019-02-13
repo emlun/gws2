@@ -8,25 +8,26 @@ use git2::Reference;
 use git2::Repository;
 use git2::Status;
 
+use commands::error::Error;
 use config::data::Project;
 
 
 pub type RepositoryStatus = BTreeSet<BranchStatus>;
 
 trait BranchMethods<'repo> {
-  fn branch_name<'a>(&'a self) -> Result<&'a str, ::git2::Error>;
-  fn is_up_to_date_with_upstream(&'repo self) -> Result<Option<bool>, ::git2::Error>;
-  fn upstream_name(&self) -> Result<Option<String>, ::git2::Error>;
+  fn branch_name<'a>(&'a self) -> Result<&'a str, Error>;
+  fn is_up_to_date_with_upstream(&'repo self) -> Result<Option<bool>, Error>;
+  fn upstream_name(&self) -> Result<Option<String>, Error>;
 }
 
 pub trait ProjectStatusMethods {
-  fn status(&self, working_dir: &Path) -> Option<Result<RepositoryStatus, ::git2::Error>>;
+  fn status(&self, working_dir: &Path) -> Result<RepositoryStatus, Error>;
 }
 
 trait RepositoryMethods {
   fn any_file(&self, pred: fn(&Status) -> bool) -> bool;
-  fn is_head(&self, branch: &Branch) -> Result<bool, ::git2::Error>;
-  fn project_status(&self, project: &Project) -> Result<RepositoryStatus, ::git2::Error>;
+  fn is_head(&self, branch: &Branch) -> Result<bool, Error>;
+  fn project_status(&self, project: &Project) -> Result<RepositoryStatus, Error>;
 }
 
 trait StatusMethods {
@@ -36,14 +37,15 @@ trait StatusMethods {
 }
 
 impl <'repo> BranchMethods<'repo> for Branch<'repo> {
-  fn branch_name<'a>(&'a self) -> Result<&'a str, ::git2::Error> {
+  fn branch_name<'a>(&'a self) -> Result<&'a str, Error> {
     self.name()
+      .map_err(Error::from)
       .and_then(|name|
-        name.ok_or(::git2::Error::from_str("No branch name found"))
+        name.ok_or(Error::NoBranchNameFound)
       )
   }
 
-  fn is_up_to_date_with_upstream(&'repo self) -> Result<Option<bool>, ::git2::Error> {
+  fn is_up_to_date_with_upstream(&'repo self) -> Result<Option<bool>, Error> {
     let branch_commit: Commit<'repo> = try!(self.get().peel_to_commit());
 
     let upstream: Option<Branch<'repo>> = self.upstream().ok();
@@ -57,19 +59,20 @@ impl <'repo> BranchMethods<'repo> for Branch<'repo> {
     }
   }
 
-  fn upstream_name(&self) -> Result<Option<String>, ::git2::Error> {
-    self.upstream()
-      .and_then(|ups| ups.name().map(|ups| ups.map(&str::to_string)))
+  fn upstream_name(&self) -> Result<Option<String>, Error> {
+    Ok(
+      self.upstream()?
+      .name()?
+      .map(&str::to_string)
+    )
   }
 
 }
 
 impl ProjectStatusMethods for Project {
-  fn status(&self, working_dir: &Path) -> Option<Result<RepositoryStatus, ::git2::Error>> {
-    self.open_repository(working_dir)
-      .map(|repo_result|
-        repo_result.and_then(|repo| repo.project_status(&self))
-      )
+  fn status(&self, working_dir: &Path) -> Result<RepositoryStatus, Error> {
+    self.open_repository(working_dir)?
+      .project_status(&self)
   }
 }
 
@@ -83,13 +86,13 @@ impl RepositoryMethods for Repository {
       .any(|s| pred(&s))
   }
 
-  fn is_head(&self, branch: &Branch) -> Result<bool, ::git2::Error> {
+  fn is_head(&self, branch: &Branch) -> Result<bool, Error> {
     let head: Reference = try!(self.head());
     let br: &Reference = branch.get();
     Ok(head.name() == br.name())
   }
 
-  fn project_status(&self, project: &Project) -> Result<RepositoryStatus, ::git2::Error> {
+  fn project_status(&self, project: &Project) -> Result<RepositoryStatus, Error> {
     let dirty_status =
       if self.any_file(StatusMethods::is_dirty) {
         if self.any_file(StatusMethods::is_modified) {

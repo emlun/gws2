@@ -6,6 +6,7 @@ mod util;
 
 use std::collections::BTreeSet;
 
+use gws2::commands::error::Error;
 use gws2::data::status::BranchStatus;
 use gws2::data::status::DirtyState;
 use gws2::data::status::ProjectStatusMethods;
@@ -24,16 +25,15 @@ pub fn tree_set<I, T>(items: I) -> BTreeSet<T>
 #[test]
 fn status_produces_correct_data_structure() {
   in_example_workspace(|working_dir, workspace| {
-    let project_stati: Vec<Option<RepositoryStatus>> = workspace.projects.iter()
+    let project_stati: Vec<Result<RepositoryStatus, Error>> = workspace.projects.iter()
       .map(|p| p.status(working_dir))
-      .map(|r| r.map(|result| result.unwrap()))
       .collect();
 
     assert_eq!(
       project_stati,
       vec![
         // clean
-        Some(tree_set(vec![
+        Ok(tree_set(vec![
           BranchStatus {
             name: "master".to_string(),
             upstream_name: "origin/master".to_string(),
@@ -51,7 +51,7 @@ fn status_produces_correct_data_structure() {
         ])),
 
         // new_commit/local
-        Some(tree_set(vec![
+        Ok(tree_set(vec![
           BranchStatus {
             name: "master".to_string(),
             upstream_name: "origin/master".to_string(),
@@ -69,7 +69,7 @@ fn status_produces_correct_data_structure() {
         ])),
 
         // new_commit/remote
-        Some(tree_set(vec![
+        Ok(tree_set(vec![
           BranchStatus {
             name: "master".to_string(),
             upstream_name: "origin/master".to_string(),
@@ -87,7 +87,7 @@ fn status_produces_correct_data_structure() {
         ])),
 
         // new_commit/unfetched_remote
-        Some(tree_set(vec![
+        Ok(tree_set(vec![
           BranchStatus {
             name: "master".to_string(),
             upstream_name: "origin/master".to_string(),
@@ -105,7 +105,7 @@ fn status_produces_correct_data_structure() {
         ])),
 
         // changes/new_files
-        Some(tree_set(vec![
+        Ok(tree_set(vec![
           BranchStatus {
             name: "master".to_string(),
             upstream_name: "origin/master".to_string(),
@@ -123,7 +123,7 @@ fn status_produces_correct_data_structure() {
         ])),
 
         // changes/changed_files
-        Some(tree_set(vec![
+        Ok(tree_set(vec![
           BranchStatus {
             name: "master".to_string(),
             upstream_name: "origin/master".to_string(),
@@ -141,10 +141,10 @@ fn status_produces_correct_data_structure() {
         ])),
 
         // missing_repository
-        None,
+        Err(Error::RepositoryMissing),
 
         // missing_repository_2
-        None,
+        Err(Error::RepositoryMissing),
       ]
     );
 
