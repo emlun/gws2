@@ -1,7 +1,5 @@
 use std::path:: Path;
 
-use git2::Repository;
-
 use super::Remote;
 
 
@@ -17,10 +15,10 @@ pub struct Project {
 
 impl Project {
 
-  pub fn open_repository<P: AsRef<Path>>(&self, working_dir: P) -> Option<Result<Repository, ::git2::Error>> {
+  pub fn open_repository<P: AsRef<Path>>(&self, working_dir: P) -> Option<Result<git2::Repository, ::git2::Error>> {
     let repo_dir = working_dir.as_ref().join(&self.path);
     if repo_dir.exists() {
-      Some(Repository::open(repo_dir))
+      Some(git2::Repository::open(repo_dir))
     } else {
       None
     }
