@@ -3,7 +3,7 @@
 # Exit on error
 set -e
 
-UPSTREAM="https://github.com/emlun/gws2.git"
+UPSTREAM="."
 
 LOCAL_MIRROR="/tmp/gws2-integration-tests/local-mirror"
 LOCAL_MIRROR_AHEAD="/tmp/gws2-integration-tests/local-mirror-ahead"
