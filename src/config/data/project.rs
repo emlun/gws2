@@ -37,7 +37,7 @@ impl Project {
     result
   }
 
-  fn local_branches_internal<'repo>(&self, repo: &'repo git2::Repository) -> Result<Vec<(git2::Branch<'repo>, Option<git2::Branch<'repo>>)>, git2::Error> {
+  fn local_branches_internal<'repo>(&self, repo: &'repo git2::Repository) -> Result<Vec<(git2::Branch<'repo>, Option<git2::Branch<'repo>>)>, Error> {
     Ok(
       repo
         .branches(Some(git2::BranchType::Local))?
@@ -53,7 +53,7 @@ impl Project {
     )
   }
 
-  pub fn local_branches<'repo>(&self, repo: &'repo git2::Repository) -> Result<BTreeSet<git2::Branch<'repo>>, git2::Error> {
+  pub fn local_branches<'repo>(&self, repo: &'repo git2::Repository) -> Result<BTreeSet<git2::Branch<'repo>>, Error> {
     Ok(
       repo
         .branches(Some(git2::BranchType::Local))?
@@ -63,7 +63,7 @@ impl Project {
     )
   }
 
-  pub fn current_upstream_heads<'repo>(&self, repo: &'repo git2::Repository) -> Result<BTreeMap<git2::Branch<'repo>, git2::Oid>, git2::Error> {
+  pub fn current_upstream_heads<'repo>(&self, repo: &'repo git2::Repository) -> Result<BTreeMap<git2::Branch<'repo>, git2::Oid>, Error> {
     self.local_branches_internal(repo)
       .map(|branches|
            branches

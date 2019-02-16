@@ -20,7 +20,7 @@ pub struct Fetch {
 
 struct FetchedProject<'repo> {
   pub repo: &'repo ::git2::Repository,
-  pub local_branches: BTreeSet<git2::Branch<'repo>>,
+  pub local_branches: Result<BTreeSet<git2::Branch<'repo>>, Error>,
   pub updated_branches: BTreeSet<git2::Branch<'repo>>,
 }
 
@@ -69,7 +69,7 @@ fn do_fetch<'repo>(
 ) -> FetchedProject<'repo> {
   FetchedProject {
     repo: repo,
-    local_branches: project.local_branches(&repo).unwrap_or_else(|_| BTreeSet::new()),
+    local_branches: project.local_branches(&repo),
     updated_branches: project.remotes()
       .into_iter()
       .flat_map(|remote_config|
@@ -97,22 +97,30 @@ fn print_output(
 
     match result.get(&project).unwrap() {
       Ok(project_result) => {
-        for branch in &project_result.local_branches {
-          let msg =
-            if project_result.updated_branches.contains(branch) {
-              palette.cloning.paint("New upstream commits")
-            } else {
-              palette.clean.paint("No update")
-            };
-          println!("{}", format_branch_line(
-            palette,
-            false,
-            match branch.name() {
-              Ok(Some(name)) => name,
-              _ => "<Unprintable name>",
-            },
-            &msg
-          ));
+        match &project_result.local_branches {
+          Ok(branches) => {
+            for branch in branches {
+              let msg =
+                if project_result.updated_branches.contains(branch) {
+                  palette.cloning.paint("New upstream commits")
+                } else {
+                  palette.clean.paint("No update")
+                };
+              println!("{}", format_branch_line(
+                palette,
+                false,
+                match branch.name() {
+                  Ok(Some(name)) => name,
+                  _ => "<Unprintable name>",
+                },
+                &msg
+              ));
+            }
+          },
+          Err(err) => {
+            eprintln!("Failed to list branches: {}", err);
+            println!("{}", palette.error.paint("Failed to list branches"));
+          },
         }
       },
       Err(Error::Git2Error(err)) => {
