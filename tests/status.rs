@@ -40,6 +40,7 @@ fn status_produces_correct_data_structure() {
             dirty: DirtyState::Clean,
             is_head: true,
             in_sync: Some(true),
+            upstream_fetched: false,
           },
           BranchStatus {
             name: "master2".to_string(),
@@ -47,6 +48,7 @@ fn status_produces_correct_data_structure() {
             dirty: DirtyState::Clean,
             is_head: false,
             in_sync: Some(true),
+            upstream_fetched: false,
           }
         ])),
 
@@ -58,6 +60,7 @@ fn status_produces_correct_data_structure() {
             dirty: DirtyState::Clean,
             is_head: true,
             in_sync: Some(false),
+            upstream_fetched: false,
           },
           BranchStatus {
             name: "master2".to_string(),
@@ -65,6 +68,7 @@ fn status_produces_correct_data_structure() {
             dirty: DirtyState::Clean,
             is_head: false,
             in_sync: Some(true),
+            upstream_fetched: false,
           }
         ])),
 
@@ -76,6 +80,7 @@ fn status_produces_correct_data_structure() {
             dirty: DirtyState::Clean,
             is_head: true,
             in_sync: Some(false),
+            upstream_fetched: false,
           },
           BranchStatus {
             name: "master2".to_string(),
@@ -83,6 +88,7 @@ fn status_produces_correct_data_structure() {
             dirty: DirtyState::Clean,
             is_head: false,
             in_sync: Some(true),
+            upstream_fetched: false,
           }
         ])),
 
@@ -94,6 +100,7 @@ fn status_produces_correct_data_structure() {
             dirty: DirtyState::Clean,
             is_head: true,
             in_sync: Some(true),
+            upstream_fetched: false,
           },
           BranchStatus {
             name: "master2".to_string(),
@@ -101,6 +108,7 @@ fn status_produces_correct_data_structure() {
             dirty: DirtyState::Clean,
             is_head: false,
             in_sync: Some(true),
+            upstream_fetched: false,
           }
         ])),
 
@@ -112,6 +120,7 @@ fn status_produces_correct_data_structure() {
             dirty: DirtyState::UntrackedFiles,
             is_head: true,
             in_sync: Some(true),
+            upstream_fetched: false,
           },
           BranchStatus {
             name: "master2".to_string(),
@@ -119,6 +128,7 @@ fn status_produces_correct_data_structure() {
             dirty: DirtyState::Clean,
             is_head: false,
             in_sync: Some(true),
+            upstream_fetched: false,
           }
         ])),
 
@@ -130,6 +140,7 @@ fn status_produces_correct_data_structure() {
             dirty: DirtyState::UncommittedChanges,
             is_head: true,
             in_sync: Some(true),
+            upstream_fetched: false,
           },
           BranchStatus {
             name: "master2".to_string(),
@@ -137,6 +148,7 @@ fn status_produces_correct_data_structure() {
             dirty: DirtyState::Clean,
             is_head: false,
             in_sync: Some(true),
+            upstream_fetched: false,
           }
         ])),
 

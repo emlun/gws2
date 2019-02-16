@@ -125,6 +125,7 @@ impl RepositoryMethods for Repository {
           dirty: dirty_status.clone(),
           is_head: is_head_branch,
           in_sync: is_in_sync,
+          upstream_fetched: false,
         }
       })
       .collect()
@@ -162,6 +163,7 @@ pub struct BranchStatus {
   pub dirty: DirtyState,
   pub is_head: bool,
   pub in_sync: Option<bool>,
+  pub upstream_fetched: bool,
 }
 
 impl PartialEq for BranchStatus {

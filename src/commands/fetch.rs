@@ -4,7 +4,6 @@ use std::collections::HashSet;
 use std::path::Path;
 
 use color::palette::Palette;
-use config::data::Branch;
 use config::data::Project;
 use config::data::Workspace;
 use super::common::Command;
@@ -19,17 +18,19 @@ pub struct Fetch {
   pub projects: HashSet<String>,
 }
 
-struct FetchedProject {
-  pub branches: BTreeSet<Branch>,
-  pub updated_branches: BTreeSet<Branch>,
+struct FetchedProject<'repo> {
+  pub repo: &'repo ::git2::Repository,
+  pub local_branches: BTreeSet<git2::Branch<'repo>>,
+  pub updated_branches: BTreeSet<git2::Branch<'repo>>,
 }
 
-fn do_fetch_remote(
+fn do_fetch_remote<'repo>(
   project: &Project,
-  repo: &git2::Repository,
+  repo: &'repo git2::Repository,
   remote: &mut git2::Remote
-) -> Result<BTreeSet<Branch>, Error> {
-  let heads_before: BTreeMap<Branch, git2::Oid> = project.current_upstream_heads(repo)?;
+) -> Result<BTreeSet<git2::Branch<'repo>>, Error> {
+  let heads_before: BTreeMap<git2::Branch, git2::Oid> =
+    project.current_upstream_heads(repo)?;
 
   let refspec_strings: Vec<String> = remote
     .refspecs()
@@ -46,12 +47,15 @@ fn do_fetch_remote(
     None
   )?;
 
-  let heads_after: BTreeMap<Branch, git2::Oid> = project.current_upstream_heads(repo)?;
+  let heads_after: BTreeMap<git2::Branch, git2::Oid> =
+    project.current_upstream_heads(repo)?;
 
-  let updated_branches: BTreeSet<Branch> = heads_after
+  let updated_branches: BTreeSet<git2::Branch> = heads_after
     .into_iter()
     .filter(|(k, v_after)|
-            heads_before.get(k).map(|v_before| v_before != v_after).unwrap_or(false)
+            heads_before.get(k)
+            .map(|v_before| v_before != v_after)
+            .unwrap_or(false)
     )
     .map(|(k, _)| k)
     .collect();
@@ -59,12 +63,13 @@ fn do_fetch_remote(
   Ok(updated_branches)
 }
 
-fn do_fetch(
+fn do_fetch<'repo>(
   project: &Project,
-  repo: &git2::Repository
-) -> FetchedProject {
+  repo: &'repo git2::Repository
+) -> FetchedProject<'repo> {
   FetchedProject {
-    branches: project.local_branches(repo).unwrap(),
+    repo: repo,
+    local_branches: project.local_branches(&repo).unwrap_or_else(|_| BTreeSet::new()),
     updated_branches: project.remotes()
       .into_iter()
       .flat_map(|remote_config|
@@ -85,14 +90,14 @@ fn do_fetch(
 fn print_output(
   workspace: &Workspace,
   palette: &Palette,
-  result: BTreeMap<&Project, Result<FetchedProject, Error>>
+  result: BTreeMap<&Project, Result<FetchedProject, &Error>>
 ) {
   for project in &workspace.projects {
     println!("{}", format_project_header(&project, &palette));
 
     match result.get(&project).unwrap() {
       Ok(project_result) => {
-        for branch in &project_result.branches {
+        for branch in &project_result.local_branches {
           let msg =
             if project_result.updated_branches.contains(branch) {
               palette.cloning.paint("New upstream commits")
@@ -102,11 +107,10 @@ fn print_output(
           println!("{}", format_branch_line(
             palette,
             false,
-            branch
-              .name
-              .as_ref()
-              .map(String::as_str)
-              .unwrap_or("<Unprintable name>"),
+            match branch.name() {
+              Ok(Some(name)) => name,
+              _ => "<Unprintable name>",
+            },
             &msg
           ));
         }
@@ -124,15 +128,21 @@ fn print_output(
 }
 
 impl Command for Fetch {
-  fn run(&self, working_dir: &Path, workspace: &Workspace, palette: &Palette) -> Result<i32, Error> {
-    let results = workspace.projects.iter()
+  fn run<'ws>(&self, working_dir: &Path, workspace: &'ws Workspace, palette: &Palette) -> Result<i32, Error> {
+    let repos: BTreeMap<&Project, Result<git2::Repository, Error>> = workspace.projects.iter()
       .map(|project|
            (
              project,
              project.open_repository(working_dir)
-               .map(|repo|
-                    do_fetch(&project, &repo)
-               )
+           )
+      )
+      .collect();
+
+    let results = repos.iter()
+      .map(|(project, repo)|
+           (
+             *project,
+             repo.as_ref().map(|repo| do_fetch(&project, &repo))
            )
       )
       .collect();
