@@ -32,6 +32,46 @@ fn status_produces_correct_data_structure() {
     assert_eq!(
       project_stati,
       vec![
+        // changes/changed_files
+        Ok(tree_set(vec![
+          BranchStatus {
+            name: "master".to_string(),
+            upstream_name: "origin/master".to_string(),
+            dirty: DirtyState::UncommittedChanges,
+            is_head: true,
+            in_sync: Some(true),
+            upstream_fetched: false,
+          },
+          BranchStatus {
+            name: "master2".to_string(),
+            upstream_name: "remote2/master".to_string(),
+            dirty: DirtyState::Clean,
+            is_head: false,
+            in_sync: Some(true),
+            upstream_fetched: false,
+          }
+        ])),
+
+        // changes/new_files
+        Ok(tree_set(vec![
+          BranchStatus {
+            name: "master".to_string(),
+            upstream_name: "origin/master".to_string(),
+            dirty: DirtyState::UntrackedFiles,
+            is_head: true,
+            in_sync: Some(true),
+            upstream_fetched: false,
+          },
+          BranchStatus {
+            name: "master2".to_string(),
+            upstream_name: "remote2/master".to_string(),
+            dirty: DirtyState::Clean,
+            is_head: false,
+            in_sync: Some(true),
+            upstream_fetched: false,
+          }
+        ])),
+
         // clean
         Ok(tree_set(vec![
           BranchStatus {
@@ -51,6 +91,12 @@ fn status_produces_correct_data_structure() {
             upstream_fetched: false,
           }
         ])),
+
+        // missing_repository
+        Err(Error::RepositoryMissing),
+
+        // missing_repository_2
+        Err(Error::RepositoryMissing),
 
         // new_commit/local
         Ok(tree_set(vec![
@@ -111,52 +157,6 @@ fn status_produces_correct_data_structure() {
             upstream_fetched: false,
           }
         ])),
-
-        // changes/new_files
-        Ok(tree_set(vec![
-          BranchStatus {
-            name: "master".to_string(),
-            upstream_name: "origin/master".to_string(),
-            dirty: DirtyState::UntrackedFiles,
-            is_head: true,
-            in_sync: Some(true),
-            upstream_fetched: false,
-          },
-          BranchStatus {
-            name: "master2".to_string(),
-            upstream_name: "remote2/master".to_string(),
-            dirty: DirtyState::Clean,
-            is_head: false,
-            in_sync: Some(true),
-            upstream_fetched: false,
-          }
-        ])),
-
-        // changes/changed_files
-        Ok(tree_set(vec![
-          BranchStatus {
-            name: "master".to_string(),
-            upstream_name: "origin/master".to_string(),
-            dirty: DirtyState::UncommittedChanges,
-            is_head: true,
-            in_sync: Some(true),
-            upstream_fetched: false,
-          },
-          BranchStatus {
-            name: "master2".to_string(),
-            upstream_name: "remote2/master".to_string(),
-            dirty: DirtyState::Clean,
-            is_head: false,
-            in_sync: Some(true),
-            upstream_fetched: false,
-          }
-        ])),
-
-        // missing_repository
-        Err(Error::RepositoryMissing),
-
-        // missing_repository_2
-        Err(Error::RepositoryMissing),
       ]
     );
 

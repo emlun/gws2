@@ -1,3 +1,4 @@
+use ::std::collections::BTreeSet;
 use ::std::str::FromStr;
 
 use config::data::MaybeNamedRemote;
@@ -14,8 +15,6 @@ impl FromStr for Workspace {
   type Err = ConfigError;
 
   fn from_str(config: &str) -> Result<Self, Self::Err> {
-    let mut projects: Vec<Project> = Vec::new();
-
     let nonempty_lines = config
       .trim()
       .lines()
@@ -23,8 +22,9 @@ impl FromStr for Workspace {
       .map(&str::trim)
       .filter(|s| !s.is_empty());
 
+    let mut projects = BTreeSet::new();
     for line in nonempty_lines {
-      projects.push(try!(line.parse()));
+      projects.insert(line.parse()?);
     }
 
     Ok(Workspace {
@@ -295,8 +295,8 @@ mod tests {
 
     assert_eq!(
       workspace,
-      Ok(Workspace {
-        projects: vec![
+      Ok(Workspace::from(
+        vec![
           Project {
             path: "foo/bar".to_string(),
             main_remote: Remote {
@@ -331,7 +331,7 @@ mod tests {
             extra_remotes: vec![],
           },
         ],
-      })
+      ))
     )
   }
 

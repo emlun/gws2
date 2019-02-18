@@ -38,8 +38,8 @@ mod tests {
     assert_eq!(
       read_workspace_file(Path::new("tests").join("example_projects.gws")),
 
-      Ok(Workspace {
-        projects: vec![
+      Ok(Workspace::from(
+        vec![
           Project {
             path: "foo/bar".to_string(),
             main_remote: Remote {
@@ -74,7 +74,7 @@ mod tests {
             extra_remotes: vec![],
           },
         ],
-      })
+      ))
     );
   }
 
