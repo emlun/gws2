@@ -26,6 +26,10 @@ struct FetchedProject<'repo> {
   pub updated_branches: BTreeSet<git2::Branch<'repo>>,
 }
 
+struct ProjectStatusReport<'repo, 'result> {
+  branch_statuses: BTreeMap<git2::Branch<'repo>, ANSIString<'result>>,
+}
+
 fn do_fetch_remote<'repo>(
   project: &Project,
   repo: &'repo git2::Repository,
@@ -91,10 +95,6 @@ fn do_fetch<'repo>(
              .collect()
          }
     )
-}
-
-struct ProjectStatusReport<'repo, 'result> {
-  branch_statuses: BTreeMap<git2::Branch<'repo>, ANSIString<'result>>,
 }
 
 fn make_project_status_report<'proj, 'repo, 'result>(
