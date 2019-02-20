@@ -24,10 +24,14 @@ trait BranchStatusPrinting {
 
 impl BranchStatusPrinting for BranchStatus {
   fn describe_sync_status(&self, palette: &Palette) -> ANSIString {
-    match self.in_sync {
-      Some(true) => palette.clean.paint("Clean".to_string()),
-      Some(false) => palette.dirty.paint(format!("Not in sync with {}", self.upstream_name)),
-      None => palette.missing.paint(format!("No remote branch {}", self.upstream_name)),
+    match &self.upstream_name {
+      Some(upstream_name) =>
+        match self.in_sync {
+          Some(true) => palette.clean.paint("Clean".to_string()),
+          Some(false) => palette.dirty.paint(format!("Not in sync with {}", upstream_name)),
+          None => palette.missing.paint(format!("No remote branch {}", upstream_name)),
+        },
+      None => palette.missing.paint("No upstream set"),
     }
   }
 

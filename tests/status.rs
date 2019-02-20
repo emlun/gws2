@@ -36,7 +36,7 @@ fn status_produces_correct_data_structure() {
         Ok(tree_set(vec![
           BranchStatus {
             name: "master".to_string(),
-            upstream_name: "origin/master".to_string(),
+            upstream_name: Some("origin/master".to_string()),
             dirty: DirtyState::UncommittedChanges,
             is_head: true,
             in_sync: Some(true),
@@ -44,7 +44,7 @@ fn status_produces_correct_data_structure() {
           },
           BranchStatus {
             name: "master2".to_string(),
-            upstream_name: "remote2/master".to_string(),
+            upstream_name: Some("remote2/master".to_string()),
             dirty: DirtyState::Clean,
             is_head: false,
             in_sync: Some(true),
@@ -56,7 +56,7 @@ fn status_produces_correct_data_structure() {
         Ok(tree_set(vec![
           BranchStatus {
             name: "master".to_string(),
-            upstream_name: "origin/master".to_string(),
+            upstream_name: Some("origin/master".to_string()),
             dirty: DirtyState::UntrackedFiles,
             is_head: true,
             in_sync: Some(true),
@@ -64,7 +64,7 @@ fn status_produces_correct_data_structure() {
           },
           BranchStatus {
             name: "master2".to_string(),
-            upstream_name: "remote2/master".to_string(),
+            upstream_name: Some("remote2/master".to_string()),
             dirty: DirtyState::Clean,
             is_head: false,
             in_sync: Some(true),
@@ -76,7 +76,7 @@ fn status_produces_correct_data_structure() {
         Ok(tree_set(vec![
           BranchStatus {
             name: "master".to_string(),
-            upstream_name: "origin/master".to_string(),
+            upstream_name: Some("origin/master".to_string()),
             dirty: DirtyState::Clean,
             is_head: true,
             in_sync: Some(true),
@@ -84,7 +84,7 @@ fn status_produces_correct_data_structure() {
           },
           BranchStatus {
             name: "master2".to_string(),
-            upstream_name: "remote2/master".to_string(),
+            upstream_name: Some("remote2/master".to_string()),
             dirty: DirtyState::Clean,
             is_head: false,
             in_sync: Some(true),
@@ -102,7 +102,7 @@ fn status_produces_correct_data_structure() {
         Ok(tree_set(vec![
           BranchStatus {
             name: "master".to_string(),
-            upstream_name: "origin/master".to_string(),
+            upstream_name: Some("origin/master".to_string()),
             dirty: DirtyState::Clean,
             is_head: true,
             in_sync: Some(false),
@@ -110,7 +110,7 @@ fn status_produces_correct_data_structure() {
           },
           BranchStatus {
             name: "master2".to_string(),
-            upstream_name: "remote2/master".to_string(),
+            upstream_name: Some("remote2/master".to_string()),
             dirty: DirtyState::Clean,
             is_head: false,
             in_sync: Some(true),
@@ -122,7 +122,7 @@ fn status_produces_correct_data_structure() {
         Ok(tree_set(vec![
           BranchStatus {
             name: "master".to_string(),
-            upstream_name: "origin/master".to_string(),
+            upstream_name: Some("origin/master".to_string()),
             dirty: DirtyState::Clean,
             is_head: true,
             in_sync: Some(false),
@@ -130,7 +130,7 @@ fn status_produces_correct_data_structure() {
           },
           BranchStatus {
             name: "master2".to_string(),
-            upstream_name: "remote2/master".to_string(),
+            upstream_name: Some("remote2/master".to_string()),
             dirty: DirtyState::Clean,
             is_head: false,
             in_sync: Some(true),
@@ -142,7 +142,7 @@ fn status_produces_correct_data_structure() {
         Ok(tree_set(vec![
           BranchStatus {
             name: "master".to_string(),
-            upstream_name: "origin/master".to_string(),
+            upstream_name: Some("origin/master".to_string()),
             dirty: DirtyState::Clean,
             is_head: true,
             in_sync: Some(true),
@@ -150,7 +150,7 @@ fn status_produces_correct_data_structure() {
           },
           BranchStatus {
             name: "master2".to_string(),
-            upstream_name: "remote2/master".to_string(),
+            upstream_name: Some("remote2/master".to_string()),
             dirty: DirtyState::Clean,
             is_head: false,
             in_sync: Some(true),

@@ -92,7 +92,7 @@ impl RepositoryMethods for Repository {
     Ok(head.name() == br.name())
   }
 
-  fn project_status(&self, project: &Project) -> Result<RepositoryStatus, Error> {
+  fn project_status(&self, _project: &Project) -> Result<RepositoryStatus, Error> {
     let dirty_status =
       if self.any_file(StatusMethods::is_dirty) {
         if self.any_file(StatusMethods::is_modified) {
@@ -120,7 +120,6 @@ impl RepositoryMethods for Repository {
             .ok()
             .and_then(|s| s)
             .map(|s| s.to_string())
-            .unwrap_or(format!("{}/{}", project.main_remote.name, b_name))
           ,
           dirty: dirty_status.clone(),
           is_head: is_head_branch,
@@ -159,7 +158,7 @@ impl StatusMethods for Status {
 #[derive(Ord)]
 pub struct BranchStatus {
   pub name: String,
-  pub upstream_name: String,
+  pub upstream_name: Option<String>,
   pub dirty: DirtyState,
   pub is_head: bool,
   pub in_sync: Option<bool>,
