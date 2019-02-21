@@ -104,10 +104,9 @@ impl RepositoryMethods for Repository {
         DirtyState::Clean
       };
 
-    let branch_stati: Vec<BranchStatus> = self.branches(None)
+    let branch_stati: Vec<BranchStatus> = self.branches(Some(BranchType::Local))
       .unwrap()
       .map(Result::unwrap)
-      .filter(|&(_, bt)| bt == BranchType::Local)
       .map(|(b, _)| {
         let b_name = b.branch_name().unwrap();
 
