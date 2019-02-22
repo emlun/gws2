@@ -1,5 +1,4 @@
 use std::collections::BTreeMap;
-use std::collections::BTreeSet;
 use std::path::Path;
 
 use commands::error::Error;
@@ -49,16 +48,6 @@ impl Project {
             upstream,
           )
         })
-        .collect()
-    )
-  }
-
-  pub fn local_branches<'repo>(&self, repo: &'repo git2::Repository) -> Result<BTreeSet<git2::Branch<'repo>>, Error> {
-    Ok(
-      repo
-        .branches(Some(git2::BranchType::Local))?
-        .flatten()
-        .map(|(branch, _)| branch)
         .collect()
     )
   }

@@ -3,11 +3,11 @@ use std::collections::BTreeSet;
 use std::collections::HashSet;
 use std::path::Path;
 
-use ansi_term::ANSIString;
-
 use color::palette::Palette;
 use config::data::Project;
 use config::data::Workspace;
+use data::status::ProjectStatusMethods;
+use data::status::RepositoryStatus;
 use super::common::Command;
 use super::common::exit_codes;
 use super::common::format_branch_line;
@@ -21,13 +21,7 @@ pub struct Fetch {
 }
 
 struct FetchedProject<'repo> {
-  pub repo: &'repo ::git2::Repository,
-  pub local_branches: BTreeSet<git2::Branch<'repo>>,
   pub updated_branches: BTreeSet<git2::Branch<'repo>>,
-}
-
-struct ProjectStatusReport<'repo, 'result> {
-  branch_statuses: BTreeMap<git2::Branch<'repo>, ANSIString<'result>>,
 }
 
 fn do_fetch_remote<'repo>(
@@ -72,71 +66,74 @@ fn do_fetch_remote<'repo>(
 fn do_fetch<'repo>(
   project: &Project,
   repo: &'repo git2::Repository
-) -> Result<FetchedProject<'repo>, Error> {
-  project
-    .local_branches(&repo)
-    .map(|local_branches|
-         FetchedProject {
-           repo: repo,
-           local_branches: local_branches,
-           updated_branches: project.remotes()
-             .into_iter()
-             .flat_map(|remote_config|
-                       match repo.find_remote(&remote_config.name) {
-                         Ok(mut remote) =>
-                           do_fetch_remote(project, &repo, &mut remote)
-                           .unwrap_or(BTreeSet::new())
-                           .into_iter()
-                           ,
-                         Err(_) =>
-                           BTreeSet::new().into_iter(),
-                       }
-             )
-             .collect()
-         }
-    )
+) -> FetchedProject<'repo> {
+    FetchedProject {
+      updated_branches: project.remotes()
+        .into_iter()
+        .flat_map(|remote_config|
+                  match repo.find_remote(&remote_config.name) {
+                    Ok(mut remote) =>
+                      do_fetch_remote(project, &repo, &mut remote)
+                      .unwrap_or(BTreeSet::new())
+                      .into_iter()
+                      ,
+                    Err(_) =>
+                      BTreeSet::new().into_iter(),
+                  }
+        )
+        .collect()
+    }
 }
 
 fn make_project_status_report<'proj, 'repo, 'result>(
+  working_dir: &Path,
+  project: &Project,
   result: FetchedProject<'repo>,
-  palette: &Palette,
-) -> ProjectStatusReport<'repo, 'result> {
-  let branches = result.local_branches;
+) -> Result<RepositoryStatus, Error> {
   let updated = result.updated_branches;
-  ProjectStatusReport {
-    branch_statuses: branches
+
+  let status = project.status(working_dir)?;
+
+  Ok(
+    status
       .into_iter()
-      .map(|branch| {
-        let msg =
-          if updated.contains(&branch) {
-            palette.cloning.paint("New upstream commits")
-          } else {
-            palette.clean.paint("No update")
-          };
-        (branch, msg)
+      .map(|mut branch_status| {
+        branch_status.upstream_fetched =
+          updated.iter()
+          .any(|upstream|
+               match upstream.name() {
+                 Ok(Some(upd_name)) => branch_status.name == upd_name,
+                 _ => false,
+               }
+          );
+        branch_status
       })
       .collect()
-  }
+  )
 }
 
 fn print_output(
   project: &Project,
-  report: &Result<ProjectStatusReport, Error>,
+  project_status: &Result<RepositoryStatus, Error>,
   palette: &Palette,
 ) {
   println!("{}", format_project_header(project, palette));
 
-  match report {
-    Ok(project_result) => {
-      for (branch, branch_status) in &project_result.branch_statuses {
+  match project_status {
+    Ok(project_status) => {
+      for branch_status in project_status {
+        let msg =
+          if branch_status.upstream_fetched {
+            palette.cloning.paint("New upstream commits")
+          } else {
+            palette.clean.paint("No update")
+          };
+
         println!("{}", format_branch_line(
           palette,
           false,
-          match branch.name() {
-            Ok(Some(name)) => name,
-            _ => "<Unprintable name>",
-          },
-          &branch_status
+          &branch_status.name,
+          &msg
         ));
       }
     },
@@ -169,10 +166,8 @@ impl Command for Fetch {
       match repo_result {
         Ok(repo) => {
           let fetch_result = do_fetch(project, &repo);
-          let report = fetch_result
-            .map(|result|
-                 make_project_status_report(result, palette)
-            );
+          let report =
+            make_project_status_report(working_dir, project, fetch_result);
           print_output(project, &report, palette);
         },
         e @ Err(_) => {

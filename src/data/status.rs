@@ -115,11 +115,10 @@ impl RepositoryMethods for Repository {
 
         BranchStatus {
           name: b_name.to_string(),
-          upstream_name: b.upstream_name()
-            .ok()
-            .and_then(|s| s)
-            .map(|s| s.to_string())
-          ,
+          upstream_name: match b.upstream_name() {
+            Ok(Some(s)) => Some(s.to_string()),
+            _ => None,
+          },
           dirty: dirty_status.clone(),
           is_head: is_head_branch,
           in_sync: is_in_sync,
