@@ -20,8 +20,8 @@ pub struct Fetch {
   pub projects: HashSet<String>,
 }
 
-struct FetchedProject<'repo> {
-  pub updated_branches: BTreeSet<git2::Branch<'repo>>,
+struct FetchedProject {
+  pub updated_branch_names: BTreeSet<String>,
 }
 
 fn do_fetch_remote<'repo>(
@@ -65,10 +65,10 @@ fn do_fetch_remote<'repo>(
 
 fn do_fetch<'repo>(
   project: &Project,
-  repo: &'repo git2::Repository
-) -> FetchedProject<'repo> {
+  repo: & git2::Repository
+) -> FetchedProject {
     FetchedProject {
-      updated_branches: project.remotes()
+      updated_branch_names: project.remotes()
         .into_iter()
         .flat_map(|remote_config|
                   match repo.find_remote(&remote_config.name) {
@@ -81,6 +81,12 @@ fn do_fetch<'repo>(
                       BTreeSet::new().into_iter(),
                   }
         )
+        .flat_map(|branch|
+                  branch.name()
+                  .ok()
+                  .and_then(|n| n)
+                  .map(String::from)
+        )
         .collect()
     }
 }
@@ -88,9 +94,9 @@ fn do_fetch<'repo>(
 fn make_project_status_report<'proj, 'repo, 'result>(
   working_dir: &Path,
   project: &Project,
-  result: FetchedProject<'repo>,
+  result: FetchedProject,
 ) -> Result<RepositoryStatus, Error> {
-  let updated = result.updated_branches;
+  let updated = result.updated_branch_names;
 
   let status = project.status(working_dir)?;
 
@@ -100,12 +106,7 @@ fn make_project_status_report<'proj, 'repo, 'result>(
       .map(|mut branch_status| {
         branch_status.upstream_fetched =
           updated.iter()
-          .any(|upstream|
-               match upstream.name() {
-                 Ok(Some(upd_name)) => branch_status.name == upd_name,
-                 _ => false,
-               }
-          );
+          .any(|upd_name| &branch_status.name == upd_name);
         branch_status
       })
       .collect()
