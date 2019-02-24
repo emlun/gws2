@@ -3,11 +3,11 @@ use ansi_term::ANSIString;
 use std::path::Path;
 
 use color::palette::Palette;
-use config::data::Project;
 use config::data::Workspace;
 use data::status::BranchStatus;
 use data::status::DirtyState;
 use data::status::ProjectStatusMethods;
+use data::status::WorkspaceStatus;
 use super::common::Command;
 use super::common::exit_codes;
 use super::common::format_branch_line;
@@ -61,58 +61,68 @@ pub struct Status {
   pub only_changes: bool,
 }
 
-impl Status {
-  fn run_project(&self, working_dir: &Path, project: &Project, palette: &Palette) -> i32 {
-    match project.status(working_dir) {
-      Ok(status) => {
-        if self.only_changes == false || status.iter()
-          .any(|b|
-            b.dirty != DirtyState::Clean
-              || b.in_sync.unwrap_or(true) == false
-          )
-        {
-          println!("{}", format_project_header(&project, &palette));
-
-          for b in status {
-            println!("{}", b.describe_full(&palette));
-          }
-        }
-        exit_codes::OK
-      },
-      Err(Error::RepositoryMissing) => {
-        if self.only_changes == false {
-          println!("{}", format_project_header(&project, &palette));
-          println!("{}", palette.missing.paint(format_message_line("Missing repository")));
-        }
-        exit_codes::OK
-      },
-      Err(err) => {
-        println!("{}", format_project_header(&project, &palette));
-        eprintln!("{}", palette.error.paint(format!("Failed to compute status: {}", err)));
-        exit_codes::STATUS_PROJECT_FAILED
-      }
-    }
-  }
-}
-
 impl Command for Status {
   fn run(&self, working_dir: &Path, workspace: &Workspace, palette: &Palette) -> Result<i32, Error> {
-    Ok(
+    let report: WorkspaceStatus =
       workspace.projects
-        .iter()
-        .map(|project|
-          self.run_project(working_dir, project, palette)
-        )
-        .fold(
-          exit_codes::OK,
-          |exit_code, next_code| {
-            if next_code != exit_codes::OK {
-              next_code
-            } else {
-              exit_code
+      .iter()
+      .map(|project|
+           (project, project.status(working_dir))
+      )
+      .collect();
+
+    for (project, project_result) in &report {
+      match project_result {
+        Ok(status) => {
+          if self.only_changes == false || status.iter()
+            .any(|b|
+                 b.dirty != DirtyState::Clean
+                 || b.in_sync.unwrap_or(true) == false
+            )
+          {
+            println!("{}", format_project_header(&project, &palette));
+
+            for b in status {
+              println!("{}", b.describe_full(&palette));
             }
           }
-        )
-    )
+        },
+        Err(Error::RepositoryMissing) => {
+          if self.only_changes == false {
+            println!("{}", format_project_header(&project, &palette));
+            println!("{}", palette.missing.paint(format_message_line("Missing repository")));
+          }
+        },
+        Err(err) => {
+          println!("{}", format_project_header(&project, &palette));
+          eprintln!("{}", palette.error.paint(format!("Failed to compute status: {}", err)));
+        }
+      }
+    }
+
+    let exit_code =
+      report
+      .values()
+      .map(|project_result|
+           match project_result {
+             Ok(_) =>
+               exit_codes::OK,
+             Err(Error::RepositoryMissing) =>
+               exit_codes::OK,
+             Err(_) =>
+               exit_codes::STATUS_PROJECT_FAILED,
+           }
+      )
+      .fold(
+        exit_codes::OK,
+        |exit_code, next_code| {
+          if next_code != exit_codes::OK {
+            next_code
+          } else {
+            exit_code
+          }
+        }
+      );
+    Ok(exit_code)
   }
 }
