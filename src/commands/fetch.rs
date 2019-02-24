@@ -6,18 +6,16 @@ use std::path::Path;
 use color::palette::Palette;
 use config::data::Project;
 use config::data::Workspace;
-use data::status::ProjectStatusMethods;
 use data::status::RepositoryStatus;
 use data::status::WorkspaceStatus;
 use super::common::Command;
 use super::common::exit_codes;
-use super::common::format_branch_line;
-use super::common::format_message_line;
-use super::common::format_project_header;
 use super::error::Error;
+use super::status::Status;
 
 
 pub struct Fetch {
+  pub status_command: Status,
   pub projects: HashSet<String>,
 }
 
@@ -92,65 +90,23 @@ fn do_fetch<'repo>(
     }
 }
 
-fn make_project_status_report<'proj, 'repo, 'result>(
-  working_dir: &Path,
-  project: &Project,
+fn augment_project_status_report<'proj, 'repo, 'result>(
+  status: RepositoryStatus,
   result: FetchedProject,
 ) -> Result<RepositoryStatus, Error> {
   let updated = result.updated_branch_names;
-
-  let status = project.status(working_dir)?;
-
   Ok(
     status
       .into_iter()
       .map(|mut branch_status| {
         branch_status.upstream_fetched =
-          updated.iter()
+          updated
+          .iter()
           .any(|upd_name| &branch_status.name == upd_name);
         branch_status
       })
       .collect()
   )
-}
-
-fn print_output(
-  project: &Project,
-  project_status: &Result<RepositoryStatus, Error>,
-  palette: &Palette,
-) {
-  println!("{}", format_project_header(project, palette));
-
-  match project_status {
-    Ok(project_status) => {
-      for branch_status in project_status {
-        let msg =
-          if branch_status.upstream_fetched {
-            palette.cloning.paint("New upstream commits")
-          } else {
-            palette.clean.paint("No update")
-          };
-
-        println!("{}", format_branch_line(
-          palette,
-          false,
-          &branch_status.name,
-          &msg
-        ));
-      }
-    },
-    Err(Error::Git2Error(err)) => {
-      eprintln!("Failed to open repository: {}", err);
-      println!("{}", palette.error.paint(format_message_line("Error")));
-    },
-    Err(Error::RepositoryMissing) => {
-      println!("{}", palette.missing.paint(format_message_line("Missing repository")));
-    },
-    Err(err) => {
-      eprintln!("Failed to list branches: {}", err);
-      println!("{}", palette.error.paint("Failed to list branches"));
-    },
-  }
 }
 
 impl Command for Fetch {
@@ -161,24 +117,25 @@ impl Command for Fetch {
     palette: &Palette,
   ) -> Result<i32, Error> {
     let status_report: WorkspaceStatus =
-      workspace
-      .projects
-      .iter()
-      .map(|project|
+      self
+      .status_command.make_report(working_dir, workspace)
+      .into_iter()
+      .map(|(project, project_status_result)|
            (
              project,
              project
                .open_repository(working_dir)
-               .and_then(|repo| {
+               .and_then(|repo| project_status_result.map(|pr| (repo, pr)))
+               .and_then(|(repo, project_status)| {
                  let fetch_result = do_fetch(project, &repo);
-                 make_project_status_report(working_dir, project, fetch_result)
+                 augment_project_status_report(project_status, fetch_result)
                }),
            )
       )
       .collect();
 
     for (project, report_result) in status_report {
-      print_output(project, &report_result, palette)
+      self.status_command.print_output(project, &report_result, palette)
     }
 
     Ok(

@@ -14,6 +14,7 @@ use git2::Repository;
 use gws2::color::palette::Palette;
 use gws2::commands::fetch::Fetch;
 use gws2::commands::common::Command;
+use gws2::commands::status::Status;
 use gws2::config::data::Workspace;
 
 use util::in_example_workspace;
@@ -39,6 +40,7 @@ fn fetch_gets_refs_from_named_remotes() {
     let project_path = "new_commit/unfetched_remote";
 
     let command: Fetch = Fetch {
+      status_command: Status { only_changes: false },
       projects: hash_set(vec!["new_commit/unfetched_remote".to_string()])
     };
 

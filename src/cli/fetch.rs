@@ -20,6 +20,7 @@ pub fn subcommand_def<'a>() -> App<'a, 'a> {
 
 pub fn make_command(matches: &ArgMatches) -> Fetch {
   Fetch {
+    status_command: super::status::make_command(matches),
     projects: matches.values_of("path")
       .map(|values| values.into_iter().map(&str::to_string).collect())
       .unwrap_or(HashSet::new())

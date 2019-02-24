@@ -28,10 +28,14 @@ impl BranchStatusPrinting for BranchStatus {
   fn describe_sync_status(&self, palette: &Palette) -> ANSIString {
     match &self.upstream_name {
       Some(upstream_name) =>
-        match self.in_sync {
-          Some(true) => palette.clean.paint("Clean".to_string()),
-          Some(false) => palette.dirty.paint(format!("Not in sync with {}", upstream_name)),
-          None => palette.missing.paint(format!("No remote branch {}", upstream_name)),
+        if self.upstream_fetched {
+          palette.cloning.paint("New upstream commits")
+        } else {
+          match self.in_sync {
+            Some(true) => palette.clean.paint("Clean".to_string()),
+            Some(false) => palette.dirty.paint(format!("Not in sync with {}", upstream_name)),
+            None => palette.missing.paint(format!("No remote branch {}", upstream_name)),
+          }
         },
       None => palette.missing.paint("No upstream set"),
     }
@@ -65,22 +69,23 @@ pub struct Status {
 
 impl Status {
 
-  fn print_output(
+  pub fn print_output(
     &self,
     project: &Project,
-    project_result: &Result<RepositoryStatus, Error>,
+    project_status: &Result<RepositoryStatus, Error>,
     palette: &Palette,
   ) {
-    match project_result {
+    println!("{}", format_project_header(project, palette));
+
+    match project_status {
       Ok(status) => {
         if self.only_changes == false || status.iter()
           .any(|b|
                b.dirty != DirtyState::Clean
                || b.in_sync.unwrap_or(true) == false
+               || b.upstream_fetched
           )
         {
-          println!("{}", format_project_header(&project, &palette));
-
           for b in status {
             println!("{}", b.describe_full(&palette));
           }
@@ -88,28 +93,39 @@ impl Status {
       },
       Err(Error::RepositoryMissing) => {
         if self.only_changes == false {
-          println!("{}", format_project_header(&project, &palette));
           println!("{}", palette.missing.paint(format_message_line("Missing repository")));
         }
       },
+      Err(Error::Git2Error(err)) => {
+        eprintln!("Failed to open repository: {}", err);
+        println!("{}", palette.error.paint(format_message_line("Error")));
+      },
       Err(err) => {
-        println!("{}", format_project_header(&project, &palette));
-        eprintln!("{}", palette.error.paint(format!("Failed to compute status: {}", err)));
-      }
+        eprintln!("Failed to list branches: {}", err);
+        println!("{}", palette.error.paint(format!("Failed to compute status: {}", err)));
+      },
     }
+  }
+
+  pub fn make_report<'ws>(
+    &self,
+    working_dir: &Path,
+    workspace: &'ws Workspace,
+  ) -> WorkspaceStatus<'ws> {
+    workspace
+      .projects
+      .iter()
+      .map(|project|
+           (project, project.status(working_dir))
+      )
+      .collect()
   }
 
 }
 
 impl Command for Status {
   fn run(&self, working_dir: &Path, workspace: &Workspace, palette: &Palette) -> Result<i32, Error> {
-    let report: WorkspaceStatus =
-      workspace.projects
-      .iter()
-      .map(|project|
-           (project, project.status(working_dir))
-      )
-      .collect();
+    let report = self.make_report(working_dir, workspace);
 
     for (project, project_result) in &report {
       self.print_output(project, project_result, palette);
