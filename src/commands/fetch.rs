@@ -155,25 +155,19 @@ fn print_output(
 
 impl Command for Fetch {
   fn run<'ws>(&self, working_dir: &Path, workspace: &'ws Workspace, palette: &Palette) -> Result<i32, Error> {
-    let repos: BTreeMap<&Project, Result<git2::Repository, Error>> = workspace.projects.iter()
+    let status_report: WorkspaceStatus =
+      workspace
+      .projects
+      .iter()
       .map(|project|
            (
              project,
-             project.open_repository(working_dir)
-           )
-      )
-      .collect();
-
-    let status_report: WorkspaceStatus =
-      repos
-      .into_iter()
-      .map(|(project, repo_result)|
-           (
-             project,
-             repo_result.and_then(|repo| {
-               let fetch_result = do_fetch(project, &repo);
-               make_project_status_report(working_dir, project, fetch_result)
-             }),
+             project
+               .open_repository(working_dir)
+               .and_then(|repo| {
+                 let fetch_result = do_fetch(project, &repo);
+                 make_project_status_report(working_dir, project, fetch_result)
+               }),
            )
       )
       .collect();
