@@ -154,7 +154,12 @@ fn print_output(
 }
 
 impl Command for Fetch {
-  fn run<'ws>(&self, working_dir: &Path, workspace: &'ws Workspace, palette: &Palette) -> Result<i32, Error> {
+  fn run<'ws>(
+    &self,
+    working_dir: &Path,
+    workspace: &'ws Workspace,
+    palette: &Palette,
+  ) -> Result<i32, Error> {
     let status_report: WorkspaceStatus =
       workspace
       .projects
