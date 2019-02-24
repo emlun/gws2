@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::path::Path;
 
@@ -12,6 +13,7 @@ use commands::error::Error;
 use config::data::Project;
 
 
+pub type WorkspaceStatus<'proj> = BTreeMap<&'proj Project, Result<RepositoryStatus, Error>>;
 pub type RepositoryStatus = BTreeSet<BranchStatus>;
 
 trait BranchMethods<'repo> {

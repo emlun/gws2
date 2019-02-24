@@ -8,6 +8,7 @@ use config::data::Project;
 use config::data::Workspace;
 use data::status::ProjectStatusMethods;
 use data::status::RepositoryStatus;
+use data::status::WorkspaceStatus;
 use super::common::Command;
 use super::common::exit_codes;
 use super::common::format_branch_line;
@@ -163,18 +164,22 @@ impl Command for Fetch {
       )
       .collect();
 
-    for (project, repo_result) in repos {
-      match repo_result {
-        Ok(repo) => {
-          let fetch_result = do_fetch(project, &repo);
-          let report =
-            make_project_status_report(working_dir, project, fetch_result);
-          print_output(project, &report, palette);
-        },
-        e @ Err(_) => {
-          print_output(project, &e.map(|_| unreachable!()), palette);
-        },
-      }
+    let status_report: WorkspaceStatus =
+      repos
+      .into_iter()
+      .map(|(project, repo_result)|
+           (
+             project,
+             repo_result.and_then(|repo| {
+               let fetch_result = do_fetch(project, &repo);
+               make_project_status_report(working_dir, project, fetch_result)
+             }),
+           )
+      )
+      .collect();
+
+    for (project, report_result) in status_report {
+      print_output(project, &report_result, palette)
     }
 
     Ok(
