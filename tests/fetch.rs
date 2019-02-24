@@ -63,3 +63,43 @@ fn fetch_gets_refs_from_named_remotes() {
     Ok(())
   });
 }
+
+#[test]
+fn fetch_reports_updates() {
+  in_example_workspace(|working_dir, workspace: Workspace| {
+    let project_path = "new_commit/unfetched_remote";
+
+    let command: Fetch = Fetch {
+      status_command: Status { only_changes: false },
+      projects: hash_set(vec!["new_commit/unfetched_remote".to_string()])
+    };
+
+    let status_report_1 = command.run_command(working_dir, &workspace);
+
+    for (project, project_status) in status_report_1 {
+      if project.path == project_path {
+        let project_status = project_status.unwrap();
+        for branch_status in project_status {
+          if branch_status.name == "master2" {
+            assert_eq!(branch_status.upstream_fetched, true);
+          } else {
+            assert_eq!(branch_status.upstream_fetched, false);
+          }
+        }
+      }
+    }
+
+    let status_report_2 = command.run_command(working_dir, &workspace);
+
+    for (project, project_status) in status_report_2 {
+      if project.path == project_path {
+        let project_status = project_status.unwrap();
+        for branch_status in project_status {
+          assert_eq!(branch_status.upstream_fetched, false);
+        }
+      }
+    }
+
+    Ok(())
+  });
+}
