@@ -3,10 +3,12 @@ use ansi_term::ANSIString;
 use std::path::Path;
 
 use color::palette::Palette;
+use config::data::Project;
 use config::data::Workspace;
 use data::status::BranchStatus;
 use data::status::DirtyState;
 use data::status::ProjectStatusMethods;
+use data::status::RepositoryStatus;
 use data::status::WorkspaceStatus;
 use super::common::Command;
 use super::common::exit_codes;
@@ -61,6 +63,44 @@ pub struct Status {
   pub only_changes: bool,
 }
 
+impl Status {
+
+  fn print_output(
+    &self,
+    project: &Project,
+    project_result: &Result<RepositoryStatus, Error>,
+    palette: &Palette,
+  ) {
+    match project_result {
+      Ok(status) => {
+        if self.only_changes == false || status.iter()
+          .any(|b|
+               b.dirty != DirtyState::Clean
+               || b.in_sync.unwrap_or(true) == false
+          )
+        {
+          println!("{}", format_project_header(&project, &palette));
+
+          for b in status {
+            println!("{}", b.describe_full(&palette));
+          }
+        }
+      },
+      Err(Error::RepositoryMissing) => {
+        if self.only_changes == false {
+          println!("{}", format_project_header(&project, &palette));
+          println!("{}", palette.missing.paint(format_message_line("Missing repository")));
+        }
+      },
+      Err(err) => {
+        println!("{}", format_project_header(&project, &palette));
+        eprintln!("{}", palette.error.paint(format!("Failed to compute status: {}", err)));
+      }
+    }
+  }
+
+}
+
 impl Command for Status {
   fn run(&self, working_dir: &Path, workspace: &Workspace, palette: &Palette) -> Result<i32, Error> {
     let report: WorkspaceStatus =
@@ -72,32 +112,7 @@ impl Command for Status {
       .collect();
 
     for (project, project_result) in &report {
-      match project_result {
-        Ok(status) => {
-          if self.only_changes == false || status.iter()
-            .any(|b|
-                 b.dirty != DirtyState::Clean
-                 || b.in_sync.unwrap_or(true) == false
-            )
-          {
-            println!("{}", format_project_header(&project, &palette));
-
-            for b in status {
-              println!("{}", b.describe_full(&palette));
-            }
-          }
-        },
-        Err(Error::RepositoryMissing) => {
-          if self.only_changes == false {
-            println!("{}", format_project_header(&project, &palette));
-            println!("{}", palette.missing.paint(format_message_line("Missing repository")));
-          }
-        },
-        Err(err) => {
-          println!("{}", format_project_header(&project, &palette));
-          eprintln!("{}", palette.error.paint(format!("Failed to compute status: {}", err)));
-        }
-      }
+      self.print_output(project, project_result, palette);
     }
 
     let exit_code =
