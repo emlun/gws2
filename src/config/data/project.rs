@@ -43,10 +43,7 @@ impl Project {
         .flatten()
         .map(|(branch, _)| {
           let upstream = branch.upstream().ok();
-          (
-            branch,
-            upstream,
-          )
+          (branch, upstream)
         })
         .collect()
     )
