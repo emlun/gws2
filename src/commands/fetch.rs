@@ -19,6 +19,31 @@ pub struct Fetch {
   pub projects: HashSet<String>,
 }
 
+impl Fetch {
+  pub fn run_command<'ws>(
+    &self,
+    working_dir: &Path,
+    workspace: &'ws Workspace,
+  ) -> WorkspaceStatus<'ws> {
+    self
+    .status_command.make_report(working_dir, workspace)
+    .into_iter()
+    .map(|(project, project_status_result)|
+         (
+           project,
+           project
+             .open_repository(working_dir)
+             .and_then(|repo| project_status_result.map(|pr| (repo, pr)))
+             .and_then(|(repo, project_status)| {
+               let fetch_result = do_fetch(project, &repo);
+               augment_project_status_report(project_status, fetch_result)
+             }),
+         )
+    )
+    .collect()
+  }
+}
+
 struct FetchedProject {
   pub updated_branch_names: BTreeSet<String>,
 }
@@ -116,23 +141,7 @@ impl Command for Fetch {
     workspace: &'ws Workspace,
     palette: &Palette,
   ) -> Result<i32, Error> {
-    let status_report: WorkspaceStatus =
-      self
-      .status_command.make_report(working_dir, workspace)
-      .into_iter()
-      .map(|(project, project_status_result)|
-           (
-             project,
-             project
-               .open_repository(working_dir)
-               .and_then(|repo| project_status_result.map(|pr| (repo, pr)))
-               .and_then(|(repo, project_status)| {
-                 let fetch_result = do_fetch(project, &repo);
-                 augment_project_status_report(project_status, fetch_result)
-               }),
-           )
-      )
-      .collect();
+    let status_report = self.run_command(working_dir, workspace);
 
     for (project, report_result) in status_report {
       self.status_command.print_output(project, &report_result, palette)
