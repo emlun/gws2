@@ -31,13 +31,17 @@ impl Fetch {
     .map(|(project, project_status_result)|
          (
            project,
-           project
-             .open_repository(working_dir)
-             .and_then(|repo| project_status_result.map(|pr| (repo, pr)))
-             .and_then(|(repo, project_status)| {
-               let fetch_result = do_fetch(project, &repo);
-               augment_project_status_report(project_status, fetch_result)
-             }),
+           if self.projects.is_empty() || self.projects.contains(&project.path) {
+             project
+               .open_repository(working_dir)
+               .and_then(|repo| project_status_result.map(|pr| (repo, pr)))
+               .and_then(|(repo, project_status)| {
+                 let fetch_result = do_fetch(project, &repo);
+                 augment_project_status_report(project_status, fetch_result)
+               })
+           } else {
+             project_status_result
+           },
          )
     )
     .collect()

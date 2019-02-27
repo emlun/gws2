@@ -11,6 +11,7 @@ use commands::fetch::Fetch;
 pub fn subcommand_def<'a>() -> App<'a, 'a> {
   SubCommand::with_name("fetch")
     .about("Print status for each project, but fetch remotes first")
+    .after_help("If no <path>s are given, fetch all projects.")
     .arg(
       Arg::with_name("path")
         .multiple(true)

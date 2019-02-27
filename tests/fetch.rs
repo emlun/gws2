@@ -6,6 +6,7 @@ mod util;
 
 use std::collections::HashSet;
 use std::hash::Hash;
+use std::path::Path;
 
 use git2::BranchType;
 use git2::Commit;
@@ -18,6 +19,7 @@ use gws2::commands::status::Status;
 use gws2::config::data::Workspace;
 
 use util::in_example_workspace;
+use util::IoErrorOrGit2Error;
 
 
 pub fn hash_set<I, T>(items: I) -> HashSet<T>
@@ -41,7 +43,7 @@ fn fetch_gets_refs_from_named_remotes() {
 
     let command: Fetch = Fetch {
       status_command: Status { only_changes: false },
-      projects: hash_set(vec!["new_commit/unfetched_remote".to_string()])
+      projects: HashSet::new(),
     };
 
     let repo: Repository = Repository::open(working_dir.join(project_path))?;
@@ -71,7 +73,7 @@ fn fetch_reports_updates() {
 
     let command: Fetch = Fetch {
       status_command: Status { only_changes: false },
-      projects: hash_set(vec!["new_commit/unfetched_remote".to_string()])
+      projects: HashSet::new(),
     };
 
     let status_report_1 = command.run_command(working_dir, &workspace);
@@ -102,4 +104,85 @@ fn fetch_reports_updates() {
 
     Ok(())
   });
+}
+
+#[test]
+fn fetch_fetches_all_projects_if_none_are_named() {
+  in_example_workspace(|working_dir, workspace: Workspace| {
+    let project_path = "new_commit/unfetched_remote";
+
+    let command: Fetch = Fetch {
+      status_command: Status { only_changes: false },
+      projects: HashSet::new(),
+    };
+
+    let status_report = command.run_command(working_dir, &workspace);
+
+    for (project, project_status) in status_report {
+      if project.path == project_path {
+        let project_status = project_status.unwrap();
+        for branch_status in project_status {
+          if branch_status.name == "master2" {
+            assert_eq!(branch_status.upstream_fetched, true);
+          } else {
+            assert_eq!(branch_status.upstream_fetched, false);
+          }
+        }
+      }
+    }
+
+    Ok(())
+  });
+}
+
+#[test]
+fn fetch_fetches_only_named_projects_if_any_are_named() {
+  fn run_test(
+    working_dir: &Path,
+    workspace: Workspace,
+    projects: HashSet<String>,
+    should_fetch: bool,
+  ) -> Result<(), IoErrorOrGit2Error> {
+    let project_path = "new_commit/unfetched_remote";
+
+    let command: Fetch = Fetch {
+      status_command: Status { only_changes: false },
+      projects,
+    };
+
+    let status_report = command.run_command(working_dir, &workspace);
+
+    for (project, project_status) in status_report {
+      if project.path == project_path {
+        let project_status = project_status.unwrap();
+        for branch_status in project_status {
+          if branch_status.name == "master2" {
+            assert_eq!(branch_status.upstream_fetched, should_fetch);
+          } else {
+            assert_eq!(branch_status.upstream_fetched, false);
+          }
+        }
+      }
+    }
+
+    Ok(())
+  }
+
+  in_example_workspace(|working_dir, workspace: Workspace| {
+    run_test(
+      working_dir,
+      workspace,
+      hash_set(vec!["new_commit/local".to_string()]),
+      false,
+    )
+  });
+
+  in_example_workspace(|working_dir, workspace: Workspace| {
+    run_test(
+      working_dir,
+      workspace,
+      hash_set(vec!["new_commit/unfetched_remote".to_string()]),
+      true,
+    )
+  })
 }
