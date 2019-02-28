@@ -26,6 +26,7 @@ mod commands;
 mod config;
 mod crate_info;
 mod data;
+mod util;
 
 fn main() {
     std::process::exit(cli::main::main());
