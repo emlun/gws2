@@ -2,7 +2,6 @@
 pub mod clone;
 pub mod fetch;
 // pub mod ff;
-// pub mod help;
 // pub mod init;
 pub mod main;
 mod status;
