@@ -14,25 +14,25 @@ use gws2::config::read::read_workspace_file;
 
 
 #[derive(Debug)]
-pub enum IoErrorOrGit2Error {
+pub enum Error {
   IoError(::std::io::Error),
   Git2Error(::git2::Error)
 }
 
-impl From<::std::io::Error> for IoErrorOrGit2Error {
-  fn from(e: ::std::io::Error) -> IoErrorOrGit2Error {
-    IoErrorOrGit2Error::IoError(e)
+impl From<::std::io::Error> for Error {
+  fn from(e: ::std::io::Error) -> Error {
+    Error::IoError(e)
   }
 }
 
-impl From<::git2::Error> for IoErrorOrGit2Error {
-  fn from(e: ::git2::Error) -> IoErrorOrGit2Error {
-    IoErrorOrGit2Error::Git2Error(e)
+impl From<::git2::Error> for Error {
+  fn from(e: ::git2::Error) -> Error {
+    Error::Git2Error(e)
   }
 }
 
 pub fn in_example_workspace<T>(
-  test: fn(&Path, Workspace) -> Result<T, IoErrorOrGit2Error>
+  test: fn(&Path, Workspace) -> Result<T, Error>
 ) {
   let result = in_example_workspace_inner(test);
   assert!(result.is_ok(), format!("{:?}", result.err()));
@@ -40,8 +40,8 @@ pub fn in_example_workspace<T>(
 
 fn in_example_workspace_inner<T, E>(
   test: fn(&Path, Workspace) -> Result<T, E>
-) -> Result<T, IoErrorOrGit2Error>
-  where IoErrorOrGit2Error: From<E>
+) -> Result<T, Error>
+  where Error: From<E>
 {
   let tmpdir = TempDir::new("gws2-test")?;
 
@@ -66,5 +66,5 @@ fn in_example_workspace_inner<T, E>(
 
   let workspace = read_workspace_file(tmpdir.path().join(".projects.gws")).unwrap();
   let result = test(tmpdir.path(), workspace);
-  result.map_err(|e| IoErrorOrGit2Error::from(e))
+  result.map_err(|e| Error::from(e))
 }

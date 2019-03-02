@@ -19,7 +19,7 @@ use gws2::commands::status::Status;
 use gws2::config::data::Workspace;
 
 use util::in_example_workspace;
-use util::IoErrorOrGit2Error;
+use util::Error;
 
 
 pub fn hash_set<I, T>(items: I) -> HashSet<T>
@@ -142,7 +142,7 @@ fn fetch_fetches_only_named_projects_if_any_are_named() {
     workspace: Workspace,
     projects: HashSet<String>,
     should_fetch: bool,
-  ) -> Result<(), IoErrorOrGit2Error> {
+  ) -> Result<(), Error> {
     let project_path = "new_commit/unfetched_remote";
 
     let command: Fetch = Fetch {
