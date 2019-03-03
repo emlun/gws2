@@ -135,23 +135,52 @@ pub fn make_example_workspace(meta_dir: &Path, workspace_dir: &Path) -> Result<(
   Ok(())
 }
 
+fn add_ahead_remote<'repo>(
+  repo: &'repo git2::Repository,
+  remote_path: &Path,
+) -> Result<git2::Remote<'repo>, Error> {
+  let mut remote = repo.remote("ahead", remote_path.to_str().unwrap())?;
+  remote.fetch(&["master"], None, None)?;
+  Ok(remote)
+}
+
+fn add_master2_branch<'repo>(
+  repo: &'repo git2::Repository,
+  target_ref: &str,
+  target_type: git2::BranchType,
+) -> Result<git2::Branch<'repo>, Error> {
+  add_master2_branch_with_upstream(repo, target_ref, target_type, target_ref)
+}
+
+fn add_master2_branch_with_upstream<'repo>(
+  repo: &'repo git2::Repository,
+  target_ref: &str,
+  target_type: git2::BranchType,
+  upstream: &str,
+) -> Result<git2::Branch<'repo>, Error> {
+  let target_commit = repo
+    .find_branch(target_ref, target_type)?
+    .get()
+    .peel_to_commit()?;
+  let mut master2 = repo.branch("master2", &target_commit, false)?;
+  master2.set_upstream(Some(upstream))?;
+  Ok(master2)
+}
+
+fn add_default_master2_branch<'repo>(
+  repo: &'repo git2::Repository,
+) -> Result<git2::Branch<'repo>, Error> {
+  add_master2_branch(repo, "ahead/master", git2::BranchType::Remote)
+}
+
 fn make_project_clean(
   path: &Path,
   origin_path: &Path,
   ahead_path: &Path,
 ) -> Result<git2::Repository, Error> {
   let repo = git2::Repository::clone(origin_path.to_str().unwrap(), path)?;
-  repo
-    .remote("ahead", ahead_path.to_str().unwrap())?
-    .fetch(&["master"], None, None)?;
-  {
-    let ahead_master_commit = repo
-      .find_branch("ahead/master", git2::BranchType::Remote)?
-      .get()
-      .peel_to_commit()?;
-    let mut master2 = repo.branch("master2", &ahead_master_commit, false)?;
-    master2.set_upstream(Some("ahead/master"))?;
-  }
+  add_ahead_remote(&repo, ahead_path)?;
+  add_default_master2_branch(&repo)?;
   Ok(repo)
 }
 
@@ -162,19 +191,8 @@ fn make_project_new_commit_local(
 ) -> Result<git2::Repository, Error> {
   let repo = git2::Repository::clone(origin_path.to_str().unwrap(), path)?;
   add_commit_to_repo(&repo)?;
-  repo
-    .remote("ahead", ahead_path.to_str().unwrap())?
-    .fetch(&["master"], None, None)?;
-
-  {
-    let master_commit = repo
-      .find_branch("master", git2::BranchType::Local)?
-      .get()
-      .peel_to_commit()?;
-    let mut master2 = repo.branch("master2", &master_commit, false)?;
-    master2.set_upstream(Some("ahead/master"))?;
-  }
-
+  add_ahead_remote(&repo, ahead_path)?;
+  add_master2_branch(&repo, "master", git2::BranchType::Local)?;
   Ok(repo)
 }
 
@@ -184,19 +202,8 @@ fn make_project_new_commit_remote(
   ahead_path: &Path,
 ) -> Result<git2::Repository, Error> {
   let repo = git2::Repository::clone(origin_path.to_str().unwrap(), path)?;
-  repo
-    .remote("ahead", ahead_path.to_str().unwrap())?
-    .fetch(&["master"], None, None)?;
-
-  {
-    let master_commit = repo
-      .find_branch("master", git2::BranchType::Local)?
-      .get()
-      .peel_to_commit()?;
-    let mut master2 = repo.branch("master2", &master_commit, false)?;
-    master2.set_upstream(Some("ahead/master"))?;
-  }
-
+  add_ahead_remote(&repo, ahead_path)?;
+  add_master2_branch(&repo, "master", git2::BranchType::Local)?;
   Ok(repo)
 }
 
@@ -206,21 +213,9 @@ fn make_project_new_commit_unfetched_remote(
   ahead_path: &Path,
 ) -> Result<git2::Repository, Error> {
   let repo = git2::Repository::clone(origin_path.to_str().unwrap(), path)?;
-
-  {
-    let mut ahead_remote = repo.remote("ahead", origin_path.to_str().unwrap())?;
-    ahead_remote.fetch(&["master"], None, None)?;
-
-    let master_commit = repo
-      .find_branch("master", git2::BranchType::Local)?
-      .get()
-      .peel_to_commit()?;
-    let mut master2 = repo.branch("master2", &master_commit, false)?;
-    master2.set_upstream(Some("ahead/master"))?;
-
-    repo.remote_set_url("ahead", ahead_path.to_str().unwrap())?;
-  }
-
+  add_ahead_remote(&repo, origin_path)?;
+  add_master2_branch_with_upstream(&repo, "master", git2::BranchType::Local, "ahead/master")?;
+  repo.remote_set_url("ahead", ahead_path.to_str().unwrap())?;
   Ok(repo)
 }
 
@@ -231,17 +226,8 @@ fn make_project_new_files(
 ) -> Result<git2::Repository, Error> {
   let repo = git2::Repository::clone(origin_path.to_str().unwrap(), path)?;
   write(path.join("foo.txt").as_path(), &[])?;
-  repo
-    .remote("ahead", ahead_path.to_str().unwrap())?
-    .fetch(&["master"], None, None)?;
-  {
-    let ahead_master_commit = repo
-      .find_branch("ahead/master", git2::BranchType::Remote)?
-      .get()
-      .peel_to_commit()?;
-    let mut master2 = repo.branch("master2", &ahead_master_commit, false)?;
-    master2.set_upstream(Some("ahead/master"))?;
-  }
+  add_ahead_remote(&repo, ahead_path)?;
+  add_default_master2_branch(&repo)?;
   Ok(repo)
 }
 
@@ -252,18 +238,8 @@ fn make_project_changed_files(
 ) -> Result<git2::Repository, Error> {
   let repo = git2::Repository::clone(origin_path.to_str().unwrap(), path)?;
   write(path.join("README.md").as_path(), "flrglgrgldrgl\n")?;
-  repo
-    .remote("ahead", ahead_path.to_str().unwrap())?
-    .fetch(&["master"], None, None)?;
-  {
-    let ahead_master_commit = repo
-      .find_branch("ahead/master", git2::BranchType::Remote)?
-      .get()
-      .peel_to_commit()?;
-    let mut master2 = repo.branch("master2", &ahead_master_commit, false)?;
-    master2.set_upstream(Some("ahead/master"))?;
-  }
-
+  add_ahead_remote(&repo, ahead_path)?;
+  add_default_master2_branch(&repo)?;
   Ok(repo)
 }
 
