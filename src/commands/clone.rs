@@ -14,68 +14,68 @@ use super::error::Error;
 
 
 pub struct Clone {
-  pub projects: HashSet<String>,
+    pub projects: HashSet<String>,
 }
 
 impl Command for Clone {
-  fn run(&self, working_dir: &Path, workspace: &Workspace, palette: &Palette) -> Result<i32, Error> {
+    fn run(&self, working_dir: &Path, workspace: &Workspace, palette: &Palette) -> Result<i32, Error> {
 
-    let mut clone_failed: bool = false;
-    let mut add_remote_failed: bool = false;
+        let mut clone_failed: bool = false;
+        let mut add_remote_failed: bool = false;
 
-    for project in workspace.projects.iter()
-      .filter(|proj|
-        self.projects.contains(&proj.path)
-      )
-    {
-      println!("{}", format_project_header(&project, &palette));
+        for project in workspace.projects.iter()
+            .filter(|proj|
+                self.projects.contains(&proj.path)
+            )
+        {
+            println!("{}", format_project_header(&project, &palette));
 
-      match project.status(working_dir) {
-        Ok(_) => {
-          println!("{}", palette.clean.paint(format_message_line("Already exists")));
-        },
-        Err(Error::RepositoryMissing) => {
-          println!("{}", palette.cloning.paint(format_message_line("Cloning…")));
+            match project.status(working_dir) {
+                Ok(_) => {
+                    println!("{}", palette.clean.paint(format_message_line("Already exists")));
+                },
+                Err(Error::RepositoryMissing) => {
+                    println!("{}", palette.cloning.paint(format_message_line("Cloning…")));
 
-          match Repository::clone_recurse(
-            &project.main_remote.url,
-            working_dir.join(&project.path)
-          ) {
-            Ok(repo) => {
-              for extra_remote in &project.extra_remotes {
-                match repo.remote(&extra_remote.name, &extra_remote.url) {
-                  Ok(_) => {},
-                  Err(err) => {
-                    add_remote_failed = true;
-                    eprintln!("Failed to add remote {}: {}", extra_remote.name, err);
-                  },
-                }
-              }
-              println!("{}", palette.clean.paint(format_message_line("Cloned.")));
-            },
-            Err(err) => {
-              clone_failed = true;
-              eprintln!("Failed to clone project {}: {}", project.path, err);
-              println!("{}", palette.error.paint(format_message_line("Error")));
+                    match Repository::clone_recurse(
+                        &project.main_remote.url,
+                        working_dir.join(&project.path)
+                    ) {
+                        Ok(repo) => {
+                            for extra_remote in &project.extra_remotes {
+                                match repo.remote(&extra_remote.name, &extra_remote.url) {
+                                    Ok(_) => {},
+                                    Err(err) => {
+                                        add_remote_failed = true;
+                                        eprintln!("Failed to add remote {}: {}", extra_remote.name, err);
+                                    },
+                                }
+                            }
+                            println!("{}", palette.clean.paint(format_message_line("Cloned.")));
+                        },
+                        Err(err) => {
+                            clone_failed = true;
+                            eprintln!("Failed to clone project {}: {}", project.path, err);
+                            println!("{}", palette.error.paint(format_message_line("Error")));
+                        }
+                    }
+                },
+                Err(err) => {
+                    clone_failed = true;
+                    eprintln!("Error: {}", err);
+                    println!("{}", palette.error.paint(format_message_line("Error")));
+                },
             }
-          }
-        },
-        Err(err) => {
-          clone_failed = true;
-          eprintln!("Error: {}", err);
-          println!("{}", palette.error.paint(format_message_line("Error")));
-        },
-      }
-    }
+        }
 
-    Ok(
-      if clone_failed {
-        exit_codes::CLONE_FAILED
-      } else if add_remote_failed {
-        exit_codes::CLONE_ADD_REMOTE_FAILED
-      } else {
-        exit_codes::OK
-      }
-    )
-  }
+        Ok(
+            if clone_failed {
+                exit_codes::CLONE_FAILED
+            } else if add_remote_failed {
+                exit_codes::CLONE_ADD_REMOTE_FAILED
+            } else {
+                exit_codes::OK
+            }
+        )
+    }
 }

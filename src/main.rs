@@ -29,5 +29,5 @@ mod data;
 
 
 fn main() {
-  std::process::exit(cli::main::main());
+    std::process::exit(cli::main::main());
 }

@@ -9,21 +9,21 @@ use commands::fetch::Fetch;
 
 
 pub fn subcommand_def<'a>() -> App<'a, 'a> {
-  SubCommand::with_name("fetch")
-    .about("Print status for each project, but fetch remotes first")
-    .after_help("If no <path>s are given, fetch all projects.")
-    .arg(
-      Arg::with_name("path")
-        .multiple(true)
-        .help("Project paths to be fetched")
-    )
+    SubCommand::with_name("fetch")
+        .about("Print status for each project, but fetch remotes first")
+        .after_help("If no <path>s are given, fetch all projects.")
+        .arg(
+            Arg::with_name("path")
+                .multiple(true)
+                .help("Project paths to be fetched")
+        )
 }
 
 pub fn make_command(matches: &ArgMatches) -> Fetch {
-  Fetch {
-    status_command: super::status::make_command(matches),
-    projects: matches.values_of("path")
-      .map(|values| values.into_iter().map(&str::to_string).collect())
-      .unwrap_or(HashSet::new())
-  }
+    Fetch {
+        status_command: super::status::make_command(matches),
+        projects: matches.values_of("path")
+            .map(|values| values.into_iter().map(&str::to_string).collect())
+            .unwrap_or(HashSet::new())
+    }
 }
