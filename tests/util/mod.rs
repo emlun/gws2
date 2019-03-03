@@ -5,6 +5,7 @@ extern crate tempdir;
 use std::fs::create_dir_all;
 use std::fs::write;
 use std::path::Path;
+use std::path::PathBuf;
 
 use tempdir::TempDir;
 
@@ -53,6 +54,17 @@ fn make_origin_repo(path: &Path) -> Result<git2::Repository, Error> {
   Ok(repo)
 }
 
+fn join_all<I, P>(path: &Path, segments: I) -> PathBuf
+  where I: IntoIterator<Item=P>,
+        P: AsRef<Path>,
+{
+  let mut pb = path.to_path_buf();
+  for segment in segments {
+    pb.push(segment);
+  }
+  pb
+}
+
 fn add_commit_to_repo(repo: &git2::Repository) -> Result<git2::Oid, Error> {
   let commit = repo.head()?.peel_to_commit()?;
   let tree = repo.find_tree(commit.tree_id())?;
@@ -82,55 +94,35 @@ pub fn make_example_workspace(meta_dir: &Path, workspace_dir: &Path) -> Result<(
     ahead_path,
   )?;
 
-  {
-    let mut pb = workspace_dir.join("new_commit");
-    pb.push("local");
-    make_project_new_commit_local(
-      pb.as_path(),
-      origin_path,
-      ahead_path,
-    )?;
-  }
+  make_project_new_commit_local(
+    &join_all(workspace_dir, &["new_commit", "local"]),
+    origin_path,
+    ahead_path,
+  )?;
 
-  {
-    let mut pb = workspace_dir.join("new_commit");
-    pb.push("remote");
-    make_project_new_commit_remote(
-      pb.as_path(),
-      origin_path,
-      ahead_path,
-    )?;
-  }
+  make_project_new_commit_remote(
+    &join_all(workspace_dir, &["new_commit", "remote"]),
+    origin_path,
+    ahead_path,
+  )?;
 
-  {
-    let mut pb = workspace_dir.join("new_commit");
-    pb.push("unfetched_remote");
-    make_project_new_commit_unfetched_remote(
-      pb.as_path(),
-      origin_path,
-      ahead_path,
-    )?;
-  }
+  make_project_new_commit_unfetched_remote(
+    &join_all(workspace_dir, &["new_commit", "unfetched_remote"]),
+    origin_path,
+    ahead_path,
+  )?;
 
-  {
-    let mut pb = workspace_dir.join("changes");
-    pb.push("new_files");
-    make_project_new_files(
-      pb.as_path(),
-      origin_path,
-      ahead_path,
-    )?;
-  }
+  make_project_new_files(
+    &join_all(workspace_dir, &["changes", "new_files"]),
+    origin_path,
+    ahead_path,
+  )?;
 
-  {
-    let mut pb = workspace_dir.join("changes");
-    pb.push("changed_files");
-    make_project_changed_files(
-      pb.as_path(),
-      origin_path,
-      ahead_path,
-    )?;
-  }
+  make_project_changed_files(
+    &join_all(workspace_dir, &["changes", "changed_files"]),
+    origin_path,
+    ahead_path,
+  )?;
 
   Ok(())
 }
