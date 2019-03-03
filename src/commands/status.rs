@@ -27,7 +27,9 @@ impl BranchStatusPrinting for BranchStatus {
     fn describe_sync_status(&self, palette: &Palette) -> ANSIString {
         match &self.upstream_name {
             Some(upstream_name) => {
-                if self.upstream_fetched {
+                if self.fast_forwarded {
+                    palette.cloning.paint("Fast-forwarded")
+                } else if self.upstream_fetched {
                     palette.cloning.paint("New upstream commits")
                 } else {
                     match self.in_sync {

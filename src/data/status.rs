@@ -119,6 +119,7 @@ impl RepositoryMethods for Repository {
                     is_head: is_head_branch,
                     in_sync: is_in_sync,
                     upstream_fetched: false,
+                    fast_forwarded: false,
                 }
             })
             .collect();
@@ -153,6 +154,7 @@ pub struct BranchStatus {
     pub is_head: bool,
     pub in_sync: Option<bool>,
     pub upstream_fetched: bool,
+    pub fast_forwarded: bool,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
