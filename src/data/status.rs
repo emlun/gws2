@@ -12,7 +12,6 @@ use git2::Status;
 use commands::error::Error;
 use config::data::Project;
 
-
 pub type WorkspaceStatus<'proj> = BTreeMap<&'proj Project, Result<RepositoryStatus, Error>>;
 pub type RepositoryStatus = BTreeSet<BranchStatus>;
 
@@ -38,13 +37,11 @@ trait StatusMethods {
     fn is_untracked(&self) -> bool;
 }
 
-impl <'repo> BranchMethods<'repo> for Branch<'repo> {
+impl<'repo> BranchMethods<'repo> for Branch<'repo> {
     fn branch_name<'a>(&'a self) -> Result<&'a str, Error> {
         self.name()
             .map_err(Error::from)
-            .and_then(|name|
-                name.ok_or(Error::NoBranchNameFound)
-            )
+            .and_then(|name| name.ok_or(Error::NoBranchNameFound))
     }
 
     fn is_up_to_date_with_upstream(&'repo self) -> Result<Option<bool>, Error> {
@@ -57,29 +54,22 @@ impl <'repo> BranchMethods<'repo> for Branch<'repo> {
             Some(ups) => {
                 let upstream_commit: Commit<'repo> = try!(ups.get().peel_to_commit());
                 Ok(Some(branch_commit.id() == upstream_commit.id()))
-            },
+            }
         }
     }
 
     fn upstream_name(&self) -> Result<Option<String>, Error> {
-        Ok(
-            self.upstream()?
-            .name()?
-            .map(&str::to_string)
-        )
+        Ok(self.upstream()?.name()?.map(&str::to_string))
     }
-
 }
 
 impl ProjectStatusMethods for Project {
     fn status(&self, working_dir: &Path) -> Result<RepositoryStatus, Error> {
-        self.open_repository(working_dir)?
-            .project_status(&self)
+        self.open_repository(working_dir)?.project_status(&self)
     }
 }
 
 impl RepositoryMethods for Repository {
-
     fn any_file(&self, pred: fn(&Status) -> bool) -> bool {
         self.statuses(None)
             .iter()
@@ -95,18 +85,18 @@ impl RepositoryMethods for Repository {
     }
 
     fn project_status(&self, _project: &Project) -> Result<RepositoryStatus, Error> {
-        let dirty_status =
-            if self.any_file(StatusMethods::is_dirty) {
-                if self.any_file(StatusMethods::is_modified) {
-                    DirtyState::UncommittedChanges
-                } else {
-                    DirtyState::UntrackedFiles
-                }
+        let dirty_status = if self.any_file(StatusMethods::is_dirty) {
+            if self.any_file(StatusMethods::is_modified) {
+                DirtyState::UncommittedChanges
             } else {
-                DirtyState::Clean
-            };
+                DirtyState::UntrackedFiles
+            }
+        } else {
+            DirtyState::Clean
+        };
 
-        let branch_stati: Vec<BranchStatus> = self.branches(Some(BranchType::Local))
+        let branch_stati: Vec<BranchStatus> = self
+            .branches(Some(BranchType::Local))
             .unwrap()
             .map(Result::unwrap)
             .map(|(b, _)| {
@@ -127,12 +117,10 @@ impl RepositoryMethods for Repository {
                     upstream_fetched: false,
                 }
             })
-            .collect()
-        ;
+            .collect();
 
         Ok(branch_stati.into_iter().collect())
     }
-
 }
 
 impl StatusMethods for Status {
@@ -153,9 +141,7 @@ impl StatusMethods for Status {
     }
 }
 
-#[derive(Debug)]
-#[derive(Eq)]
-#[derive(Ord)]
+#[derive(Debug, Eq, Ord)]
 pub struct BranchStatus {
     pub name: String,
     pub upstream_name: Option<String>,
@@ -177,12 +163,7 @@ impl PartialOrd for BranchStatus {
     }
 }
 
-#[derive(Clone)]
-#[derive(Debug)]
-#[derive(Eq)]
-#[derive(PartialEq)]
-#[derive(Ord)]
-#[derive(PartialOrd)]
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum DirtyState {
     Clean,
     UncommittedChanges,

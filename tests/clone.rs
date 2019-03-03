@@ -16,10 +16,10 @@ use gws2::config::data::Workspace;
 
 use util::in_example_workspace;
 
-
 pub fn hash_set<I, T>(items: I) -> HashSet<T>
-    where I: IntoIterator<Item=T>,
-                T: Eq + Hash,
+where
+    I: IntoIterator<Item = T>,
+    T: Eq + Hash,
 {
     items.into_iter().collect()
 }
@@ -27,13 +27,13 @@ pub fn hash_set<I, T>(items: I) -> HashSet<T>
 #[test]
 fn clone_creates_repo() {
     in_example_workspace(|working_dir, workspace: Workspace| {
-
         let command: Clone = Clone {
-            projects: hash_set(vec!["missing_repository".to_string()])
+            projects: hash_set(vec!["missing_repository".to_string()]),
         };
 
         assert_eq!(false, working_dir.join("missing_repository").exists());
-        command.run(working_dir, &workspace, &Palette::default())
+        command
+            .run(working_dir, &workspace, &Palette::default())
             .expect("Clone command failed");
         assert!(working_dir.join("missing_repository").exists());
         assert_eq!(false, working_dir.join("missing_repository_2").exists());
@@ -45,14 +45,17 @@ fn clone_creates_repo() {
 #[test]
 fn clone_supports_multiple_arguments() {
     in_example_workspace(|working_dir, workspace: Workspace| {
-
         let command: Clone = Clone {
-            projects: hash_set(vec!["missing_repository".to_string(), "missing_repository_2".to_string()])
+            projects: hash_set(vec![
+                "missing_repository".to_string(),
+                "missing_repository_2".to_string(),
+            ]),
         };
 
         assert_eq!(false, working_dir.join("missing_repository").exists());
         assert_eq!(false, working_dir.join("missing_repository_2").exists());
-        command.run(working_dir, &workspace, &Palette::default())
+        command
+            .run(working_dir, &workspace, &Palette::default())
             .expect("Clone command failed");
         assert!(working_dir.join("missing_repository").exists());
         assert!(working_dir.join("missing_repository_2").exists());
@@ -64,18 +67,20 @@ fn clone_supports_multiple_arguments() {
 #[test]
 fn clone_creates_extra_remotes() {
     in_example_workspace(|working_dir, workspace: Workspace| {
-
         let command: Clone = Clone {
-            projects: hash_set(vec!["missing_repository".to_string()])
+            projects: hash_set(vec!["missing_repository".to_string()]),
         };
 
-        let repo_path: String = workspace.projects.iter()
+        let repo_path: String = workspace
+            .projects
+            .iter()
             .find(|proj| proj.path == "missing_repository")
             .unwrap()
             .path
             .clone();
 
-        command.run(working_dir, &workspace, &Palette::default())
+        command
+            .run(working_dir, &workspace, &Palette::default())
             .expect("Clone command failed");
 
         assert_eq!(

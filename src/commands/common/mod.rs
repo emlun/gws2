@@ -4,14 +4,18 @@ use std::path::Path;
 
 use ansi_term::ANSIString;
 
+use super::error::Error;
 use color::palette::Palette;
 use config::data::Project;
 use config::data::Workspace;
-use super::error::Error;
-
 
 pub trait Command {
-    fn run(&self, working_dir: &Path, workspace: &Workspace, palette: &Palette) -> Result<i32, Error>;
+    fn run(
+        &self,
+        working_dir: &Path,
+        workspace: &Workspace,
+        palette: &Palette,
+    ) -> Result<i32, Error>;
 }
 
 fn ellipsisize(s: &str, length: usize) -> String {
@@ -22,11 +26,18 @@ fn ellipsisize(s: &str, length: usize) -> String {
     }
 }
 
-pub fn format_branch_line(palette: &Palette, is_head: bool, name: &str, description: &ANSIString) -> String {
+pub fn format_branch_line(
+    palette: &Palette,
+    is_head: bool,
+    name: &str,
+    description: &ANSIString,
+) -> String {
     format!(
         "  {} {} {}",
         if is_head { "*" } else { " " },
-        palette.branch.paint(format!("{: <25}", format!("{} :", ellipsisize(name, 23)))),
+        palette
+            .branch
+            .paint(format!("{: <25}", format!("{} :", ellipsisize(name, 23)))),
         description
     )
 }

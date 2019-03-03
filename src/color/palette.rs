@@ -1,9 +1,7 @@
-use ::ansi_term::Colour;
-use ::ansi_term::Style;
+use ansi_term::Colour;
+use ansi_term::Style;
 
-
-#[derive(Debug)]
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct Palette {
     pub branch: Style,
     pub clean: Style,

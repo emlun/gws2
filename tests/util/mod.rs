@@ -12,11 +12,10 @@ use tempdir::TempDir;
 use gws2::config::data::Workspace;
 use gws2::config::read::read_workspace_file;
 
-
 #[derive(Debug)]
 pub enum Error {
     IoError(::std::io::Error),
-    Git2Error(::git2::Error)
+    Git2Error(::git2::Error),
 }
 
 impl From<::std::io::Error> for Error {
@@ -55,8 +54,9 @@ fn make_origin_repo(path: &Path) -> Result<git2::Repository, Error> {
 }
 
 fn join_all<I, P>(path: &Path, segments: I) -> PathBuf
-    where I: IntoIterator<Item=P>,
-                P: AsRef<Path>,
+where
+    I: IntoIterator<Item = P>,
+    P: AsRef<Path>,
 {
     let mut pb = path.to_path_buf();
     for segment in segments {
@@ -256,17 +256,14 @@ missing_repository_2        | {origin} | {ahead} ahead
     Ok(write(path, content)?)
 }
 
-pub fn in_example_workspace<T>(
-    test: fn(&Path, Workspace) -> Result<T, Error>
-) {
+pub fn in_example_workspace<T>(test: fn(&Path, Workspace) -> Result<T, Error>) {
     let result = in_example_workspace_inner(test);
     assert!(result.is_ok(), format!("{:?}", result.err()));
 }
 
-fn in_example_workspace_inner<T, E>(
-    test: fn(&Path, Workspace) -> Result<T, E>
-) -> Result<T, Error>
-    where Error: From<E>
+fn in_example_workspace_inner<T, E>(test: fn(&Path, Workspace) -> Result<T, E>) -> Result<T, Error>
+where
+    Error: From<E>,
 {
     let tmpdir = TempDir::new("gws2-test")?;
     let meta_dir = tmpdir.path().join("meta");

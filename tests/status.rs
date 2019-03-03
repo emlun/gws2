@@ -14,10 +14,10 @@ use gws2::data::status::RepositoryStatus;
 
 use util::in_example_workspace;
 
-
 pub fn tree_set<I, T>(items: I) -> BTreeSet<T>
-    where I: IntoIterator<Item=T>,
-                T: Ord,
+where
+    I: IntoIterator<Item = T>,
+    T: Ord,
 {
     items.into_iter().collect()
 }
@@ -25,7 +25,9 @@ pub fn tree_set<I, T>(items: I) -> BTreeSet<T>
 #[test]
 fn status_produces_correct_data_structure() {
     in_example_workspace(|working_dir, workspace| {
-        let project_stati: Vec<Result<RepositoryStatus, Error>> = workspace.projects.iter()
+        let project_stati: Vec<Result<RepositoryStatus, Error>> = workspace
+            .projects
+            .iter()
             .map(|p| p.status(working_dir))
             .collect();
 
@@ -51,7 +53,6 @@ fn status_produces_correct_data_structure() {
                         upstream_fetched: false,
                     }
                 ])),
-
                 // changes/new_files
                 Ok(tree_set(vec![
                     BranchStatus {
@@ -71,7 +72,6 @@ fn status_produces_correct_data_structure() {
                         upstream_fetched: false,
                     }
                 ])),
-
                 // clean
                 Ok(tree_set(vec![
                     BranchStatus {
@@ -91,13 +91,10 @@ fn status_produces_correct_data_structure() {
                         upstream_fetched: false,
                     }
                 ])),
-
                 // missing_repository
                 Err(Error::RepositoryMissing),
-
                 // missing_repository_2
                 Err(Error::RepositoryMissing),
-
                 // new_commit/local
                 Ok(tree_set(vec![
                     BranchStatus {
@@ -117,7 +114,6 @@ fn status_produces_correct_data_structure() {
                         upstream_fetched: false,
                     }
                 ])),
-
                 // new_commit/remote
                 Ok(tree_set(vec![
                     BranchStatus {
@@ -137,7 +133,6 @@ fn status_produces_correct_data_structure() {
                         upstream_fetched: false,
                     }
                 ])),
-
                 // new_commit/unfetched_remote
                 Ok(tree_set(vec![
                     BranchStatus {

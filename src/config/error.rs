@@ -6,13 +6,12 @@ pub enum ConfigError {
     SyntaxError(String),
 }
 
-use self::ConfigError::InvalidConfig;
 use self::ConfigError::InternalError;
+use self::ConfigError::InvalidConfig;
 use self::ConfigError::OpenFile;
 use self::ConfigError::SyntaxError;
 
 impl PartialEq for ConfigError {
-
     fn eq(&self, rhs: &Self) -> bool {
         match (self, rhs) {
             (&InvalidConfig(ref a), &InvalidConfig(ref b)) => a == b,

@@ -1,16 +1,10 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-use commands::error::Error;
 use super::Remote;
+use commands::error::Error;
 
-
-#[derive(Debug)]
-#[derive(Eq)]
-#[derive(Hash)]
-#[derive(Ord)]
-#[derive(PartialEq)]
-#[derive(PartialOrd)]
+#[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Project {
     pub path: String,
     pub main_remote: Remote,
@@ -18,12 +12,13 @@ pub struct Project {
 }
 
 impl Project {
-
-    pub fn open_repository<P: AsRef<Path>>(&self, working_dir: P) -> Result<git2::Repository, Error> {
+    pub fn open_repository<P: AsRef<Path>>(
+        &self,
+        working_dir: P,
+    ) -> Result<git2::Repository, Error> {
         let repo_dir = working_dir.as_ref().join(&self.path);
         if repo_dir.exists() {
-            git2::Repository::open(repo_dir)
-                .map_err(Error::from)
+            git2::Repository::open(repo_dir).map_err(Error::from)
         } else {
             Err(Error::RepositoryMissing)
         }
@@ -36,32 +31,31 @@ impl Project {
         result
     }
 
-    fn local_branches_internal<'repo>(&self, repo: &'repo git2::Repository) -> Result<Vec<(git2::Branch<'repo>, Option<git2::Branch<'repo>>)>, Error> {
-        Ok(
-            repo
-                .branches(Some(git2::BranchType::Local))?
-                .flatten()
-                .map(|(branch, _)| {
-                    let upstream = branch.upstream().ok();
-                    (branch, upstream)
-                })
-                .collect()
-        )
+    fn local_branches_internal<'repo>(
+        &self,
+        repo: &'repo git2::Repository,
+    ) -> Result<Vec<(git2::Branch<'repo>, Option<git2::Branch<'repo>>)>, Error> {
+        Ok(repo
+            .branches(Some(git2::BranchType::Local))?
+            .flatten()
+            .map(|(branch, _)| {
+                let upstream = branch.upstream().ok();
+                (branch, upstream)
+            })
+            .collect())
     }
 
-    pub fn current_upstream_heads<'repo>(&self, repo: &'repo git2::Repository) -> Result<BTreeMap<git2::Branch<'repo>, git2::Oid>, Error> {
-        self.local_branches_internal(repo)
-            .map(|branches|
-                     branches
-                     .into_iter()
-                     .flat_map(|(branch, gupstream)|
-                                         gupstream.map(|gupstream| (branch, gupstream))
-                     )
-                     .map(|(branch, gupstream)|
-                                (branch, gupstream.get().peel_to_commit().unwrap().id()),
-                     )
-                     .collect()
-            )
+    pub fn current_upstream_heads<'repo>(
+        &self,
+        repo: &'repo git2::Repository,
+    ) -> Result<BTreeMap<git2::Branch<'repo>, git2::Oid>, Error> {
+        self.local_branches_internal(repo).map(|branches| {
+            branches
+                .into_iter()
+                .flat_map(|(branch, gupstream)| gupstream.map(|gupstream| (branch, gupstream)))
+                .map(|(branch, gupstream)| (branch, gupstream.get().peel_to_commit().unwrap().id()))
+                .collect()
+        })
     }
 }
 
@@ -89,7 +83,8 @@ mod tests {
                         url: "testurl".to_string(),
                     },
                 ],
-            }.remotes(),
+            }
+            .remotes(),
             vec![
                 Remote {
                     name: "origin".to_string(),
@@ -103,7 +98,9 @@ mod tests {
                     name: "upstream".to_string(),
                     url: "testurl".to_string(),
                 },
-            ].iter().collect::<Vec<&Remote>>()
+            ]
+            .iter()
+            .collect::<Vec<&Remote>>()
         );
     }
 }

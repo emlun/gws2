@@ -5,7 +5,6 @@ use ansi_term::Colour;
 
 use gws2::color::palette::Palette;
 
-
 #[test]
 fn default_palette_is_correct() {
     let expected = Palette {

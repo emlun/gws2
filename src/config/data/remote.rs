@@ -1,9 +1,4 @@
-#[derive(Debug)]
-#[derive(Eq)]
-#[derive(Hash)]
-#[derive(Ord)]
-#[derive(PartialEq)]
-#[derive(PartialOrd)]
+#[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Remote {
     pub url: String,
     pub name: String,
@@ -17,7 +12,9 @@ impl MaybeNamedRemote {
     pub fn to_named(self) -> Result<Remote, String> {
         Ok(Remote {
             url: self.url,
-            name: try!(self.name.ok_or("Cannot create a named remote from a remote without a name.")),
+            name: try!(self
+                .name
+                .ok_or("Cannot create a named remote from a remote without a name.")),
         })
     }
 

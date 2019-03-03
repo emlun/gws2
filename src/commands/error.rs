@@ -1,8 +1,6 @@
 use std::fmt;
 
-
-#[derive(Debug)]
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum Error {
     Git2Error(git2::Error),
     NoBranchNameFound,

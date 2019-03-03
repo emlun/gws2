@@ -5,8 +5,7 @@ pub fn crate_author() -> &'static str {
 }
 
 pub fn crate_description() -> &'static str {
-    option_env!("CARGO_PKG_DESCRIPTION")
-        .unwrap_or("")
+    option_env!("CARGO_PKG_DESCRIPTION").unwrap_or("")
 }
 
 pub fn crate_name() -> &'static str {
