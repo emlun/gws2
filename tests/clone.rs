@@ -86,7 +86,7 @@ fn clone_creates_extra_remotes() {
         .iter()
         .map(Option::unwrap)
         .collect::<HashSet<&str>>(),
-      hash_set(vec!["origin", "remote2"])
+      hash_set(vec!["origin", "ahead"])
     );
 
     Ok(())

@@ -44,7 +44,7 @@ fn status_produces_correct_data_structure() {
           },
           BranchStatus {
             name: "master2".to_string(),
-            upstream_name: Some("remote2/master".to_string()),
+            upstream_name: Some("ahead/master".to_string()),
             dirty: DirtyState::Clean,
             is_head: false,
             in_sync: Some(true),
@@ -64,7 +64,7 @@ fn status_produces_correct_data_structure() {
           },
           BranchStatus {
             name: "master2".to_string(),
-            upstream_name: Some("remote2/master".to_string()),
+            upstream_name: Some("ahead/master".to_string()),
             dirty: DirtyState::Clean,
             is_head: false,
             in_sync: Some(true),
@@ -84,7 +84,7 @@ fn status_produces_correct_data_structure() {
           },
           BranchStatus {
             name: "master2".to_string(),
-            upstream_name: Some("remote2/master".to_string()),
+            upstream_name: Some("ahead/master".to_string()),
             dirty: DirtyState::Clean,
             is_head: false,
             in_sync: Some(true),
@@ -110,7 +110,7 @@ fn status_produces_correct_data_structure() {
           },
           BranchStatus {
             name: "master2".to_string(),
-            upstream_name: Some("remote2/master".to_string()),
+            upstream_name: Some("ahead/master".to_string()),
             dirty: DirtyState::Clean,
             is_head: false,
             in_sync: Some(true),
@@ -130,7 +130,7 @@ fn status_produces_correct_data_structure() {
           },
           BranchStatus {
             name: "master2".to_string(),
-            upstream_name: Some("remote2/master".to_string()),
+            upstream_name: Some("ahead/master".to_string()),
             dirty: DirtyState::Clean,
             is_head: false,
             in_sync: Some(true),
@@ -150,7 +150,7 @@ fn status_produces_correct_data_structure() {
           },
           BranchStatus {
             name: "master2".to_string(),
-            upstream_name: Some("remote2/master".to_string()),
+            upstream_name: Some("ahead/master".to_string()),
             dirty: DirtyState::Clean,
             is_head: false,
             in_sync: Some(true),

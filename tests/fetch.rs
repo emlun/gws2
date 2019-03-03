@@ -49,13 +49,13 @@ fn fetch_gets_refs_from_named_remotes() {
     let repo: Repository = Repository::open(working_dir.join(project_path))?;
 
     let master_reference_before: Commit = resolve_ref("origin/master", &repo)?;
-    let master2_reference_before: Commit = resolve_ref("remote2/master", &repo)?;
+    let master2_reference_before: Commit = resolve_ref("ahead/master", &repo)?;
 
     command.run(working_dir, &workspace, &Palette::default())
       .expect("Fetch command failed");
 
     let master_reference_after: Commit = resolve_ref("origin/master", &repo)?;
-    let master2_reference_after: Commit = resolve_ref("remote2/master", &repo)?;
+    let master2_reference_after: Commit = resolve_ref("ahead/master", &repo)?;
 
     assert_eq!(master_reference_after.id(), master_reference_before.id());
 
