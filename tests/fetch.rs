@@ -31,13 +31,11 @@ where
 
 #[test]
 fn fetch_gets_refs_from_named_remotes() {
-    fn resolve_ref<'repo>(
-        name: &str,
-        repo: &'repo Repository,
-    ) -> Result<Commit<'repo>, ::git2::Error> {
-        repo.find_branch(name, BranchType::Remote)?
+    fn resolve_ref<'repo>(name: &str, repo: &'repo Repository) -> Result<Commit<'repo>, Error> {
+        Ok(repo
+            .find_branch(name, BranchType::Remote)?
             .get()
-            .peel_to_commit()
+            .peel_to_commit()?)
     }
 
     in_example_workspace(|working_dir, workspace: Workspace| {
