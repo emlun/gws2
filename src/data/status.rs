@@ -45,14 +45,14 @@ impl<'repo> BranchMethods<'repo> for Branch<'repo> {
     }
 
     fn is_up_to_date_with_upstream(&'repo self) -> Result<Option<bool>, Error> {
-        let branch_commit: Commit<'repo> = try!(self.get().peel_to_commit());
+        let branch_commit: Commit<'repo> = self.get().peel_to_commit()?;
 
         let upstream: Option<Branch<'repo>> = self.upstream().ok();
 
         match upstream {
             None => Ok(None),
             Some(ups) => {
-                let upstream_commit: Commit<'repo> = try!(ups.get().peel_to_commit());
+                let upstream_commit: Commit<'repo> = ups.get().peel_to_commit()?;
                 Ok(Some(branch_commit.id() == upstream_commit.id()))
             }
         }
@@ -79,7 +79,7 @@ impl RepositoryMethods for Repository {
     }
 
     fn is_head(&self, branch: &Branch) -> Result<bool, Error> {
-        let head: Reference = try!(self.head());
+        let head: Reference = self.head()?;
         let br: &Reference = branch.get();
         Ok(head.name() == br.name())
     }

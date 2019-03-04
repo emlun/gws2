@@ -35,35 +35,39 @@ impl FromStr for Project {
     type Err = ConfigError;
 
     fn from_str(line: &str) -> Result<Self, Self::Err> {
-        let mut segments = try!(line
+        let mut segments = line
             .trim()
             .split('#')
             .next()
             .ok_or(ConfigError::InternalError(
-                "Failed to remove line comment".to_string()
-            )))
-        .split('|')
-        .map(&str::trim);
+                "Failed to remove line comment".to_string(),
+            ))?
+            .split('|')
+            .map(&str::trim);
 
-        let path: String = try!(segments.next().ok_or(ConfigError::SyntaxError(
-            "Expected project path, found empty line.".to_string()
-        )))
-        .to_string();
+        let path: String = segments
+            .next()
+            .ok_or(ConfigError::SyntaxError(
+                "Expected project path, found empty line.".to_string(),
+            ))?
+            .to_string();
 
         let remote_parses: Vec<Result<MaybeNamedRemote, ConfigError>> =
             segments.map(MaybeNamedRemote::from_str).collect();
         let mut maybe_remotes: Vec<MaybeNamedRemote> = Vec::new();
 
         for result in remote_parses {
-            maybe_remotes.push(try!(result));
+            maybe_remotes.push(result?);
         }
 
         let mut maybe_remotes_iter = maybe_remotes.into_iter();
 
-        let first_remote: Remote = try!(maybe_remotes_iter.next().ok_or(
-            ConfigError::InvalidConfig("At least one remote is required".to_string())
-        ))
-        .to_named_or("origin");
+        let first_remote: Remote = maybe_remotes_iter
+            .next()
+            .ok_or(ConfigError::InvalidConfig(
+                "At least one remote is required".to_string(),
+            ))?
+            .to_named_or("origin");
 
         let second_remote: Option<Remote> =
             maybe_remotes_iter.next().map(|r| r.to_named_or("upstream"));
@@ -74,9 +78,11 @@ impl FromStr for Project {
             .for_each(|r| extra_remotes.push(r));
 
         for r in maybe_remotes_iter {
-            extra_remotes.push(try!(r.to_named().map_err(|_| ConfigError::SyntaxError(
-                "Remotes past the 2nd must be given an explicit name.".to_string()
-            ))));
+            extra_remotes.push(r.to_named().map_err(|_| {
+                ConfigError::SyntaxError(
+                    "Remotes past the 2nd must be given an explicit name.".to_string(),
+                )
+            })?);
         }
 
         Ok(Project {
@@ -96,10 +102,12 @@ impl FromStr for MaybeNamedRemote {
             .map(&str::trim)
             .filter(|s| !s.is_empty());
 
-        let url: String = try!(parts.next().ok_or(ConfigError::SyntaxError(
-            "All remotes must specify a URL.".to_string()
-        )))
-        .to_string();
+        let url: String = parts
+            .next()
+            .ok_or(ConfigError::SyntaxError(
+                "All remotes must specify a URL.".to_string(),
+            ))?
+            .to_string();
         let name: Option<String> = parts.next().map(String::from);
 
         Ok(MaybeNamedRemote { url, name })

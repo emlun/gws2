@@ -9,7 +9,7 @@ use super::parse::legacy;
 pub fn read_workspace_file<P: AsRef<Path>>(file_path: P) -> Result<Workspace, ConfigError> {
     let mut contents: String = String::new();
 
-    let mut file = try!(File::open(file_path).map_err(|e| ConfigError::OpenFile(e)));
+    let mut file = File::open(file_path).map_err(|e| ConfigError::OpenFile(e))?;
 
     file.read_to_string(&mut contents)
         .map_err(ConfigError::OpenFile)

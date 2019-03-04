@@ -12,9 +12,9 @@ impl MaybeNamedRemote {
     pub fn to_named(self) -> Result<Remote, String> {
         Ok(Remote {
             url: self.url,
-            name: try!(self
+            name: self
                 .name
-                .ok_or("Cannot create a named remote from a remote without a name.")),
+                .ok_or("Cannot create a named remote from a remote without a name.")?,
         })
     }
 
