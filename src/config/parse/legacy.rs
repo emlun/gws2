@@ -82,7 +82,7 @@ impl FromStr for Project {
         Ok(Project {
             path,
             main_remote: first_remote,
-            extra_remotes: extra_remotes,
+            extra_remotes,
         })
     }
 }
