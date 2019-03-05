@@ -121,7 +121,7 @@ fn status_produces_correct_data_structure() {
                         upstream_name: Some("origin/master".to_string()),
                         dirty: DirtyState::Clean,
                         is_head: true,
-                        in_sync: Some(false),
+                        in_sync: Some(true),
                         upstream_fetched: false,
                     },
                     BranchStatus {
@@ -129,7 +129,7 @@ fn status_produces_correct_data_structure() {
                         upstream_name: Some("ahead/master".to_string()),
                         dirty: DirtyState::Clean,
                         is_head: false,
-                        in_sync: Some(true),
+                        in_sync: Some(false),
                         upstream_fetched: false,
                     }
                 ])),
