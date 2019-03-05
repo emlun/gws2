@@ -7,9 +7,9 @@ mod util;
 use std::collections::BTreeSet;
 
 use gws2::commands::error::Error;
+use gws2::commands::status::Status;
 use gws2::data::status::BranchStatus;
 use gws2::data::status::DirtyState;
-use gws2::data::status::ProjectStatusMethods;
 use gws2::data::status::RepositoryStatus;
 
 use util::in_example_workspace;
@@ -25,10 +25,14 @@ where
 #[test]
 fn status_produces_correct_data_structure() {
     in_example_workspace(|working_dir, workspace| {
-        let project_stati: Vec<Result<RepositoryStatus, Error>> = workspace
-            .projects
-            .iter()
-            .map(|p| p.status(working_dir))
+        let command = Status {
+            only_changes: false,
+        };
+
+        let project_stati: Vec<Result<RepositoryStatus, Error>> = command
+            .make_report(working_dir, &workspace)
+            .into_iter()
+            .map(|(_, s)| s)
             .collect();
 
         assert_eq!(
