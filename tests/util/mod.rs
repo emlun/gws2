@@ -184,7 +184,7 @@ fn make_project_new_commit_local(
     let repo = git2::Repository::clone(origin_path.to_str().unwrap(), path)?;
     add_commit_to_repo(&repo)?;
     add_ahead_remote(&repo, ahead_path)?;
-    add_master2_branch(&repo, "master", git2::BranchType::Local)?;
+    add_master2_branch(&repo, "ahead/master", git2::BranchType::Remote)?;
     Ok(repo)
 }
 
