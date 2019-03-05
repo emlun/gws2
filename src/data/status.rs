@@ -141,7 +141,7 @@ impl StatusMethods for Status {
     }
 }
 
-#[derive(Debug, Eq, Ord)]
+#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub struct BranchStatus {
     pub name: String,
     pub upstream_name: Option<String>,
@@ -149,18 +149,6 @@ pub struct BranchStatus {
     pub is_head: bool,
     pub in_sync: Option<bool>,
     pub upstream_fetched: bool,
-}
-
-impl PartialEq for BranchStatus {
-    fn eq(&self, rhs: &Self) -> bool {
-        self.name == rhs.name
-    }
-}
-
-impl PartialOrd for BranchStatus {
-    fn partial_cmp(&self, rhs: &Self) -> Option<::std::cmp::Ordering> {
-        self.name.partial_cmp(&rhs.name)
-    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
