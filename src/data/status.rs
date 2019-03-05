@@ -157,6 +157,15 @@ pub struct BranchStatus {
     pub fast_forwarded: bool,
 }
 
+impl BranchStatus {
+    pub fn is_clean(&self) -> bool {
+        (self.dirty == DirtyState::Clean || !self.is_head)
+            && self.in_sync.unwrap_or(true)
+            && !self.upstream_fetched
+            && !self.fast_forwarded
+    }
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum DirtyState {
     Clean,
