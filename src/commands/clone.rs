@@ -10,7 +10,7 @@ use super::common::DirectoryCommand;
 use super::error::Error;
 use color::palette::Palette;
 use config::data::Workspace;
-use data::status::ProjectStatusMethods;
+use data::status::project_status;
 
 pub struct Clone {
     pub projects: HashSet<String>,
@@ -33,7 +33,7 @@ impl DirectoryCommand for Clone {
         {
             println!("{}", format_project_header(&project, &palette));
 
-            match project.status(working_dir) {
+            match project_status(project, working_dir) {
                 Ok(_) => {
                     println!(
                         "{}",

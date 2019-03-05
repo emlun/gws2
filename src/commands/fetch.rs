@@ -4,6 +4,7 @@ use std::collections::HashSet;
 use std::path::Path;
 
 use super::common::exit_codes;
+use super::common::print_status;
 use super::common::RepositoryCommand;
 use super::error::Error;
 use super::status::Status;
@@ -129,8 +130,7 @@ impl RepositoryCommand for Fetch {
         let status_report = self.run_command(working_dir, workspace);
 
         for (project, report_result) in status_report {
-            self.status_command
-                .print_output(project, &report_result, palette)
+            print_status(project, &report_result, palette)
         }
 
         Ok(exit_codes::OK)

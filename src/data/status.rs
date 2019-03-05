@@ -21,10 +21,6 @@ trait BranchMethods<'repo> {
     fn upstream_name(&self) -> Result<Option<String>, Error>;
 }
 
-pub trait ProjectStatusMethods {
-    fn status(&self, working_dir: &Path) -> Result<RepositoryStatus, Error>;
-}
-
 trait RepositoryMethods {
     fn any_file(&self, pred: fn(&Status) -> bool) -> bool;
     fn is_head(&self, branch: &Branch) -> Result<bool, Error>;
@@ -63,10 +59,10 @@ impl<'repo> BranchMethods<'repo> for Branch<'repo> {
     }
 }
 
-impl ProjectStatusMethods for Project {
-    fn status(&self, working_dir: &Path) -> Result<RepositoryStatus, Error> {
-        self.open_repository(working_dir)?.project_status(&self)
-    }
+pub fn project_status(project: &Project, working_dir: &Path) -> Result<RepositoryStatus, Error> {
+    project
+        .open_repository(working_dir)?
+        .project_status(project)
 }
 
 impl RepositoryMethods for Repository {
