@@ -43,7 +43,7 @@ fn ellipsisize(s: &str, length: usize) -> String {
     }
 }
 
-pub fn format_branch_line(
+fn format_branch_line(
     palette: &Palette,
     is_head: bool,
     name: &str,
@@ -67,60 +67,52 @@ pub fn format_project_header(project: &Project, palette: &Palette) -> String {
     format!("{}:", palette.repo.paint(project.path.clone()))
 }
 
-trait BranchStatusPrinting {
-    fn describe_sync_status(&self, palette: &Palette) -> ANSIString;
-    fn describe_status(&self, palette: &Palette) -> ANSIString;
-    fn describe_full(&self, palette: &Palette) -> String;
+fn describe_sync_status<'a>(status: &'a BranchStatus, palette: &Palette) -> ANSIString<'a> {
+    match &status.upstream_name {
+        Some(upstream_name) => {
+            if status.fast_forwarded {
+                palette.cloning.paint("Fast-forwarded")
+            } else if status.upstream_fetched {
+                palette.cloning.paint("New upstream commits")
+            } else {
+                match status.in_sync {
+                    Some(true) => palette.clean.paint("Clean".to_string()),
+                    Some(false) => palette
+                        .dirty
+                        .paint(format!("Not in sync with {}", upstream_name)),
+                    None => palette
+                        .missing
+                        .paint(format!("No remote branch {}", upstream_name)),
+                }
+            }
+        }
+        None => palette.missing.paint("No upstream set"),
+    }
 }
 
-impl BranchStatusPrinting for BranchStatus {
-    fn describe_sync_status(&self, palette: &Palette) -> ANSIString {
-        match &self.upstream_name {
-            Some(upstream_name) => {
-                if self.fast_forwarded {
-                    palette.cloning.paint("Fast-forwarded")
-                } else if self.upstream_fetched {
-                    palette.cloning.paint("New upstream commits")
-                } else {
-                    match self.in_sync {
-                        Some(true) => palette.clean.paint("Clean".to_string()),
-                        Some(false) => palette
-                            .dirty
-                            .paint(format!("Not in sync with {}", upstream_name)),
-                        None => palette
-                            .missing
-                            .paint(format!("No remote branch {}", upstream_name)),
-                    }
-                }
+fn describe_status<'a>(status: &'a BranchStatus, palette: &Palette) -> ANSIString<'a> {
+    if status.is_head {
+        match status.dirty {
+            DirtyState::Clean => describe_sync_status(status, palette),
+            DirtyState::UncommittedChanges => palette
+                .dirty
+                .paint("Dirty (Uncommitted changes)".to_string()),
+            DirtyState::UntrackedFiles => {
+                palette.dirty.paint("Dirty (Untracked files)".to_string())
             }
-            None => palette.missing.paint("No upstream set"),
         }
+    } else {
+        describe_sync_status(status, palette)
     }
+}
 
-    fn describe_status(&self, palette: &Palette) -> ANSIString {
-        if self.is_head {
-            match self.dirty {
-                DirtyState::Clean => self.describe_sync_status(palette),
-                DirtyState::UncommittedChanges => palette
-                    .dirty
-                    .paint("Dirty (Uncommitted changes)".to_string()),
-                DirtyState::UntrackedFiles => {
-                    palette.dirty.paint("Dirty (Untracked files)".to_string())
-                }
-            }
-        } else {
-            self.describe_sync_status(palette)
-        }
-    }
-
-    fn describe_full(&self, palette: &Palette) -> String {
-        format_branch_line(
-            &palette,
-            self.is_head,
-            &self.name,
-            &self.describe_status(&palette),
-        )
-    }
+fn describe_full(status: &BranchStatus, palette: &Palette) -> String {
+    format_branch_line(
+        &palette,
+        status.is_head,
+        &status.name,
+        &describe_status(status, &palette),
+    )
 }
 
 pub fn print_status(
@@ -133,7 +125,7 @@ pub fn print_status(
     match project_status {
         Ok(status) => {
             for b in status {
-                println!("{}", b.describe_full(&palette));
+                println!("{}", describe_full(b, &palette));
             }
         }
         Err(Error::RepositoryMissing) => {
