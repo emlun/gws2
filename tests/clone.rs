@@ -11,7 +11,7 @@ use git2::Repository;
 
 use gws2::color::palette::Palette;
 use gws2::commands::clone::Clone;
-use gws2::commands::common::Command;
+use gws2::commands::common::DirectoryCommand;
 use gws2::config::data::Workspace;
 
 use util::in_example_workspace;

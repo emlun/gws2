@@ -5,6 +5,7 @@ use clap::Arg;
 use clap::ArgMatches;
 use clap::SubCommand;
 
+use commands::common::Command;
 use commands::fetch::Fetch;
 
 pub fn subcommand_def<'a>() -> App<'a, 'a> {
@@ -26,4 +27,8 @@ pub fn make_command(matches: &ArgMatches) -> Fetch {
             .map(|values| values.into_iter().map(&str::to_string).collect())
             .unwrap_or(HashSet::new()),
     }
+}
+
+pub fn make_cli_command(matches: &ArgMatches) -> Command {
+    Command::RepositoryCommand(Box::new(make_command(matches)))
 }

@@ -6,7 +6,7 @@ use super::common::exit_codes;
 use super::common::format_branch_line;
 use super::common::format_message_line;
 use super::common::format_project_header;
-use super::common::Command;
+use super::common::RepositoryCommand;
 use super::error::Error;
 use color::palette::Palette;
 use config::data::Project;
@@ -139,7 +139,7 @@ impl Status {
     }
 }
 
-impl Command for Status {
+impl RepositoryCommand for Status {
     fn run(
         &self,
         working_dir: &Path,

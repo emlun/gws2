@@ -3,6 +3,7 @@ use clap::Arg;
 use clap::ArgMatches;
 use clap::SubCommand;
 
+use commands::common::Command;
 use commands::ff::FastForward;
 
 pub fn subcommand_def<'a>() -> App<'a, 'a> {
@@ -22,4 +23,8 @@ pub fn make_command(matches: &ArgMatches) -> FastForward {
     FastForward {
         fetch_command: super::fetch::make_command(matches),
     }
+}
+
+pub fn make_cli_command(matches: &ArgMatches) -> Command {
+    Command::RepositoryCommand(Box::new(make_command(matches)))
 }

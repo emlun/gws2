@@ -9,7 +9,21 @@ use color::palette::Palette;
 use config::data::Project;
 use config::data::Workspace;
 
-pub trait Command {
+pub enum Command {
+    DirectoryCommand(Box<DirectoryCommand>),
+    RepositoryCommand(Box<RepositoryCommand>),
+}
+
+pub trait DirectoryCommand {
+    fn run(
+        &self,
+        working_dir: &Path,
+        workspace: &Workspace,
+        palette: &Palette,
+    ) -> Result<i32, Error>;
+}
+
+pub trait RepositoryCommand {
     fn run(
         &self,
         working_dir: &Path,

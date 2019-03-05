@@ -13,7 +13,7 @@ use git2::Commit;
 use git2::Repository;
 
 use gws2::color::palette::Palette;
-use gws2::commands::common::Command;
+use gws2::commands::common::RepositoryCommand;
 use gws2::commands::fetch::Fetch;
 use gws2::commands::status::Status;
 use gws2::config::data::Workspace;

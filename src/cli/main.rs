@@ -42,14 +42,14 @@ pub fn main() -> i32 {
 
     let palette = Palette::default();
 
-    let subcommand: Box<Command> = match &matches.subcommand {
-        None => Box::new(super::status::make_command(&matches)),
+    let subcommand: Command = match &matches.subcommand {
+        None => super::status::make_cli_command(&matches),
         Some(sc) => match sc.name.as_ref() {
-            "clone" => Box::new(super::clone::make_command(&sc.matches)),
-            "fetch" => Box::new(super::fetch::make_command(&sc.matches)),
-            "ff" => Box::new(super::ff::make_command(&sc.matches)),
-            "status" => Box::new(super::status::make_command(&sc.matches)),
-            "update" => Box::new(super::update::make_command(&sc.matches)),
+            "clone" => super::clone::make_cli_command(&sc.matches),
+            "fetch" => super::fetch::make_cli_command(&sc.matches),
+            "ff" => super::ff::make_cli_command(&sc.matches),
+            "status" => super::status::make_cli_command(&sc.matches),
+            "update" => super::update::make_cli_command(&sc.matches),
             _ => panic!("Unknown subcommand: {}", sc.name),
         },
     };
@@ -57,10 +57,16 @@ pub fn main() -> i32 {
     let ws_file_path = working_dir.join(".projects.gws");
     if ws_file_path.exists() {
         match read_workspace_file(&ws_file_path) {
-            Ok(ws) => match subcommand.run(working_dir, &ws, &palette) {
-                Ok(status) => status,
-                Err(_) => exit_codes::UNKNOWN_ERROR,
-            },
+            Ok(ws) => {
+                let result = match subcommand {
+                    Command::DirectoryCommand(cmd) => cmd.run(working_dir, &ws, &palette),
+                    Command::RepositoryCommand(cmd) => cmd.run(working_dir, &ws, &palette),
+                };
+                match result {
+                    Ok(status) => status,
+                    Err(_) => exit_codes::UNKNOWN_ERROR,
+                }
+            }
             Err(_) => {
                 eprintln!("Failed to parse projects file: {:?}", ws_file_path);
                 exit_codes::BAD_PROJECTS_FILE

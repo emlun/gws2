@@ -2,6 +2,7 @@ use clap::App;
 use clap::ArgMatches;
 use clap::SubCommand;
 
+use commands::common::Command;
 use commands::update::Update;
 
 pub fn subcommand_def<'a>() -> App<'a, 'a> {
@@ -11,4 +12,8 @@ pub fn subcommand_def<'a>() -> App<'a, 'a> {
 
 pub fn make_command(_matches: &ArgMatches) -> Update {
     Update {}
+}
+
+pub fn make_cli_command(matches: &ArgMatches) -> Command {
+    Command::DirectoryCommand(Box::new(make_command(matches)))
 }

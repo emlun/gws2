@@ -6,7 +6,7 @@ use git2::Repository;
 use super::common::exit_codes;
 use super::common::format_message_line;
 use super::common::format_project_header;
-use super::common::Command;
+use super::common::DirectoryCommand;
 use super::error::Error;
 use color::palette::Palette;
 use config::data::Workspace;
@@ -16,7 +16,7 @@ pub struct Clone {
     pub projects: HashSet<String>,
 }
 
-impl Command for Clone {
+impl DirectoryCommand for Clone {
     fn run(
         &self,
         working_dir: &Path,

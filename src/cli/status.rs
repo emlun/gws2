@@ -3,6 +3,7 @@ use clap::Arg;
 use clap::ArgMatches;
 use clap::SubCommand;
 
+use commands::common::Command;
 use commands::status::Status;
 
 pub fn subcommand_def<'a>() -> App<'a, 'a> {
@@ -19,4 +20,8 @@ pub fn make_command(matches: &ArgMatches) -> Status {
     Status {
         only_changes: matches.is_present("only-changes"),
     }
+}
+
+pub fn make_cli_command(matches: &ArgMatches) -> Command {
+    Command::RepositoryCommand(Box::new(make_command(matches)))
 }

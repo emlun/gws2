@@ -6,6 +6,7 @@ use clap::ArgMatches;
 use clap::SubCommand;
 
 use commands::clone::Clone;
+use commands::common::Command;
 
 pub fn subcommand_def<'a>() -> App<'a, 'a> {
     SubCommand::with_name("clone")
@@ -24,4 +25,8 @@ pub fn make_command(matches: &ArgMatches) -> Clone {
             .map(|values| values.into_iter().map(&str::to_string).collect())
             .unwrap_or(HashSet::new()),
     }
+}
+
+pub fn make_cli_command(matches: &ArgMatches) -> Command {
+    Command::DirectoryCommand(Box::new(make_command(matches)))
 }

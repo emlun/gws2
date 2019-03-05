@@ -2,7 +2,7 @@ use std::collections::HashSet;
 use std::path::Path;
 
 use super::common::exit_codes;
-use super::common::Command;
+use super::common::RepositoryCommand;
 use super::error::Error;
 use super::fetch::Fetch;
 use color::palette::Palette;
@@ -83,7 +83,7 @@ fn do_ff<'repo>(
         .collect()
 }
 
-impl Command for FastForward {
+impl RepositoryCommand for FastForward {
     fn run<'ws>(
         &self,
         working_dir: &Path,

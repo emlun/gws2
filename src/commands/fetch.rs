@@ -4,7 +4,7 @@ use std::collections::HashSet;
 use std::path::Path;
 
 use super::common::exit_codes;
-use super::common::Command;
+use super::common::RepositoryCommand;
 use super::error::Error;
 use super::status::Status;
 use color::palette::Palette;
@@ -119,7 +119,7 @@ fn augment_project_status_report<'proj, 'repo, 'result>(
         .collect())
 }
 
-impl Command for Fetch {
+impl RepositoryCommand for Fetch {
     fn run<'ws>(
         &self,
         working_dir: &Path,
