@@ -135,6 +135,13 @@ impl Status {
             .projects
             .iter()
             .map(|project| (project, project.status(working_dir)))
+            .filter(|(_, status_result)| {
+                self.only_changes == false
+                    || status_result
+                        .as_ref()
+                        .map(|status| status.iter().any(|b| !b.is_clean()))
+                        .unwrap_or(false)
+            })
             .collect()
     }
 }
