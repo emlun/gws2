@@ -111,7 +111,11 @@ impl RepositoryMethods for Repository {
                         Ok(Some(s)) => Some(s.to_string()),
                         _ => None,
                     },
-                    dirty: dirty_status.clone(),
+                    dirty: if is_head_branch {
+                        dirty_status.clone()
+                    } else {
+                        DirtyState::Clean
+                    },
                     is_head: is_head_branch,
                     in_sync: is_in_sync,
                     upstream_fetched: false,
