@@ -13,6 +13,11 @@ pub fn subcommand_def<'a>() -> App<'a, 'a> {
 
 If no <path>s are given, fast-forward all projects.")
         .arg(
+            Arg::with_name("only-changes")
+                .long("only-changes")
+                .help("Only print out-of-sync or fast-forwarded repositories and branches"),
+        )
+        .arg(
             Arg::with_name("path")
                 .multiple(true)
                 .help("Project paths to be fast-forwarded"),
