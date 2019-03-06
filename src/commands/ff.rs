@@ -1,50 +1,15 @@
 use std::collections::HashSet;
-use std::path::Path;
 
-use super::common::exit_codes;
-use super::common::print_status;
 use super::common::RepositoryCommand;
 use super::error::Error;
 use super::fetch::Fetch;
-use color::palette::Palette;
-use config::data::Workspace;
+use config::data::Project;
 use crate_info::crate_name;
 use data::status::RepositoryStatus;
-use data::status::WorkspaceStatus;
 use util::git2::WithAncestors;
 
 pub struct FastForward {
     pub fetch_command: Fetch,
-}
-
-impl FastForward {
-    fn projects(&self) -> &HashSet<String> {
-        &self.fetch_command.projects
-    }
-
-    pub fn run_command<'ws>(
-        &self,
-        working_dir: &Path,
-        workspace: &'ws Workspace,
-    ) -> WorkspaceStatus<'ws> {
-        self.fetch_command
-            .run_command(working_dir, workspace)
-            .into_iter()
-            .map(|(project, project_ff_result)| {
-                (
-                    project,
-                    if self.projects().is_empty() || self.projects().contains(&project.path) {
-                        project
-                            .open_repository(working_dir)
-                            .and_then(|repo| project_ff_result.map(|pr| (repo, pr)))
-                            .and_then(|(repo, project_status)| do_ff(&repo, project_status))
-                    } else {
-                        project_ff_result
-                    },
-                )
-            })
-            .collect()
-    }
 }
 
 fn do_ff<'repo>(
@@ -85,18 +50,21 @@ fn do_ff<'repo>(
 }
 
 impl RepositoryCommand for FastForward {
-    fn run<'ws>(
+    fn only_changes(&self) -> bool {
+        self.fetch_command.only_changes()
+    }
+
+    fn project_args(&self) -> &HashSet<String> {
+        self.fetch_command.project_args()
+    }
+
+    fn run_project(
         &self,
-        working_dir: &Path,
-        workspace: &'ws Workspace,
-        palette: &Palette,
-    ) -> Result<i32, Error> {
-        let status_report = self.run_command(working_dir, workspace);
-
-        for (project, report_result) in status_report {
-            print_status(project, &report_result, palette)
-        }
-
-        Ok(exit_codes::OK)
+        project: &Project,
+        repository: &git2::Repository,
+    ) -> Result<RepositoryStatus, Error> {
+        self.fetch_command
+            .run_project(project, repository)
+            .and_then(|project_status| do_ff(repository, project_status))
     }
 }

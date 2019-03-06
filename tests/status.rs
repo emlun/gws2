@@ -5,7 +5,9 @@ extern crate tempdir;
 mod util;
 
 use std::collections::BTreeSet;
+use std::collections::HashSet;
 
+use gws2::commands::common::RepositoryCommand;
 use gws2::commands::error::Error;
 use gws2::commands::status::Status;
 use gws2::data::status::BranchStatus;
@@ -27,6 +29,7 @@ fn status_produces_correct_data_structure() {
     in_example_workspace(|working_dir, workspace| {
         let command = Status {
             only_changes: false,
+            projects: HashSet::new(),
         };
 
         let project_stati: Vec<Result<RepositoryStatus, Error>> = command
@@ -178,7 +181,10 @@ fn status_produces_correct_data_structure() {
 #[test]
 fn status_ignores_clean_repos_with_only_changes() {
     in_example_workspace(|working_dir, workspace| {
-        let command = Status { only_changes: true };
+        let command = Status {
+            only_changes: true,
+            projects: HashSet::new(),
+        };
 
         let project_stati: Vec<Result<RepositoryStatus, Error>> = command
             .make_report(working_dir, &workspace)

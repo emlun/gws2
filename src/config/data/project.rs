@@ -1,5 +1,4 @@
 use std::collections::BTreeMap;
-use std::path::Path;
 
 use super::Remote;
 use commands::error::Error;
@@ -12,18 +11,6 @@ pub struct Project {
 }
 
 impl Project {
-    pub fn open_repository<P: AsRef<Path>>(
-        &self,
-        working_dir: P,
-    ) -> Result<git2::Repository, Error> {
-        let repo_dir = working_dir.as_ref().join(&self.path);
-        if repo_dir.exists() {
-            git2::Repository::open(repo_dir).map_err(Error::from)
-        } else {
-            Err(Error::RepositoryMissing)
-        }
-    }
-
     pub fn remotes(&self) -> Vec<&Remote> {
         let mut extras: Vec<&Remote> = self.extra_remotes.iter().collect();
         let mut result = vec![&self.main_remote];

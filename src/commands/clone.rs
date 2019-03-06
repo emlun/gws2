@@ -10,7 +10,6 @@ use super::common::DirectoryCommand;
 use super::error::Error;
 use color::palette::Palette;
 use config::data::Workspace;
-use data::status::project_status;
 
 pub struct Clone {
     pub projects: HashSet<String>,
@@ -33,49 +32,41 @@ impl DirectoryCommand for Clone {
         {
             println!("{}", format_project_header(&project, &palette));
 
-            match project_status(project, working_dir) {
-                Ok(_) => {
-                    println!(
-                        "{}",
-                        palette.clean.paint(format_message_line("Already exists"))
-                    );
-                }
-                Err(Error::RepositoryMissing) => {
-                    println!(
-                        "{}",
-                        palette.cloning.paint(format_message_line("Cloning…"))
-                    );
+            if working_dir.join(&project.path).exists() {
+                println!(
+                    "{}",
+                    palette.clean.paint(format_message_line("Already exists"))
+                );
+            } else {
+                println!(
+                    "{}",
+                    palette.cloning.paint(format_message_line("Cloning…"))
+                );
 
-                    match Repository::clone_recurse(
-                        &project.main_remote.url,
-                        working_dir.join(&project.path),
-                    ) {
-                        Ok(repo) => {
-                            for extra_remote in &project.extra_remotes {
-                                match repo.remote(&extra_remote.name, &extra_remote.url) {
-                                    Ok(_) => {}
-                                    Err(err) => {
-                                        add_remote_failed = true;
-                                        eprintln!(
-                                            "Failed to add remote {}: {}",
-                                            extra_remote.name, err
-                                        );
-                                    }
+                match Repository::clone_recurse(
+                    &project.main_remote.url,
+                    working_dir.join(&project.path),
+                ) {
+                    Ok(repo) => {
+                        for extra_remote in &project.extra_remotes {
+                            match repo.remote(&extra_remote.name, &extra_remote.url) {
+                                Ok(_) => {}
+                                Err(err) => {
+                                    add_remote_failed = true;
+                                    eprintln!(
+                                        "Failed to add remote {}: {}",
+                                        extra_remote.name, err
+                                    );
                                 }
                             }
-                            println!("{}", palette.clean.paint(format_message_line("Cloned.")));
                         }
-                        Err(err) => {
-                            clone_failed = true;
-                            eprintln!("Failed to clone project {}: {}", project.path, err);
-                            println!("{}", palette.error.paint(format_message_line("Error")));
-                        }
+                        println!("{}", palette.clean.paint(format_message_line("Cloned.")));
                     }
-                }
-                Err(err) => {
-                    clone_failed = true;
-                    eprintln!("Error: {}", err);
-                    println!("{}", palette.error.paint(format_message_line("Error")));
+                    Err(err) => {
+                        clone_failed = true;
+                        eprintln!("Failed to clone project {}: {}", project.path, err);
+                        println!("{}", palette.error.paint(format_message_line("Error")));
+                    }
                 }
             }
         }

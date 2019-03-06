@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use clap::App;
 use clap::Arg;
 use clap::ArgMatches;
@@ -14,11 +16,20 @@ pub fn subcommand_def<'a>() -> App<'a, 'a> {
                 .long("only-changes")
                 .help("Only print out-of-sync repositories and branches"),
         )
+        .arg(
+            Arg::with_name("path")
+                .multiple(true)
+                .help("Project paths to show status for"),
+        )
 }
 
 pub fn make_command(matches: &ArgMatches) -> Status {
     Status {
         only_changes: matches.is_present("only-changes"),
+        projects: matches
+            .values_of("path")
+            .map(|values| values.into_iter().map(&str::to_string).collect())
+            .unwrap_or(HashSet::new()),
     }
 }
 

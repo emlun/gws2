@@ -61,8 +61,8 @@ fn ff_gets_refs_and_updates_heads() {
             fetch_command: Fetch {
                 status_command: Status {
                     only_changes: false,
+                    projects: HashSet::new(),
                 },
-                projects: HashSet::new(),
             },
         };
 
@@ -127,12 +127,12 @@ fn run_test(
         fetch_command: Fetch {
             status_command: Status {
                 only_changes: false,
+                projects,
             },
-            projects,
         },
     };
 
-    let status_report = command.run_command(working_dir, &workspace);
+    let status_report = command.make_report(working_dir, &workspace);
 
     for (project, project_status) in status_report {
         if project.path == project_path {
@@ -185,13 +185,13 @@ fn ff_produces_correct_data_structure() {
             fetch_command: Fetch {
                 status_command: Status {
                     only_changes: false,
+                    projects: HashSet::new(),
                 },
-                projects: HashSet::new(),
             },
         };
 
         let status_report: Vec<Result<RepositoryStatus, gws2::commands::error::Error>> = command
-            .run_command(working_dir, &workspace)
+            .make_report(working_dir, &workspace)
             .into_iter()
             .map(|(_, status)| status)
             .collect();

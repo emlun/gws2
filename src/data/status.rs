@@ -1,6 +1,5 @@
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
-use std::path::Path;
 
 use git2::Branch;
 use git2::BranchType;
@@ -59,10 +58,11 @@ impl<'repo> BranchMethods<'repo> for Branch<'repo> {
     }
 }
 
-pub fn project_status(project: &Project, working_dir: &Path) -> Result<RepositoryStatus, Error> {
-    project
-        .open_repository(working_dir)?
-        .project_status(project)
+pub fn project_status(
+    project: &Project,
+    repository: &git2::Repository,
+) -> Result<RepositoryStatus, Error> {
+    repository.project_status(project)
 }
 
 impl RepositoryMethods for Repository {

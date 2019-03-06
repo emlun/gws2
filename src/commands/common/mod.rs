@@ -1,5 +1,6 @@
 pub mod exit_codes;
 
+use std::collections::HashSet;
 use std::path::Path;
 
 use ansi_term::ANSIString;
@@ -11,6 +12,7 @@ use config::data::Workspace;
 use data::status::BranchStatus;
 use data::status::DirtyState;
 use data::status::RepositoryStatus;
+use data::status::WorkspaceStatus;
 
 pub enum Command {
     DirectoryCommand(Box<DirectoryCommand>),
@@ -27,12 +29,78 @@ pub trait DirectoryCommand {
 }
 
 pub trait RepositoryCommand {
+    fn only_changes(&self) -> bool;
+
+    fn project_args(&self) -> &HashSet<String>;
+
     fn run(
         &self,
         working_dir: &Path,
         workspace: &Workspace,
         palette: &Palette,
-    ) -> Result<i32, Error>;
+    ) -> Result<i32, Error> {
+        let reports = self.make_report(working_dir, workspace);
+
+        let exit_code = reports
+            .iter()
+            .map(|(project, project_result)| {
+                print_status(project, &project_result, palette);
+
+                match project_result {
+                    Ok(_) => exit_codes::OK,
+                    Err(Error::RepositoryMissing) => exit_codes::OK,
+                    Err(_) => exit_codes::STATUS_PROJECT_FAILED,
+                }
+            })
+            .fold(exit_codes::OK, |exit_code, next_code| {
+                if next_code != exit_codes::OK {
+                    next_code
+                } else {
+                    exit_code
+                }
+            });
+        Ok(exit_code)
+    }
+
+    fn make_report<'ws>(
+        &self,
+        working_dir: &Path,
+        workspace: &'ws Workspace,
+    ) -> WorkspaceStatus<'ws> {
+        workspace
+            .projects
+            .iter()
+            .filter(|project| {
+                self.project_args().is_empty() || self.project_args().contains(&project.path)
+            })
+            .map(|project| {
+                let project_path: &Path = &working_dir.join(&project.path);
+                (
+                    project,
+                    if project_path.exists() {
+                        git2::Repository::open(project_path)
+                            .map_err(Error::from)
+                            .and_then(|repo| self.run_project(project, &repo))
+                    } else {
+                        Err(Error::RepositoryMissing)
+                    },
+                )
+            })
+            .filter(|(_, status_result)| {
+                self.only_changes() == false
+                    || status_result
+                        .as_ref()
+                        .map(|status| status.iter().any(|b| !b.is_clean()))
+                        .unwrap_or(false)
+            })
+            .collect()
+    }
+
+    fn run_project(
+        &self,
+        project: &Project,
+        repository: &git2::Repository,
+    ) -> Result<RepositoryStatus, Error>;
 }
 
 fn ellipsisize(s: &str, length: usize) -> String {

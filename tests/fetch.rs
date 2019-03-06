@@ -44,8 +44,8 @@ fn fetch_gets_refs_from_named_remotes() {
         let command: Fetch = Fetch {
             status_command: Status {
                 only_changes: false,
+                projects: HashSet::new(),
             },
-            projects: HashSet::new(),
         };
 
         let repo: Repository = Repository::open(working_dir.join(project_path))?;
@@ -80,11 +80,11 @@ fn fetch_reports_updates() {
         let command: Fetch = Fetch {
             status_command: Status {
                 only_changes: false,
+                projects: HashSet::new(),
             },
-            projects: HashSet::new(),
         };
 
-        let status_report_1 = command.run_command(working_dir, &workspace);
+        let status_report_1 = command.make_report(working_dir, &workspace);
 
         for (project, project_status) in status_report_1 {
             if project.path == project_path {
@@ -99,7 +99,7 @@ fn fetch_reports_updates() {
             }
         }
 
-        let status_report_2 = command.run_command(working_dir, &workspace);
+        let status_report_2 = command.make_report(working_dir, &workspace);
 
         for (project, project_status) in status_report_2 {
             if project.path == project_path {
@@ -122,11 +122,11 @@ fn fetch_fetches_all_projects_if_none_are_named() {
         let command: Fetch = Fetch {
             status_command: Status {
                 only_changes: false,
+                projects: HashSet::new(),
             },
-            projects: HashSet::new(),
         };
 
-        let status_report = command.run_command(working_dir, &workspace);
+        let status_report = command.make_report(working_dir, &workspace);
 
         for (project, project_status) in status_report {
             if project.path == project_path {
@@ -158,11 +158,11 @@ fn fetch_fetches_only_named_projects_if_any_are_named() {
         let command: Fetch = Fetch {
             status_command: Status {
                 only_changes: false,
+                projects,
             },
-            projects,
         };
 
-        let status_report = command.run_command(working_dir, &workspace);
+        let status_report = command.make_report(working_dir, &workspace);
 
         for (project, project_status) in status_report {
             if project.path == project_path {

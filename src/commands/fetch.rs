@@ -1,51 +1,15 @@
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::collections::HashSet;
-use std::path::Path;
 
-use super::common::exit_codes;
-use super::common::print_status;
 use super::common::RepositoryCommand;
 use super::error::Error;
 use super::status::Status;
-use color::palette::Palette;
 use config::data::Project;
-use config::data::Workspace;
 use data::status::RepositoryStatus;
-use data::status::WorkspaceStatus;
 
 pub struct Fetch {
     pub status_command: Status,
-    pub projects: HashSet<String>,
-}
-
-impl Fetch {
-    pub fn run_command<'ws>(
-        &self,
-        working_dir: &Path,
-        workspace: &'ws Workspace,
-    ) -> WorkspaceStatus<'ws> {
-        self.status_command
-            .make_report(working_dir, workspace)
-            .into_iter()
-            .map(|(project, project_status_result)| {
-                (
-                    project,
-                    if self.projects.is_empty() || self.projects.contains(&project.path) {
-                        project
-                            .open_repository(working_dir)
-                            .and_then(|repo| project_status_result.map(|pr| (repo, pr)))
-                            .and_then(|(repo, project_status)| {
-                                let fetch_result = do_fetch(project, &repo);
-                                augment_project_status_report(project_status, fetch_result)
-                            })
-                    } else {
-                        project_status_result
-                    },
-                )
-            })
-            .collect()
-    }
 }
 
 struct FetchedProject {
@@ -121,18 +85,24 @@ fn augment_project_status_report<'proj, 'repo, 'result>(
 }
 
 impl RepositoryCommand for Fetch {
-    fn run<'ws>(
+    fn only_changes(&self) -> bool {
+        self.status_command.only_changes()
+    }
+
+    fn project_args(&self) -> &HashSet<String> {
+        self.status_command.project_args()
+    }
+
+    fn run_project(
         &self,
-        working_dir: &Path,
-        workspace: &'ws Workspace,
-        palette: &Palette,
-    ) -> Result<i32, Error> {
-        let status_report = self.run_command(working_dir, workspace);
-
-        for (project, report_result) in status_report {
-            print_status(project, &report_result, palette)
-        }
-
-        Ok(exit_codes::OK)
+        project: &Project,
+        repository: &git2::Repository,
+    ) -> Result<RepositoryStatus, Error> {
+        self.status_command
+            .run_project(project, repository)
+            .and_then(|project_status| {
+                let fetch_result = do_fetch(project, repository);
+                augment_project_status_report(project_status, fetch_result)
+            })
     }
 }
