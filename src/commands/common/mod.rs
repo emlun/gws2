@@ -39,18 +39,14 @@ pub trait RepositoryCommand {
         workspace: &Workspace,
         palette: &Palette,
     ) -> Result<i32, Error> {
-        let reports = self.make_report(working_dir, workspace);
+        let reports = self.make_report_and_maybe_print(working_dir, workspace, Some(palette));
 
         let exit_code = reports
             .iter()
-            .map(|(project, project_result)| {
-                print_status(project, &project_result, palette);
-
-                match project_result {
-                    Ok(_) => exit_codes::OK,
-                    Err(Error::RepositoryMissing) => exit_codes::OK,
-                    Err(_) => exit_codes::STATUS_PROJECT_FAILED,
-                }
+            .map(|(_, project_result)| match project_result {
+                Ok(_) => exit_codes::OK,
+                Err(Error::RepositoryMissing) => exit_codes::OK,
+                Err(_) => exit_codes::STATUS_PROJECT_FAILED,
             })
             .fold(exit_codes::OK, |exit_code, next_code| {
                 if next_code != exit_codes::OK {
@@ -62,10 +58,11 @@ pub trait RepositoryCommand {
         Ok(exit_code)
     }
 
-    fn make_report<'ws>(
+    fn make_report_and_maybe_print<'ws>(
         &self,
         working_dir: &Path,
         workspace: &'ws Workspace,
+        palette: Option<&Palette>,
     ) -> WorkspaceStatus<'ws> {
         workspace
             .projects
@@ -93,7 +90,21 @@ pub trait RepositoryCommand {
                         .map(|status| status.iter().any(|b| !b.is_clean()))
                         .unwrap_or(false)
             })
+            .map(|(project, status)| {
+                for p in palette {
+                    print_status(project, &status, p);
+                }
+                (project, status)
+            })
             .collect()
+    }
+
+    fn make_report<'ws>(
+        &self,
+        working_dir: &Path,
+        workspace: &'ws Workspace,
+    ) -> WorkspaceStatus<'ws> {
+        self.make_report_and_maybe_print(working_dir, workspace, None)
     }
 
     fn run_project(
