@@ -108,6 +108,16 @@ fn status_produces_correct_data_structure() {
                 Err(Error::RepositoryMissing),
                 // missing_repository_2
                 Err(Error::RepositoryMissing),
+                // new_commit/diverged
+                Ok(tree_set(vec![BranchStatus {
+                    name: "master".to_string(),
+                    upstream_name: Some("origin/master".to_string()),
+                    dirty: DirtyState::Clean,
+                    is_head: true,
+                    in_sync: Some(false),
+                    upstream_fetched: false,
+                    fast_forwarded: false,
+                },])),
                 // new_commit/local
                 Ok(tree_set(vec![
                     BranchStatus {
@@ -237,6 +247,16 @@ fn status_ignores_clean_repos_with_only_changes() {
                         fast_forwarded: false,
                     }
                 ])),
+                // new_commit/diverged
+                Ok(tree_set(vec![BranchStatus {
+                    name: "master".to_string(),
+                    upstream_name: Some("origin/master".to_string()),
+                    dirty: DirtyState::Clean,
+                    is_head: true,
+                    in_sync: Some(false),
+                    upstream_fetched: false,
+                    fast_forwarded: false,
+                },])),
                 // new_commit/local
                 Ok(tree_set(vec![
                     BranchStatus {

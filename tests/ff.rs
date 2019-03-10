@@ -266,6 +266,16 @@ fn ff_produces_correct_data_structure() {
                 Err(gws2::commands::error::Error::RepositoryMissing),
                 // missing_repository_2
                 Err(gws2::commands::error::Error::RepositoryMissing),
+                // new_commit/diverged
+                Ok(tree_set(vec![BranchStatus {
+                    name: "master".to_string(),
+                    upstream_name: Some("origin/master".to_string()),
+                    dirty: DirtyState::Clean,
+                    is_head: true,
+                    in_sync: Some(false),
+                    upstream_fetched: false,
+                    fast_forwarded: false,
+                },])),
                 // new_commit/local
                 Ok(tree_set(vec![
                     BranchStatus {

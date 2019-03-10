@@ -65,11 +65,11 @@ where
     pb
 }
 
-fn add_commit_to_repo(repo: &git2::Repository) -> Result<git2::Oid, Error> {
+fn add_commit_to_repo(repo: &git2::Repository, msg: &str) -> Result<git2::Oid, Error> {
     let commit = repo.head()?.peel_to_commit()?;
     let tree = repo.find_tree(commit.tree_id())?;
     let sig = repo.signature()?;
-    Ok(repo.commit(Some("HEAD"), &sig, &sig, "More work", &tree, &[&commit])?)
+    Ok(repo.commit(Some("HEAD"), &sig, &sig, msg, &tree, &[&commit])?)
 }
 
 pub fn make_example_workspace(meta_dir: &Path, workspace_dir: &Path) -> Result<(), Error> {
@@ -78,7 +78,7 @@ pub fn make_example_workspace(meta_dir: &Path, workspace_dir: &Path) -> Result<(
 
     make_origin_repo(origin_path)?;
     let ahead_repo = git2::Repository::clone(origin_path.to_str().unwrap(), ahead_path)?;
-    add_commit_to_repo(&ahead_repo)?;
+    add_commit_to_repo(&ahead_repo, "More upstream work")?;
 
     create_dir_all(workspace_dir)?;
 
@@ -109,6 +109,11 @@ pub fn make_example_workspace(meta_dir: &Path, workspace_dir: &Path) -> Result<(
     make_project_new_commit_unfetched_remote(
         &join_all(workspace_dir, &["new_commit", "unfetched_remote"]),
         origin_path,
+        ahead_path,
+    )?;
+
+    make_project_new_commit_diverged(
+        &join_all(workspace_dir, &["new_commit", "diverged"]),
         ahead_path,
     )?;
 
@@ -182,7 +187,7 @@ fn make_project_new_commit_local(
     ahead_path: &Path,
 ) -> Result<git2::Repository, Error> {
     let repo = git2::Repository::clone(origin_path.to_str().unwrap(), path)?;
-    add_commit_to_repo(&repo)?;
+    add_commit_to_repo(&repo, "More local work")?;
     add_ahead_remote(&repo, ahead_path)?;
     add_master2_branch(&repo, "ahead/master", git2::BranchType::Remote)?;
     Ok(repo)
@@ -206,6 +211,25 @@ fn make_project_new_commit_unfetched_remote(
 ) -> Result<git2::Repository, Error> {
     let repo = make_project_new_commit_remote(path, origin_path, origin_path)?;
     repo.remote_set_url("ahead", ahead_path.to_str().unwrap())?;
+    Ok(repo)
+}
+
+fn make_project_new_commit_diverged(
+    path: &Path,
+    ahead_path: &Path,
+) -> Result<git2::Repository, Error> {
+    let repo = git2::Repository::clone(ahead_path.to_str().unwrap(), path)?;
+
+    {
+        let master = repo.find_branch("master", git2::BranchType::Local)?;
+        let target_commit = master.get().peel_to_commit()?.parent(0)?;
+        master
+            .into_reference()
+            .set_target(target_commit.id(), "Prepare for divergence")?;
+    }
+
+    add_commit_to_repo(&repo, "More local work")?;
+
     Ok(repo)
 }
 
@@ -240,6 +264,7 @@ fn write_test_projects_file(
 ) -> Result<(), Error> {
     let content = format!(
         "clean                       | {origin} | {ahead} ahead
+new_commit/diverged         | {origin} | {ahead} ahead
 new_commit/local            | {origin} | {ahead} ahead
 new_commit/remote           | {origin} | {ahead} ahead
 new_commit/unfetched_remote | {origin} | {ahead} ahead
