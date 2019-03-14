@@ -19,29 +19,31 @@ fn do_ff<'repo>(
     status_report
         .into_iter()
         .map(|mut branch_status| {
-            let branch = repo.find_branch(&branch_status.name, git2::BranchType::Local)?;
-            let upstream = branch.upstream()?;
-            let upstream_id: git2::Oid = upstream.get().peel_to_commit()?.id();
+            if branch_status.upstream_name.is_some() {
+                let branch = repo.find_branch(&branch_status.name, git2::BranchType::Local)?;
+                let upstream = branch.upstream()?;
+                let upstream_id: git2::Oid = upstream.get().peel_to_commit()?.id();
 
-            if branch.get().peel_to_commit()?.id() != upstream_id {
-                let can_fast_forward = upstream
-                    .get()
-                    .peel_to_commit()?
-                    .is_descendant_of(&branch.get().peel_to_commit()?);
+                if branch.get().peel_to_commit()?.id() != upstream_id {
+                    let can_fast_forward = upstream
+                        .get()
+                        .peel_to_commit()?
+                        .is_descendant_of(&branch.get().peel_to_commit()?);
 
-                if can_fast_forward {
-                    let reflog_msg = format!(
-                        "{prog_name}: Fast-forward {branch_name} to upstream {upstream_name}",
-                        prog_name = crate_name(),
-                        branch_name = branch.name()?.unwrap(),
-                        upstream_name = upstream.name()?.unwrap()
-                    );
+                    if can_fast_forward {
+                        let reflog_msg = format!(
+                            "{prog_name}: Fast-forward {branch_name} to upstream {upstream_name}",
+                            prog_name = crate_name(),
+                            branch_name = branch.name()?.unwrap(),
+                            upstream_name = upstream.name()?.unwrap()
+                        );
 
-                    branch
-                        .into_reference()
-                        .set_target(upstream_id, &reflog_msg)?;
+                        branch
+                            .into_reference()
+                            .set_target(upstream_id, &reflog_msg)?;
 
-                    branch_status.fast_forwarded = true;
+                        branch_status.fast_forwarded = true;
+                    }
                 }
             }
             Ok(branch_status)

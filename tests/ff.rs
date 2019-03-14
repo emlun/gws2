@@ -253,11 +253,11 @@ fn ff_produces_correct_data_structure() {
                         fast_forwarded: false,
                     },
                     BranchStatus {
-                        name: "master2".to_string(),
-                        upstream_name: Some("ahead/master".to_string()),
+                        name: "feature".to_string(),
+                        upstream_name: None,
                         dirty: DirtyState::Clean,
                         is_head: false,
-                        in_sync: Some(true),
+                        in_sync: None,
                         upstream_fetched: false,
                         fast_forwarded: false,
                     }

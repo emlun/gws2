@@ -187,7 +187,15 @@ fn make_project_clean(
 ) -> Result<git2::Repository, Error> {
     let repo = git2::Repository::clone(origin_path.to_str().unwrap(), path)?;
     add_ahead_remote(&repo, ahead_path)?;
-    add_default_master2_branch(&repo)?;
+
+    {
+        let target_commit = repo
+            .find_branch("master", git2::BranchType::Local)?
+            .get()
+            .peel_to_commit()?;
+        repo.branch("feature", &target_commit, false)?;
+    }
+
     Ok(repo)
 }
 
