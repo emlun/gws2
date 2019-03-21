@@ -132,13 +132,21 @@ pub fn make_example_workspace(meta_dir: &Path, workspace_dir: &Path) -> Result<(
     Ok(())
 }
 
+fn add_remote<'repo>(
+    name: &str,
+    repo: &'repo git2::Repository,
+    remote_path: &Path,
+) -> Result<git2::Remote<'repo>, Error> {
+    let mut remote = repo.remote(name, remote_path.to_str().unwrap())?;
+    remote.fetch(&["master"], None, None)?;
+    Ok(remote)
+}
+
 fn add_ahead_remote<'repo>(
     repo: &'repo git2::Repository,
     remote_path: &Path,
 ) -> Result<git2::Remote<'repo>, Error> {
-    let mut remote = repo.remote("ahead", remote_path.to_str().unwrap())?;
-    remote.fetch(&["master"], None, None)?;
-    Ok(remote)
+    add_remote("ahead", repo, remote_path)
 }
 
 fn add_master2_branch<'repo>(
