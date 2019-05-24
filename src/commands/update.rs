@@ -2,8 +2,8 @@ use std::path::Path;
 
 use super::common::DirectoryCommand;
 use super::error::Error;
-use color::palette::Palette;
-use config::data::Workspace;
+use crate::color::palette::Palette;
+use crate::config::data::Workspace;
 
 pub struct Update {}
 

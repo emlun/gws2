@@ -6,13 +6,13 @@ use std::path::Path;
 use ansi_term::ANSIString;
 
 use super::error::Error;
-use color::palette::Palette;
-use config::data::Project;
-use config::data::Workspace;
-use data::status::BranchStatus;
-use data::status::DirtyState;
-use data::status::RepositoryStatus;
-use data::status::WorkspaceStatus;
+use crate::color::palette::Palette;
+use crate::config::data::Project;
+use crate::config::data::Workspace;
+use crate::data::status::BranchStatus;
+use crate::data::status::DirtyState;
+use crate::data::status::RepositoryStatus;
+use crate::data::status::WorkspaceStatus;
 
 pub enum Command {
     DirectoryCommand(Box<DirectoryCommand>),

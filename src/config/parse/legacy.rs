@@ -1,11 +1,11 @@
 use std::collections::BTreeSet;
 use std::str::FromStr;
 
-use config::data::MaybeNamedRemote;
-use config::data::Project;
-use config::data::Remote;
-use config::data::Workspace;
-use config::error::ConfigError;
+use super::super::data::MaybeNamedRemote;
+use super::super::data::Project;
+use super::super::data::Remote;
+use super::super::data::Workspace;
+use super::super::error::ConfigError;
 
 pub fn parse(input: &str) -> Result<Workspace, ConfigError> {
     input.parse()

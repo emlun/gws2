@@ -3,10 +3,10 @@ use std::collections::HashSet;
 use super::common::RepositoryCommand;
 use super::error::Error;
 use super::fetch::Fetch;
-use config::data::Project;
-use crate_info::crate_name;
-use data::status::RepositoryStatus;
-use util::git2::WithAncestors;
+use crate::config::data::Project;
+use crate::crate_info::crate_name;
+use crate::data::status::RepositoryStatus;
+use crate::util::git2::WithAncestors;
 
 pub struct FastForward {
     pub fetch_command: Fetch,

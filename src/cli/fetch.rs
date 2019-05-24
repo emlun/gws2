@@ -3,8 +3,8 @@ use clap::Arg;
 use clap::ArgMatches;
 use clap::SubCommand;
 
-use commands::common::Command;
-use commands::fetch::Fetch;
+use crate::commands::common::Command;
+use crate::commands::fetch::Fetch;
 
 pub fn subcommand_def<'a>() -> App<'a, 'a> {
     SubCommand::with_name("fetch")

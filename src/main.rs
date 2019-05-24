@@ -16,10 +16,6 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-extern crate ansi_term;
-extern crate clap;
-extern crate git2;
-
 mod cli;
 mod color;
 mod commands;

@@ -8,8 +8,8 @@ use super::common::format_message_line;
 use super::common::format_project_header;
 use super::common::DirectoryCommand;
 use super::error::Error;
-use color::palette::Palette;
-use config::data::Workspace;
+use crate::color::palette::Palette;
+use crate::config::data::Workspace;
 
 pub struct Clone {
     pub projects: HashSet<String>,

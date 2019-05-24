@@ -8,8 +8,8 @@ use git2::Reference;
 use git2::Repository;
 use git2::Status;
 
-use commands::error::Error;
-use config::data::Project;
+use crate::commands::error::Error;
+use crate::config::data::Project;
 
 pub type WorkspaceStatus<'proj> = BTreeMap<&'proj Project, Result<RepositoryStatus, Error>>;
 pub type RepositoryStatus = BTreeSet<BranchStatus>;

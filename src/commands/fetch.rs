@@ -5,8 +5,8 @@ use std::collections::HashSet;
 use super::common::RepositoryCommand;
 use super::error::Error;
 use super::status::Status;
-use config::data::Project;
-use data::status::RepositoryStatus;
+use crate::config::data::Project;
+use crate::data::status::RepositoryStatus;
 
 pub struct Fetch {
     pub status_command: Status,

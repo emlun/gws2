@@ -2,9 +2,9 @@ use std::collections::HashSet;
 
 use super::common::RepositoryCommand;
 use super::error::Error;
-use config::data::Project;
-use data::status::project_status;
-use data::status::RepositoryStatus;
+use crate::config::data::Project;
+use crate::data::status::project_status;
+use crate::data::status::RepositoryStatus;
 
 pub struct Status {
     pub only_changes: bool,

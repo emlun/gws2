@@ -3,14 +3,14 @@ use clap::Arg;
 
 use std::path::Path;
 
-use color::palette::Palette;
-use commands::common::exit_codes;
-use commands::common::Command;
-use config::read::read_workspace_file;
-use crate_info::crate_author;
-use crate_info::crate_description;
-use crate_info::crate_name;
-use crate_info::crate_version;
+use crate::color::palette::Palette;
+use crate::commands::common::exit_codes;
+use crate::commands::common::Command;
+use crate::config::read::read_workspace_file;
+use crate::crate_info::crate_author;
+use crate::crate_info::crate_description;
+use crate::crate_info::crate_name;
+use crate::crate_info::crate_version;
 
 pub fn main() -> i32 {
     let chdir_arg = Arg::with_name("dir")

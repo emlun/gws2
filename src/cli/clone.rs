@@ -5,8 +5,8 @@ use clap::Arg;
 use clap::ArgMatches;
 use clap::SubCommand;
 
-use commands::clone::Clone;
-use commands::common::Command;
+use crate::commands::clone::Clone;
+use crate::commands::common::Command;
 
 pub fn subcommand_def<'a>() -> App<'a, 'a> {
     SubCommand::with_name("clone")

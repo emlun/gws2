@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use super::Remote;
-use commands::error::Error;
+use crate::commands::error::Error;
 
 #[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Project {

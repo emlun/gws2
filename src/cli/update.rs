@@ -2,8 +2,8 @@ use clap::App;
 use clap::ArgMatches;
 use clap::SubCommand;
 
-use commands::common::Command;
-use commands::update::Update;
+use crate::commands::common::Command;
+use crate::commands::update::Update;
 
 pub fn subcommand_def<'a>() -> App<'a, 'a> {
     SubCommand::with_name("update")

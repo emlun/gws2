@@ -5,8 +5,8 @@ use clap::Arg;
 use clap::ArgMatches;
 use clap::SubCommand;
 
-use commands::common::Command;
-use commands::status::Status;
+use crate::commands::common::Command;
+use crate::commands::status::Status;
 
 pub fn subcommand_def<'a>() -> App<'a, 'a> {
     SubCommand::with_name("status")
