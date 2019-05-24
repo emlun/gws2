@@ -2,7 +2,7 @@
 name = "gws2"
 edition = "2018"
 version = "0.1.0"
-description = "gws is a helper to manage workspaces which contain git repositories."
+description = "Colorful helper for workspaces of git repositories"
 authors = ["Emil Lundberg <emil@emlun.se>"]
 
 [dependencies]
