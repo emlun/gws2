@@ -87,7 +87,10 @@ pub trait RepositoryCommand {
                 self.only_changes() == false
                     || status_result
                         .as_ref()
-                        .map(|status| status.iter().any(|b| !b.is_clean()))
+                        .map(|status| {
+                            status.iter().any(|b| !b.is_clean())
+                                || status.iter().all(|b| b.upstream_name == None)
+                        })
                         .unwrap_or(false)
             })
             .map(|(project, status)| {
