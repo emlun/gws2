@@ -4,6 +4,10 @@ edition = "2018"
 version = "0.1.0"
 description = "Colorful helper for workspaces of git repositories"
 authors = ["Emil Lundberg <emil@emlun.se>"]
+homepage = "https://github.com/emlun/gws2"
+repository = "https://github.com/emlun/gws2"
+readme = "README.md"
+license = "GPL-3.0-or-later"
 
 [dependencies]
 ansi_term = "0.11"
@@ -12,3 +16,8 @@ git2 = { path = "lib/git2-rs" }
 
 [dev-dependencies]
 tempdir = "0.3"
+
+[badges]
+maintenance = { status = "experimental" }
+is-it-maintained-issue-resolution = { repository = "https://github.com/emlun/gws2" }
+is-it-maintained-open-issues = { repository = "https://github.com/emlun/gws2" }
