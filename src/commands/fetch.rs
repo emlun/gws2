@@ -19,7 +19,7 @@ fn do_fetch_remote<'repo>(
     project: &Project,
     repo: &'repo git2::Repository,
     remote: &mut git2::Remote,
-) -> Result<BTreeSet<git2::Branch<'repo>>, Error> {
+) -> Result<BTreeSet<String>, Error> {
     let heads_before = project.current_upstream_heads(repo)?;
 
     let refspec_strings: Vec<String> = remote
@@ -35,7 +35,7 @@ fn do_fetch_remote<'repo>(
 
     let heads_after = project.current_upstream_heads(repo)?;
 
-    let updated_branches: BTreeSet<git2::Branch> = heads_after
+    let updated_branches: BTreeSet<String> = heads_after
         .into_iter()
         .filter(|(k, v_after)| {
             heads_before
@@ -62,7 +62,6 @@ fn do_fetch<'repo>(project: &Project, repo: &git2::Repository) -> FetchedProject
                     Err(_) => BTreeSet::new().into_iter(),
                 },
             )
-            .flat_map(|branch| branch.name().ok().and_then(|n| n).map(String::from))
             .collect(),
     }
 }

@@ -35,12 +35,17 @@ impl Project {
     pub fn current_upstream_heads<'repo>(
         &self,
         repo: &'repo git2::Repository,
-    ) -> Result<BTreeMap<git2::Branch<'repo>, git2::Oid>, Error> {
+    ) -> Result<BTreeMap<String, git2::Oid>, Error> {
         self.local_branches_internal(repo).map(|branches| {
             branches
                 .into_iter()
                 .flat_map(|(branch, gupstream)| gupstream.map(|gupstream| (branch, gupstream)))
-                .map(|(branch, gupstream)| (branch, gupstream.get().peel_to_commit().unwrap().id()))
+                .map(|(branch, gupstream)| {
+                    (
+                        branch.name().ok().unwrap().unwrap().to_string(),
+                        gupstream.get().peel_to_commit().unwrap().id(),
+                    )
+                })
                 .collect()
         })
     }
