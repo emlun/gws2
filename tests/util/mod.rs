@@ -94,6 +94,8 @@ pub fn make_example_workspace(meta_dir: &Path, workspace_dir: &Path) -> Result<(
         ahead_path,
     )?;
 
+    make_project_no_upstream(workspace_dir.join("no_upstream").as_path(), origin_path)?;
+
     make_project_new_commit_local(
         &join_all(workspace_dir, &["new_commit", "local"]),
         origin_path,
@@ -189,6 +191,15 @@ fn make_project_clean(
     Ok(repo)
 }
 
+fn make_project_no_upstream(path: &Path, origin_path: &Path) -> Result<git2::Repository, Error> {
+    let repo = git2::Repository::clone(origin_path.to_str().unwrap(), path)?;
+
+    repo.find_branch("master", git2::BranchType::Local)?
+        .set_upstream(None)?;
+
+    Ok(repo)
+}
+
 fn make_project_new_commit_local(
     path: &Path,
     origin_path: &Path,
@@ -272,6 +283,7 @@ fn write_test_projects_file(
 ) -> Result<(), Error> {
     let content = format!(
         "clean                       | {origin} | {ahead} ahead
+no_upstream                 | {origin}
 new_commit/diverged         | {origin} | {ahead} ahead
 new_commit/local            | {origin} | {ahead} ahead
 new_commit/remote           | {origin} | {ahead} ahead

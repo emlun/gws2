@@ -181,6 +181,16 @@ fn status_produces_correct_data_structure() {
                         fast_forwarded: false,
                     }
                 ])),
+                // no_upstream
+                Ok(tree_set(vec![BranchStatus {
+                    name: "master".to_string(),
+                    upstream_name: None,
+                    dirty: DirtyState::Clean,
+                    is_head: true,
+                    in_sync: None,
+                    upstream_fetched: false,
+                    fast_forwarded: false,
+                },])),
             ]
         );
 
@@ -299,6 +309,16 @@ fn status_ignores_clean_repos_with_only_changes() {
                         fast_forwarded: false,
                     }
                 ])),
+                // no_upstream
+                Ok(tree_set(vec![BranchStatus {
+                    name: "master".to_string(),
+                    upstream_name: None,
+                    dirty: DirtyState::Clean,
+                    is_head: true,
+                    in_sync: None,
+                    upstream_fetched: false,
+                    fast_forwarded: false,
+                },])),
             ]
         );
 

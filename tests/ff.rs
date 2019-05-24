@@ -339,6 +339,16 @@ fn ff_produces_correct_data_structure() {
                         fast_forwarded: true,
                     }
                 ])),
+                // no_upstream
+                Ok(tree_set(vec![BranchStatus {
+                    name: "master".to_string(),
+                    upstream_name: None,
+                    dirty: DirtyState::Clean,
+                    is_head: true,
+                    in_sync: None,
+                    upstream_fetched: false,
+                    fast_forwarded: false,
+                },])),
             ]
         );
 
