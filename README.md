@@ -52,6 +52,15 @@ But on the other hand, gws2 already has some new features:
 Installation
 ---
 
+
+### Arch Linux
+
+Install the [gws2-git](https://aur.archlinux.org/packages/gws2-git) package from
+the AUR.
+
+
+### Other
+
 Build and install the `gws` binary using `cargo`:
 
 ```
