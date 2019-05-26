@@ -12,14 +12,14 @@ use crate::crate_info::crate_description;
 use crate::crate_info::crate_name;
 use crate::crate_info::crate_version;
 
-pub fn main() -> i32 {
+pub fn build_cli() -> App<'static, 'static> {
     let chdir_arg = Arg::with_name("dir")
         .short("C")
         .long("chdir")
         .help("Change to <dir> before doing anything")
         .takes_value(true);
 
-    let matches = App::new(crate_name())
+    App::new(crate_name())
         .version(crate_version())
         .about(crate_description())
         .author(crate_author())
@@ -29,7 +29,12 @@ pub fn main() -> i32 {
         .subcommand(super::ff::subcommand_def())
         .subcommand(super::status::subcommand_def())
         .subcommand(super::update::subcommand_def())
-        .get_matches();
+}
+
+pub fn main() -> i32 {
+    let cli = build_cli();
+
+    let matches = cli.get_matches();
 
     let working_dir: &Path = match matches.args.get("dir") {
         Some(chdir_arg) => Path::new(
