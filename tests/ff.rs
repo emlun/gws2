@@ -1,5 +1,5 @@
 extern crate git2;
-extern crate gws2;
+extern crate gws;
 extern crate tempdir;
 
 mod util;
@@ -12,15 +12,15 @@ use std::path::Path;
 use git2::Commit;
 use git2::Repository;
 
-use gws2::color::palette::Palette;
-use gws2::commands::common::RepositoryCommand;
-use gws2::commands::fetch::Fetch;
-use gws2::commands::ff::FastForward;
-use gws2::commands::status::Status;
-use gws2::config::data::Workspace;
-use gws2::data::status::BranchStatus;
-use gws2::data::status::DirtyState;
-use gws2::data::status::RepositoryStatus;
+use gws::color::palette::Palette;
+use gws::commands::common::RepositoryCommand;
+use gws::commands::fetch::Fetch;
+use gws::commands::ff::FastForward;
+use gws::commands::status::Status;
+use gws::config::data::Workspace;
+use gws::data::status::BranchStatus;
+use gws::data::status::DirtyState;
+use gws::data::status::RepositoryStatus;
 
 use util::in_example_workspace;
 use util::Error;
@@ -190,7 +190,7 @@ fn ff_produces_correct_data_structure() {
             },
         };
 
-        let status_report: Vec<Result<RepositoryStatus, gws2::commands::error::Error>> = command
+        let status_report: Vec<Result<RepositoryStatus, gws::commands::error::Error>> = command
             .make_report(working_dir, &workspace)
             .into_iter()
             .map(|(_, status)| status)
@@ -263,9 +263,9 @@ fn ff_produces_correct_data_structure() {
                     }
                 ])),
                 // missing_repository
-                Err(gws2::commands::error::Error::RepositoryMissing),
+                Err(gws::commands::error::Error::RepositoryMissing),
                 // missing_repository_2
-                Err(gws2::commands::error::Error::RepositoryMissing),
+                Err(gws::commands::error::Error::RepositoryMissing),
                 // new_commit/diverged
                 Ok(tree_set(vec![BranchStatus {
                     name: "master".to_string(),

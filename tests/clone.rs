@@ -1,5 +1,5 @@
 extern crate git2;
-extern crate gws2;
+extern crate gws;
 extern crate tempdir;
 
 mod util;
@@ -9,10 +9,10 @@ use std::hash::Hash;
 
 use git2::Repository;
 
-use gws2::color::palette::Palette;
-use gws2::commands::clone::Clone;
-use gws2::commands::common::DirectoryCommand;
-use gws2::config::data::Workspace;
+use gws::color::palette::Palette;
+use gws::commands::clone::Clone;
+use gws::commands::common::DirectoryCommand;
+use gws::config::data::Workspace;
 
 use util::in_example_workspace;
 

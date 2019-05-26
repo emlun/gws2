@@ -1,5 +1,5 @@
 /*
-gws2: Colorful KISS helper for git workspaces
+gws: Colorful KISS helper for git workspaces
 Copyright (C) 2018  Emil Lundberg <emil@emlun.se>
 
 This program is free software: you can redistribute it and/or modify

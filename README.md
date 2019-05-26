@@ -52,22 +52,22 @@ But on the other hand, gws2 already has some new features:
 Installation
 ---
 
-Build and install the `gws2` binary using `cargo`:
+Build and install the `gws` binary using `cargo`:
 
 ```
 $ git clone --recurse-submodules https://github.com/emlun/gws2.git
 $ cd gws2
 $ cargo install --path .
-$ gws2 --version
+$ gws --version
 ```
 
 Optionally, also generate a completions file for your shell. For example:
 
 ```
-$ gws2 completions bash > ~/.config/bash/completions/gws2.bash_completion
+$ gws completions bash > ~/.config/bash/completions/gws.bash_completion
 ```
 
-See `gws2 completions --help` for a list of supported shells.
+See `gws completions --help` for a list of supported shells.
 
 
 Quick Start

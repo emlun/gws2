@@ -1,5 +1,5 @@
 extern crate git2;
-extern crate gws2;
+extern crate gws;
 extern crate tempdir;
 
 use std::fs::create_dir_all;
@@ -9,8 +9,8 @@ use std::path::PathBuf;
 
 use tempdir::TempDir;
 
-use gws2::config::data::Workspace;
-use gws2::config::read::read_workspace_file;
+use gws::config::data::Workspace;
+use gws::config::read::read_workspace_file;
 
 #[derive(Debug)]
 pub enum Error {
@@ -316,7 +316,7 @@ fn in_example_workspace_inner<T, E>(test: fn(&Path, Workspace) -> Result<T, E>) 
 where
     Error: From<E>,
 {
-    let tmpdir = TempDir::new("gws2-test")?;
+    let tmpdir = TempDir::new("gws-test")?;
     let meta_dir = tmpdir.path().join("meta");
     let workspace_dir = tmpdir.path().join("workspace");
 

@@ -1,5 +1,5 @@
 [package]
-name = "gws2"
+name = "gws"
 edition = "2018"
 version = "0.1.0"
 description = "Colorful helper for workspaces of git repositories"

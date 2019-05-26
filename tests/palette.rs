@@ -1,9 +1,9 @@
 extern crate ansi_term;
-extern crate gws2;
+extern crate gws;
 
 use ansi_term::Colour;
 
-use gws2::color::palette::Palette;
+use gws::color::palette::Palette;
 
 #[test]
 fn default_palette_is_correct() {

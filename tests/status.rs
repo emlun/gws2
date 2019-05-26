@@ -1,5 +1,5 @@
 extern crate git2;
-extern crate gws2;
+extern crate gws;
 extern crate tempdir;
 
 mod util;
@@ -7,12 +7,12 @@ mod util;
 use std::collections::BTreeSet;
 use std::collections::HashSet;
 
-use gws2::commands::common::RepositoryCommand;
-use gws2::commands::error::Error;
-use gws2::commands::status::Status;
-use gws2::data::status::BranchStatus;
-use gws2::data::status::DirtyState;
-use gws2::data::status::RepositoryStatus;
+use gws::commands::common::RepositoryCommand;
+use gws::commands::error::Error;
+use gws::commands::status::Status;
+use gws::data::status::BranchStatus;
+use gws::data::status::DirtyState;
+use gws::data::status::RepositoryStatus;
 
 use util::in_example_workspace;
 

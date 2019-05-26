@@ -1,5 +1,5 @@
 extern crate git2;
-extern crate gws2;
+extern crate gws;
 extern crate tempdir;
 
 mod util;
@@ -12,11 +12,11 @@ use git2::BranchType;
 use git2::Commit;
 use git2::Repository;
 
-use gws2::color::palette::Palette;
-use gws2::commands::common::RepositoryCommand;
-use gws2::commands::fetch::Fetch;
-use gws2::commands::status::Status;
-use gws2::config::data::Workspace;
+use gws::color::palette::Palette;
+use gws::commands::common::RepositoryCommand;
+use gws::commands::fetch::Fetch;
+use gws::commands::status::Status;
+use gws::config::data::Workspace;
 
 use util::in_example_workspace;
 use util::Error;
