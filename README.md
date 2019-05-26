@@ -27,14 +27,16 @@ Differences from original gws
 
 gws2 hasn't quite yet reached feature parity with [gws][gws].
 
-- [ ] `check` command
+- [ ] `check` command [#2][iss-check]
 - [x] `clone` command
 - [x] `fetch` command
 - [x] `ff` command
-- [ ] `init` command
+- [ ] `init` command [#1][iss-init]
 - [x] `status` command
 - [x] `update` command
-- [ ] Customizable color scheme
+- [ ] Customizable color scheme [#4][iss-theme]
+- [ ] `.ignore.gws` file [#3][iss-ignore]
+- [ ] Run from subdirectory [#5][iss-subdir]
 
 
 But on the other hand, gws2 already has some new features:
@@ -76,7 +78,7 @@ Quick Start
 
 **or**
 
-- (NOT YET IMPLEMENTED: [#1](https://github.com/emlun/gws2/issues/1)) Let `gws` detect existing repositories and create the `.projects.gws` for
+- (NOT YET IMPLEMENTED: [#1][iss-init]) Let `gws` detect existing repositories and create the `.projects.gws` for
   you:
 
         $ cd path/to/your/workspace
@@ -176,13 +178,13 @@ This tool offers some features, including:
         work/theSoftware | git@github.com:You/theSoftware.git
         perso/gws        | git@github.com:You/gws.git         | git@github.com:StreakyCobra/gws.git
 
-- (NOT YET IMPLEMENTED: [#3](https://github.com/emlun/gws2/issues/3)) It can use an ignore list, named `.ignore.gws`, containing regular
+- (NOT YET IMPLEMENTED: [#3][iss-ignore]) It can use an ignore list, named `.ignore.gws`, containing regular
   expressions which discard some specific projects, for instance to disable on
   your home computer the work-related projects.
 
         ^work/
 
-- (NOT YET IMPLEMENTED: [#1](https://github.com/emlun/gws2/issues/1)) It can detect already existing repositories and create the projects list
+- (NOT YET IMPLEMENTED: [#1][iss-init]) It can detect already existing repositories and create the projects list
   from that.
 
         $ gws init
@@ -232,7 +234,7 @@ This tool offers some features, including:
   `ff` accepts the `--only-changes` option, which has the same effect as for
   `status`.
 
-- (NOT YET IMPLEMENTED: [#2](https://github.com/emlun/gws2/issues/2)) It can check the workspace for all repositories (known, unknown, ignored,
+- (NOT YET IMPLEMENTED: [#2][iss-check]) It can check the workspace for all repositories (known, unknown, ignored,
   missing). Note: This command can be quite slow in large repositories (e.g.
   home folder), because it needs to search the entire space for unknown
   repositories. Mainly used from time to time to check workspace consistency:
@@ -272,7 +274,7 @@ where
 
 ### .ignore.gws
 
-(NOT YET IMPLEMENTED: [#3](https://github.com/emlun/gws2/issues/3))
+(NOT YET IMPLEMENTED: [#3][iss-ignore])
 
 One regular expression per line. The regular expression will be matched against
 each project's *folder path*. Some examples:
@@ -295,7 +297,7 @@ needed or not accessible.
 
 ### Theme file
 
-(NOT YET IMPLEMENTED: [#4](https://github.com/emlun/gws2/issues/4))
+(NOT YET IMPLEMENTED: [#4][iss-theme])
 
 You can customise the color scheme in a future version, maybe.
 
@@ -313,7 +315,7 @@ Other thoughts
   too much checking to prevent data loss. Instead, just look at the status of
   the repositories and perform any needed actions manually on regular basis.
 
-- (NOT YET IMPLEMENTED: [#5](https://github.com/emlun/gws2/issues/5)) You can use the commands from any subfolder of the workspace (as `git` does
+- (NOT YET IMPLEMENTED: [#5][iss-subdir]) You can use the commands from any subfolder of the workspace (as `git` does
   for instance).
 
 - The file `.projects.gws` can easily be verisoned to sync the list of
@@ -324,9 +326,14 @@ Other thoughts
   work-related projects at home because they are unneeded or even not
   accessible from there).
 
-- (NOT YET IMPLEMENTED: [#2](https://github.com/emlun/gws2/issues/2)) `gws check` can be quite slow (for instance if the
+- (NOT YET IMPLEMENTED: [#2][iss-check]) `gws check` can be quite slow (for instance if the
   workspace is the home folder) because it searches all existing Git projects
   recursively.
 
 
 [gws]: https://github.com/StreakyCobra/gws
+[iss-init]: https://github.com/emlun/gws2/issues/1
+[iss-check]: https://github.com/emlun/gws2/issues/2
+[iss-ignore]: https://github.com/emlun/gws2/issues/3
+[iss-theme]: https://github.com/emlun/gws2/issues/4
+[iss-subdir]: https://github.com/emlun/gws2/issues/5
