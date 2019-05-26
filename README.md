@@ -61,6 +61,14 @@ $ cargo install --path .
 $ gws2 --version
 ```
 
+Optionally, also generate a completions file for your shell. For example:
+
+```
+$ gws2 completions bash > ~/.config/bash/completions/gws2.bash_completion
+```
+
+See `gws2 completions --help` for a list of supported shells.
+
 
 Quick Start
 ---

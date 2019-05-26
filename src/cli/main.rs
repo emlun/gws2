@@ -6,10 +6,31 @@ use crate::commands::common::exit_codes;
 use crate::commands::common::Command;
 use crate::config::read::read_workspace_file;
 
+use clap::Shell;
+
 pub fn main() -> i32 {
     let cli = super::build_cli();
     let matches = cli.get_matches();
-    run_gws(matches)
+
+    if &matches.subcommand_name() == &Some("completions") {
+        run_completions(matches)
+    } else {
+        run_gws(matches)
+    }
+}
+
+fn run_completions(matches: ArgMatches) -> i32 {
+    let mut cli = super::build_cli();
+    let shell: Shell = matches
+        .subcommand
+        .unwrap()
+        .matches
+        .value_of("shell")
+        .expect("shell argument required")
+        .parse()
+        .expect("Failed to parse shell argument");
+    cli.gen_completions_to("gws2", shell, &mut std::io::stdout());
+    exit_codes::OK
 }
 
 fn run_gws(matches: ArgMatches) -> i32 {
