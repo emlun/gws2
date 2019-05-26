@@ -29,7 +29,8 @@ fn run_completions(matches: ArgMatches) -> i32 {
         .expect("shell argument required")
         .parse()
         .expect("Failed to parse shell argument");
-    cli.gen_completions_to("gws2", shell, &mut std::io::stdout());
+    let bin_name: String = cli.get_name().to_string();
+    cli.gen_completions_to(bin_name, shell, &mut std::io::stdout());
     exit_codes::OK
 }
 
