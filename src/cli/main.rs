@@ -1,3 +1,4 @@
+use clap::ArgMatches;
 use std::path::Path;
 
 use crate::color::palette::Palette;
@@ -7,9 +8,11 @@ use crate::config::read::read_workspace_file;
 
 pub fn main() -> i32 {
     let cli = super::build_cli();
-
     let matches = cli.get_matches();
+    run_gws(matches)
+}
 
+fn run_gws(matches: ArgMatches) -> i32 {
     let working_dir: &Path = match matches.args.get("dir") {
         Some(chdir_arg) => Path::new(
             chdir_arg.vals[0]
