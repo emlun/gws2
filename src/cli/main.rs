@@ -1,38 +1,12 @@
-use clap::App;
-use clap::Arg;
-
 use std::path::Path;
 
 use crate::color::palette::Palette;
 use crate::commands::common::exit_codes;
 use crate::commands::common::Command;
 use crate::config::read::read_workspace_file;
-use crate::crate_info::crate_author;
-use crate::crate_info::crate_description;
-use crate::crate_info::crate_name;
-use crate::crate_info::crate_version;
-
-pub fn build_cli() -> App<'static, 'static> {
-    let chdir_arg = Arg::with_name("dir")
-        .short("C")
-        .long("chdir")
-        .help("Change to <dir> before doing anything")
-        .takes_value(true);
-
-    App::new(crate_name())
-        .version(crate_version())
-        .about(crate_description())
-        .author(crate_author())
-        .arg(chdir_arg)
-        .subcommand(super::clone::subcommand_def())
-        .subcommand(super::fetch::subcommand_def())
-        .subcommand(super::ff::subcommand_def())
-        .subcommand(super::status::subcommand_def())
-        .subcommand(super::update::subcommand_def())
-}
 
 pub fn main() -> i32 {
-    let cli = build_cli();
+    let cli = super::build_cli();
 
     let matches = cli.get_matches();
 
