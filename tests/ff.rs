@@ -42,7 +42,7 @@ where
 }
 
 #[test]
-fn ff_gets_refs_and_updates_heads() {
+fn ff_gets_refs_and_updates_heads() -> Result<(), util::Error> {
     fn resolve_ref<'repo>(
         name: &str,
         repo: &'repo Repository,
@@ -112,7 +112,7 @@ fn ff_gets_refs_and_updates_heads() {
         );
 
         Ok(())
-    });
+    })
 }
 
 fn run_test(
@@ -151,14 +151,14 @@ fn run_test(
 }
 
 #[test]
-fn ff_fetches_all_projects_if_none_are_named() {
+fn ff_fetches_all_projects_if_none_are_named() -> Result<(), Error> {
     in_example_workspace(|working_dir, workspace: Workspace| {
         run_test(working_dir, workspace, HashSet::new(), true)
-    });
+    })
 }
 
 #[test]
-fn ff_fetches_only_named_projects_if_any_are_named() {
+fn ff_fetches_only_named_projects_if_any_are_named() -> Result<(), Error> {
     in_example_workspace(|working_dir, workspace: Workspace| {
         run_test(
             working_dir,
@@ -166,7 +166,7 @@ fn ff_fetches_only_named_projects_if_any_are_named() {
             hash_set(vec!["new_commit/local".to_string()]),
             false,
         )
-    });
+    })?;
 
     in_example_workspace(|working_dir, workspace: Workspace| {
         run_test(
@@ -179,7 +179,7 @@ fn ff_fetches_only_named_projects_if_any_are_named() {
 }
 
 #[test]
-fn ff_produces_correct_data_structure() {
+fn ff_produces_correct_data_structure() -> Result<(), Error> {
     in_example_workspace(|working_dir, workspace| {
         let command: FastForward = FastForward {
             fetch_command: Fetch {
@@ -353,5 +353,5 @@ fn ff_produces_correct_data_structure() {
         );
 
         Ok(())
-    });
+    })
 }

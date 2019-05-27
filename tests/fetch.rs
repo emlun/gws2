@@ -30,7 +30,7 @@ where
 }
 
 #[test]
-fn fetch_gets_refs_from_named_remotes() {
+fn fetch_gets_refs_from_named_remotes() -> Result<(), Error> {
     fn resolve_ref<'repo>(name: &str, repo: &'repo Repository) -> Result<Commit<'repo>, Error> {
         Ok(repo
             .find_branch(name, BranchType::Remote)?
@@ -69,11 +69,11 @@ fn fetch_gets_refs_from_named_remotes() {
         );
 
         Ok(())
-    });
+    })
 }
 
 #[test]
-fn fetch_reports_updates() {
+fn fetch_reports_updates() -> Result<(), Error> {
     in_example_workspace(|working_dir, workspace: Workspace| {
         let project_path = "new_commit/unfetched_remote";
 
@@ -111,11 +111,11 @@ fn fetch_reports_updates() {
         }
 
         Ok(())
-    });
+    })
 }
 
 #[test]
-fn fetch_fetches_all_projects_if_none_are_named() {
+fn fetch_fetches_all_projects_if_none_are_named() -> Result<(), Error> {
     in_example_workspace(|working_dir, workspace: Workspace| {
         let project_path = "new_commit/unfetched_remote";
 
@@ -142,11 +142,11 @@ fn fetch_fetches_all_projects_if_none_are_named() {
         }
 
         Ok(())
-    });
+    })
 }
 
 #[test]
-fn fetch_fetches_only_named_projects_if_any_are_named() {
+fn fetch_fetches_only_named_projects_if_any_are_named() -> Result<(), Error> {
     fn run_test(
         working_dir: &Path,
         workspace: Workspace,
@@ -187,7 +187,7 @@ fn fetch_fetches_only_named_projects_if_any_are_named() {
             hash_set(vec!["new_commit/local".to_string()]),
             false,
         )
-    });
+    })?;
 
     in_example_workspace(|working_dir, workspace: Workspace| {
         run_test(

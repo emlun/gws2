@@ -307,15 +307,7 @@ missing_repository_2        | {origin} | {ahead} ahead
     Ok(write(path, content)?)
 }
 
-pub fn in_example_workspace<T>(test: fn(&Path, Workspace) -> Result<T, Error>) {
-    let result = in_example_workspace_inner(test);
-    assert!(result.is_ok(), format!("{:?}", result.err()));
-}
-
-fn in_example_workspace_inner<T, E>(test: fn(&Path, Workspace) -> Result<T, E>) -> Result<T, Error>
-where
-    Error: From<E>,
-{
+pub fn in_example_workspace<T>(test: fn(&Path, Workspace) -> Result<T, Error>) -> Result<T, Error> {
     let tmpdir = TempDir::new("gws-test")?;
     let meta_dir = tmpdir.path().join("meta");
     let workspace_dir = tmpdir.path().join("workspace");
@@ -323,7 +315,5 @@ where
     make_example_workspace(&meta_dir, &workspace_dir)?;
 
     let workspace = read_workspace_file(workspace_dir.join(".projects.gws")).unwrap();
-    let result = test(&workspace_dir, workspace);
-
-    result.map_err(|e| Error::from(e))
+    Ok(test(&workspace_dir, workspace)?)
 }

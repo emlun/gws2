@@ -15,6 +15,7 @@ use gws::commands::common::DirectoryCommand;
 use gws::config::data::Workspace;
 
 use util::in_example_workspace;
+use util::Error;
 
 pub fn hash_set<I, T>(items: I) -> HashSet<T>
 where
@@ -25,7 +26,7 @@ where
 }
 
 #[test]
-fn clone_creates_repo() {
+fn clone_creates_repo() -> Result<(), Error> {
     in_example_workspace(|working_dir, workspace: Workspace| {
         let command: Clone = Clone {
             projects: hash_set(vec!["missing_repository".to_string()]),
@@ -39,11 +40,11 @@ fn clone_creates_repo() {
         assert_eq!(false, working_dir.join("missing_repository_2").exists());
 
         Ok(())
-    });
+    })
 }
 
 #[test]
-fn clone_supports_multiple_arguments() {
+fn clone_supports_multiple_arguments() -> Result<(), Error> {
     in_example_workspace(|working_dir, workspace: Workspace| {
         let command: Clone = Clone {
             projects: hash_set(vec![
@@ -61,11 +62,11 @@ fn clone_supports_multiple_arguments() {
         assert!(working_dir.join("missing_repository_2").exists());
 
         Ok(())
-    });
+    })
 }
 
 #[test]
-fn clone_creates_extra_remotes() {
+fn clone_creates_extra_remotes() -> Result<(), Error> {
     in_example_workspace(|working_dir, workspace: Workspace| {
         let command: Clone = Clone {
             projects: hash_set(vec!["missing_repository".to_string()]),
@@ -95,5 +96,5 @@ fn clone_creates_extra_remotes() {
         );
 
         Ok(())
-    });
+    })
 }

@@ -25,7 +25,7 @@ where
 }
 
 #[test]
-fn status_produces_correct_data_structure() {
+fn status_produces_correct_data_structure() -> Result<(), util::Error> {
     in_example_workspace(|working_dir, workspace| {
         let command = Status {
             only_changes: false,
@@ -195,11 +195,11 @@ fn status_produces_correct_data_structure() {
         );
 
         Ok(())
-    });
+    })
 }
 
 #[test]
-fn status_ignores_clean_repos_with_only_changes() {
+fn status_ignores_clean_repos_with_only_changes() -> Result<(), util::Error> {
     in_example_workspace(|working_dir, workspace| {
         let command = Status {
             only_changes: true,
@@ -323,5 +323,5 @@ fn status_ignores_clean_repos_with_only_changes() {
         );
 
         Ok(())
-    });
+    })
 }
