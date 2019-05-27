@@ -140,7 +140,11 @@ fn add_remote<'repo>(
     remote_path: &Path,
 ) -> Result<git2::Remote<'repo>, Error> {
     let mut remote = repo.remote(name, remote_path.to_str().unwrap())?;
-    remote.fetch(&["master"], None, None)?;
+    remote.fetch(
+        &[&format!("refs/heads/*:refs/remotes/{}/*", name)],
+        None,
+        None,
+    )?;
     Ok(remote)
 }
 
