@@ -69,6 +69,15 @@ fn add_commit_to_head(repo: &git2::Repository, msg: &str) -> Result<git2::Oid, E
     add_commit_to_repo(repo, msg, Some("HEAD"), &[&repo.head()?.target().unwrap()])
 }
 
+fn add_commit_to_branch(
+    repo: &git2::Repository,
+    msg: &str,
+    branch: &str,
+    parents: &[&git2::Oid],
+) -> Result<git2::Oid, Error> {
+    add_commit_to_repo(repo, msg, Some(&format!("refs/heads/{}", branch)), parents)
+}
+
 fn add_commit_to_repo(
     repo: &git2::Repository,
     msg: &str,
