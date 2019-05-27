@@ -66,10 +66,30 @@ where
 }
 
 fn add_commit_to_head(repo: &git2::Repository, msg: &str) -> Result<git2::Oid, Error> {
-    let commit = repo.head()?.peel_to_commit()?;
-    let tree = repo.find_tree(commit.tree_id())?;
+    add_commit_to_repo(repo, msg, Some("HEAD"), &[&repo.head()?.target().unwrap()])
+}
+
+fn add_commit_to_repo(
+    repo: &git2::Repository,
+    msg: &str,
+    branch: Option<&str>,
+    parents: &[&git2::Oid],
+) -> Result<git2::Oid, Error> {
+    let parent_commits: Vec<git2::Commit> = parents
+        .iter()
+        .map(|&o| repo.find_commit(*o).unwrap())
+        .collect();
+    let parent_commit_refs: Vec<&git2::Commit> = parent_commits.iter().map(|o| o).collect();
+    let tree = repo.find_tree(parent_commits[0].tree_id())?;
     let sig = repo.signature()?;
-    Ok(repo.commit(Some("HEAD"), &sig, &sig, msg, &tree, &[&commit])?)
+    Ok(repo.commit(
+        branch,
+        &sig,
+        &sig,
+        msg,
+        &tree,
+        &parent_commit_refs.as_slice(),
+    )?)
 }
 
 pub fn make_example_workspace(meta_dir: &Path, workspace_dir: &Path) -> Result<(), Error> {
