@@ -316,6 +316,15 @@ fn ff_produces_correct_data_structure() -> Result<(), Error> {
                         in_sync: Some(false), // It was not in sync before fast-forward
                         upstream_fetched: false,
                         fast_forwarded: true,
+                    },
+                    BranchStatus {
+                        name: "merginator".to_string(),
+                        upstream_name: Some("ahead/merginator".to_string()),
+                        dirty: DirtyState::Clean,
+                        is_head: false,
+                        in_sync: Some(false), // It was not in sync before fast-forward
+                        upstream_fetched: false,
+                        fast_forwarded: true,
                     }
                 ])),
                 // new_commit/unfetched_remote
