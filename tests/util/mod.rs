@@ -192,8 +192,9 @@ fn add_master2_branch<'repo>(
     add_master2_branch_with_upstream(repo, target_ref, target_type, target_ref)
 }
 
-fn add_master2_branch_with_upstream<'repo>(
+fn add_branch_with_upstream<'repo>(
     repo: &'repo git2::Repository,
+    branch_name: &str,
     target_ref: &str,
     target_type: git2::BranchType,
     upstream: &str,
@@ -202,9 +203,18 @@ fn add_master2_branch_with_upstream<'repo>(
         .find_branch(target_ref, target_type)?
         .get()
         .peel_to_commit()?;
-    let mut master2 = repo.branch("master2", &target_commit, false)?;
-    master2.set_upstream(Some(upstream))?;
-    Ok(master2)
+    let mut new_branch = repo.branch(branch_name, &target_commit, false)?;
+    new_branch.set_upstream(Some(upstream))?;
+    Ok(new_branch)
+}
+
+fn add_master2_branch_with_upstream<'repo>(
+    repo: &'repo git2::Repository,
+    target_ref: &str,
+    target_type: git2::BranchType,
+    upstream: &str,
+) -> Result<git2::Branch<'repo>, Error> {
+    add_branch_with_upstream(repo, "master2", target_ref, target_type, upstream)
 }
 
 fn add_default_master2_branch<'repo>(
