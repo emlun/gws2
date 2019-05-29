@@ -5,6 +5,7 @@ use super::error::Error;
 use super::fetch::Fetch;
 use crate::config::data::Project;
 use crate::crate_info::crate_name;
+use crate::data::status::DirtyState;
 use crate::data::status::RepositoryStatus;
 use crate::util::git2::WithAncestors;
 
@@ -19,7 +20,7 @@ fn do_ff<'repo>(
     status_report
         .into_iter()
         .map(|mut branch_status| {
-            if branch_status.upstream_name.is_some() {
+            if branch_status.dirty == DirtyState::Clean && branch_status.upstream_name.is_some() {
                 let branch = repo.find_branch(&branch_status.name, git2::BranchType::Local)?;
                 let upstream = branch.upstream()?;
                 let upstream_id: git2::Oid = upstream.get().peel_to_commit()?.id();
