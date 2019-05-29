@@ -40,6 +40,10 @@ fn do_ff<'repo>(
                             .into_reference()
                             .set_target(upstream_id, &reflog_msg)?;
 
+                        if branch_status.is_head {
+                            repo.checkout_head(Some(git2::build::CheckoutBuilder::new().force()))?;
+                        }
+
                         branch_status.fast_forwarded = true;
                     }
                 }
