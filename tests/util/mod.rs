@@ -39,10 +39,11 @@ fn make_origin_repo(path: &Path) -> Result<git2::Repository, Error> {
     let mut repo_index = repo.index()?;
 
     let readme_path = Path::new("README.md");
-    write(path.join(readme_path).as_path(), &[])?;
+    write(path.join(readme_path).as_path(), "Initial")?;
     repo_index.add_path(readme_path)?;
 
     let tree_id = repo_index.write_tree()?;
+    repo_index.write()?;
 
     {
         let tree = repo.find_tree(tree_id)?;
@@ -89,16 +90,27 @@ fn add_commit_to_repo(
         .map(|&o| repo.find_commit(*o).unwrap())
         .collect();
     let parent_commit_refs: Vec<&git2::Commit> = parent_commits.iter().map(|o| o).collect();
-    let tree = repo.find_tree(parent_commits[0].tree_id())?;
+
+    let readme_path = Path::new("README.md");
+    write(repo.workdir().unwrap().join(readme_path).as_path(), parent_commit_refs[0].id().to_string())?;
+    let mut repo_index = repo.index()?;
+    repo_index.add_path(readme_path)?;
+    let tree_id = repo_index.write_tree()?;
+    repo_index.write()?;
+    let tree = repo.find_tree(tree_id)?;
+
     let sig = repo.signature()?;
-    Ok(repo.commit(
+    let commit = repo.commit(
         branch,
         &sig,
         &sig,
         msg,
         &tree,
         &parent_commit_refs.as_slice(),
-    )?)
+    )?;
+    repo.reset(repo.head()?.peel_to_commit()?.as_object(), git2::ResetType::Hard, None)?;
+
+    Ok(commit)
 }
 
 pub fn make_example_workspace(meta_dir: &Path, workspace_dir: &Path) -> Result<(), Error> {
