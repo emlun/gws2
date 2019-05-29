@@ -361,11 +361,12 @@ fn ff_produces_correct_data_structure() -> Result<(), Error> {
             ]
         );
 
-        let second_status_report: Vec<Result<RepositoryStatus, gws::commands::error::Error>> = command
-            .make_report(working_dir, &workspace)
-            .into_iter()
-            .map(|(_, status)| status)
-            .collect();
+        let second_status_report: Vec<Result<RepositoryStatus, gws::commands::error::Error>> =
+            command
+                .make_report(working_dir, &workspace)
+                .into_iter()
+                .map(|(_, status)| status)
+                .collect();
 
         assert_eq!(
             second_status_report,

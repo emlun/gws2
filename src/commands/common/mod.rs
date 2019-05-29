@@ -125,12 +125,7 @@ fn ellipsisize(s: &str, length: usize) -> String {
     }
 }
 
-fn format_branch_line(
-    palette: &Palette,
-    is_head: bool,
-    name: &str,
-    description: &str,
-) -> String {
+fn format_branch_line(palette: &Palette, is_head: bool, name: &str, description: &str) -> String {
     format!(
         "  {} {} {}",
         if is_head { "*" } else { " " },

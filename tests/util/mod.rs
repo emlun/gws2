@@ -92,7 +92,10 @@ fn add_commit_to_repo(
     let parent_commit_refs: Vec<&git2::Commit> = parent_commits.iter().map(|o| o).collect();
 
     let readme_path = Path::new("README.md");
-    write(repo.workdir().unwrap().join(readme_path).as_path(), parent_commit_refs[0].id().to_string())?;
+    write(
+        repo.workdir().unwrap().join(readme_path).as_path(),
+        parent_commit_refs[0].id().to_string(),
+    )?;
     let mut repo_index = repo.index()?;
     repo_index.add_path(readme_path)?;
     let tree_id = repo_index.write_tree()?;
@@ -108,7 +111,11 @@ fn add_commit_to_repo(
         &tree,
         &parent_commit_refs.as_slice(),
     )?;
-    repo.reset(repo.head()?.peel_to_commit()?.as_object(), git2::ResetType::Hard, None)?;
+    repo.reset(
+        repo.head()?.peel_to_commit()?.as_object(),
+        git2::ResetType::Hard,
+        None,
+    )?;
 
     Ok(commit)
 }
@@ -292,7 +299,8 @@ fn make_project_new_commit_remote(
 ) -> Result<git2::Repository, Error> {
     let repo = git2::Repository::clone(origin_path.to_str().unwrap(), path)?;
     add_ahead_remote(&repo, ahead_path)?;
-    repo.find_branch("master", git2::BranchType::Local)?.set_upstream(Some("ahead/master"))?;
+    repo.find_branch("master", git2::BranchType::Local)?
+        .set_upstream(Some("ahead/master"))?;
     add_master2_branch_with_upstream(&repo, "master", git2::BranchType::Local, "ahead/master")?;
     add_branch_with_upstream(
         &repo,
@@ -311,7 +319,8 @@ fn make_project_new_commit_unfetched_remote(
 ) -> Result<git2::Repository, Error> {
     let repo = git2::Repository::clone(origin_path.to_str().unwrap(), path)?;
     add_ahead_remote(&repo, origin_path)?;
-    repo.find_branch("master", git2::BranchType::Local)?.set_upstream(Some("ahead/master"))?;
+    repo.find_branch("master", git2::BranchType::Local)?
+        .set_upstream(Some("ahead/master"))?;
     add_master2_branch_with_upstream(&repo, "master", git2::BranchType::Local, "ahead/master")?;
     repo.remote_set_url("ahead", ahead_path.to_str().unwrap())?;
     Ok(repo)
