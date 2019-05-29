@@ -7,7 +7,6 @@ use crate::config::data::Project;
 use crate::crate_info::crate_name;
 use crate::data::status::DirtyState;
 use crate::data::status::RepositoryStatus;
-use crate::util::git2::WithAncestors;
 
 pub struct FastForward {
     pub fetch_command: Fetch,
