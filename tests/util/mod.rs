@@ -292,6 +292,7 @@ fn make_project_new_commit_remote(
 ) -> Result<git2::Repository, Error> {
     let repo = git2::Repository::clone(origin_path.to_str().unwrap(), path)?;
     add_ahead_remote(&repo, ahead_path)?;
+    repo.find_branch("master", git2::BranchType::Local)?.set_upstream(Some("ahead/master"))?;
     add_master2_branch_with_upstream(&repo, "master", git2::BranchType::Local, "ahead/master")?;
     add_branch_with_upstream(
         &repo,
@@ -310,6 +311,7 @@ fn make_project_new_commit_unfetched_remote(
 ) -> Result<git2::Repository, Error> {
     let repo = git2::Repository::clone(origin_path.to_str().unwrap(), path)?;
     add_ahead_remote(&repo, origin_path)?;
+    repo.find_branch("master", git2::BranchType::Local)?.set_upstream(Some("ahead/master"))?;
     add_master2_branch_with_upstream(&repo, "master", git2::BranchType::Local, "ahead/master")?;
     repo.remote_set_url("ahead", ahead_path.to_str().unwrap())?;
     Ok(repo)

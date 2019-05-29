@@ -143,10 +143,10 @@ fn status_produces_correct_data_structure() -> Result<(), util::Error> {
                 Ok(tree_set(vec![
                     BranchStatus {
                         name: "master".to_string(),
-                        upstream_name: Some("origin/master".to_string()),
+                        upstream_name: Some("ahead/master".to_string()),
                         dirty: DirtyState::Clean,
                         is_head: true,
-                        in_sync: Some(true),
+                        in_sync: Some(false),
                         upstream_fetched: false,
                         fast_forwarded: false,
                     },
@@ -173,7 +173,7 @@ fn status_produces_correct_data_structure() -> Result<(), util::Error> {
                 Ok(tree_set(vec![
                     BranchStatus {
                         name: "master".to_string(),
-                        upstream_name: Some("origin/master".to_string()),
+                        upstream_name: Some("ahead/master".to_string()),
                         dirty: DirtyState::Clean,
                         is_head: true,
                         in_sync: Some(true),
@@ -301,10 +301,10 @@ fn status_ignores_clean_repos_with_only_changes() -> Result<(), util::Error> {
                 Ok(tree_set(vec![
                     BranchStatus {
                         name: "master".to_string(),
-                        upstream_name: Some("origin/master".to_string()),
+                        upstream_name: Some("ahead/master".to_string()),
                         dirty: DirtyState::Clean,
                         is_head: true,
-                        in_sync: Some(true),
+                        in_sync: Some(false),
                         upstream_fetched: false,
                         fast_forwarded: false,
                     },

@@ -90,7 +90,7 @@ fn fetch_reports_updates() -> Result<(), Error> {
             if project.path == project_path {
                 let project_status = project_status.unwrap();
                 for branch_status in project_status {
-                    if branch_status.name == "master2" {
+                    if branch_status.name == "master" || branch_status.name == "master2" {
                         assert_eq!(branch_status.upstream_fetched, true);
                     } else {
                         assert_eq!(branch_status.upstream_fetched, false);
@@ -132,7 +132,7 @@ fn fetch_fetches_all_projects_if_none_are_named() -> Result<(), Error> {
             if project.path == project_path {
                 let project_status = project_status.unwrap();
                 for branch_status in project_status {
-                    if branch_status.name == "master2" {
+                    if branch_status.name == "master" || branch_status.name == "master2" {
                         assert_eq!(branch_status.upstream_fetched, true);
                     } else {
                         assert_eq!(branch_status.upstream_fetched, false);
@@ -168,7 +168,7 @@ fn fetch_fetches_only_named_projects_if_any_are_named() -> Result<(), Error> {
             if project.path == project_path {
                 let project_status = project_status.unwrap();
                 for branch_status in project_status {
-                    if branch_status.name == "master2" {
+                    if branch_status.name == "master" || branch_status.name == "master2" {
                         assert_eq!(branch_status.upstream_fetched, should_fetch);
                     } else {
                         assert_eq!(branch_status.upstream_fetched, false);
