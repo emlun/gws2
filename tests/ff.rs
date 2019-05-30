@@ -91,7 +91,7 @@ fn ff_gets_refs_and_updates_heads() -> Result<(), util::Error> {
         let ahead_master_reference_after: Commit =
             resolve_ref("ahead/master", &repo, git2::BranchType::Remote)?;
 
-        assert_eq!(master_reference_after.id(), master_reference_before.id());
+        assert_ne!(master_reference_after.id(), master_reference_before.id());
         assert_eq!(
             origin_master_reference_after.id(),
             origin_master_reference_before.id()
@@ -138,7 +138,7 @@ fn run_test(
         if project.path == project_path {
             let project_status = project_status.unwrap();
             for branch_status in project_status {
-                if branch_status.name == "master2" {
+                if branch_status.name == "master" || branch_status.name == "master2" {
                     assert_eq!(branch_status.fast_forwarded, should_ff);
                 } else {
                     assert_eq!(branch_status.fast_forwarded, false);
@@ -301,16 +301,25 @@ fn ff_produces_correct_data_structure() -> Result<(), Error> {
                 Ok(tree_set(vec![
                     BranchStatus {
                         name: "master".to_string(),
-                        upstream_name: Some("origin/master".to_string()),
+                        upstream_name: Some("ahead/master".to_string()),
                         dirty: DirtyState::Clean,
                         is_head: true,
-                        in_sync: Some(true),
+                        in_sync: Some(false),
                         upstream_fetched: false,
-                        fast_forwarded: false,
+                        fast_forwarded: true,
                     },
                     BranchStatus {
                         name: "master2".to_string(),
                         upstream_name: Some("ahead/master".to_string()),
+                        dirty: DirtyState::Clean,
+                        is_head: false,
+                        in_sync: Some(false), // It was not in sync before fast-forward
+                        upstream_fetched: false,
+                        fast_forwarded: true,
+                    },
+                    BranchStatus {
+                        name: "merginator".to_string(),
+                        upstream_name: Some("ahead/merginator".to_string()),
                         dirty: DirtyState::Clean,
                         is_head: false,
                         in_sync: Some(false), // It was not in sync before fast-forward
@@ -322,7 +331,149 @@ fn ff_produces_correct_data_structure() -> Result<(), Error> {
                 Ok(tree_set(vec![
                     BranchStatus {
                         name: "master".to_string(),
+                        upstream_name: Some("ahead/master".to_string()),
+                        dirty: DirtyState::Clean,
+                        is_head: true,
+                        in_sync: Some(true),
+                        upstream_fetched: true,
+                        fast_forwarded: true,
+                    },
+                    BranchStatus {
+                        name: "master2".to_string(),
+                        upstream_name: Some("ahead/master".to_string()),
+                        dirty: DirtyState::Clean,
+                        is_head: false,
+                        in_sync: Some(true), // It was in sync before fetching
+                        upstream_fetched: true,
+                        fast_forwarded: true,
+                    }
+                ])),
+                // no_upstream
+                Ok(tree_set(vec![BranchStatus {
+                    name: "master".to_string(),
+                    upstream_name: None,
+                    dirty: DirtyState::Clean,
+                    is_head: true,
+                    in_sync: None,
+                    upstream_fetched: false,
+                    fast_forwarded: false,
+                },])),
+            ]
+        );
+
+        let second_status_report: Vec<Result<RepositoryStatus, gws::commands::error::Error>> =
+            command
+                .make_report(working_dir, &workspace)
+                .into_iter()
+                .map(|(_, status)| status)
+                .collect();
+
+        assert_eq!(
+            second_status_report,
+            vec![
+                // changes/changed_files
+                Ok(tree_set(vec![
+                    BranchStatus {
+                        name: "master".to_string(),
                         upstream_name: Some("origin/master".to_string()),
+                        dirty: DirtyState::UncommittedChanges,
+                        is_head: true,
+                        in_sync: Some(true),
+                        upstream_fetched: false,
+                        fast_forwarded: false,
+                    },
+                    BranchStatus {
+                        name: "master2".to_string(),
+                        upstream_name: Some("ahead/master".to_string()),
+                        dirty: DirtyState::Clean,
+                        is_head: false,
+                        in_sync: Some(true),
+                        upstream_fetched: false,
+                        fast_forwarded: false,
+                    }
+                ])),
+                // changes/new_files
+                Ok(tree_set(vec![
+                    BranchStatus {
+                        name: "master".to_string(),
+                        upstream_name: Some("origin/master".to_string()),
+                        dirty: DirtyState::UntrackedFiles,
+                        is_head: true,
+                        in_sync: Some(true),
+                        upstream_fetched: false,
+                        fast_forwarded: false,
+                    },
+                    BranchStatus {
+                        name: "master2".to_string(),
+                        upstream_name: Some("ahead/master".to_string()),
+                        dirty: DirtyState::Clean,
+                        is_head: false,
+                        in_sync: Some(true),
+                        upstream_fetched: false,
+                        fast_forwarded: false,
+                    }
+                ])),
+                // clean
+                Ok(tree_set(vec![
+                    BranchStatus {
+                        name: "master".to_string(),
+                        upstream_name: Some("origin/master".to_string()),
+                        dirty: DirtyState::Clean,
+                        is_head: true,
+                        in_sync: Some(true),
+                        upstream_fetched: false,
+                        fast_forwarded: false,
+                    },
+                    BranchStatus {
+                        name: "feature".to_string(),
+                        upstream_name: None,
+                        dirty: DirtyState::Clean,
+                        is_head: false,
+                        in_sync: None,
+                        upstream_fetched: false,
+                        fast_forwarded: false,
+                    }
+                ])),
+                // missing_repository
+                Err(gws::commands::error::Error::RepositoryMissing),
+                // missing_repository_2
+                Err(gws::commands::error::Error::RepositoryMissing),
+                // new_commit/diverged
+                Ok(tree_set(vec![BranchStatus {
+                    name: "master".to_string(),
+                    upstream_name: Some("origin/master".to_string()),
+                    dirty: DirtyState::Clean,
+                    is_head: true,
+                    in_sync: Some(false),
+                    upstream_fetched: false,
+                    fast_forwarded: false,
+                },])),
+                // new_commit/local
+                Ok(tree_set(vec![
+                    BranchStatus {
+                        name: "master".to_string(),
+                        upstream_name: Some("origin/master".to_string()),
+                        dirty: DirtyState::Clean,
+                        is_head: true,
+                        in_sync: Some(false),
+                        upstream_fetched: false,
+                        fast_forwarded: false,
+                    },
+                    BranchStatus {
+                        name: "master2".to_string(),
+                        upstream_name: Some("ahead/master".to_string()),
+                        dirty: DirtyState::Clean,
+                        is_head: false,
+                        in_sync: Some(true),
+                        upstream_fetched: false,
+                        fast_forwarded: false,
+                    }
+                ])),
+                // new_commit/remote
+                Ok(tree_set(vec![
+                    BranchStatus {
+                        name: "master".to_string(),
+                        upstream_name: Some("ahead/master".to_string()),
                         dirty: DirtyState::Clean,
                         is_head: true,
                         in_sync: Some(true),
@@ -334,9 +485,39 @@ fn ff_produces_correct_data_structure() -> Result<(), Error> {
                         upstream_name: Some("ahead/master".to_string()),
                         dirty: DirtyState::Clean,
                         is_head: false,
-                        in_sync: Some(true), // It was in sync before fetching
-                        upstream_fetched: true,
-                        fast_forwarded: true,
+                        in_sync: Some(true),
+                        upstream_fetched: false,
+                        fast_forwarded: false,
+                    },
+                    BranchStatus {
+                        name: "merginator".to_string(),
+                        upstream_name: Some("ahead/merginator".to_string()),
+                        dirty: DirtyState::Clean,
+                        is_head: false,
+                        in_sync: Some(true),
+                        upstream_fetched: false,
+                        fast_forwarded: false,
+                    }
+                ])),
+                // new_commit/unfetched_remote
+                Ok(tree_set(vec![
+                    BranchStatus {
+                        name: "master".to_string(),
+                        upstream_name: Some("ahead/master".to_string()),
+                        dirty: DirtyState::Clean,
+                        is_head: true,
+                        in_sync: Some(true),
+                        upstream_fetched: false,
+                        fast_forwarded: false,
+                    },
+                    BranchStatus {
+                        name: "master2".to_string(),
+                        upstream_name: Some("ahead/master".to_string()),
+                        dirty: DirtyState::Clean,
+                        is_head: false,
+                        in_sync: Some(true),
+                        upstream_fetched: false,
+                        fast_forwarded: false,
                     }
                 ])),
                 // no_upstream

@@ -125,12 +125,7 @@ fn ellipsisize(s: &str, length: usize) -> String {
     }
 }
 
-fn format_branch_line(
-    palette: &Palette,
-    is_head: bool,
-    name: &str,
-    description: &ANSIString,
-) -> String {
+fn format_branch_line(palette: &Palette, is_head: bool, name: &str, description: &str) -> String {
     format!(
         "  {} {} {}",
         if is_head { "*" } else { " " },
@@ -172,19 +167,31 @@ fn describe_sync_status<'a>(status: &'a BranchStatus, palette: &Palette) -> ANSI
     }
 }
 
-fn describe_status<'a>(status: &'a BranchStatus, palette: &Palette) -> ANSIString<'a> {
+fn describe_status(status: &BranchStatus, palette: &Palette) -> String {
     if status.is_head {
+        let fetch_prefix = if status.upstream_fetched {
+            format!("{} - ", palette.cloning.paint("New upstream commits"))
+        } else {
+            "".to_string()
+        };
+
         match status.dirty {
-            DirtyState::Clean => describe_sync_status(status, palette),
-            DirtyState::UncommittedChanges => palette
-                .dirty
-                .paint("Dirty (Uncommitted changes)".to_string()),
-            DirtyState::UntrackedFiles => {
-                palette.dirty.paint("Dirty (Untracked files)".to_string())
-            }
+            DirtyState::Clean => describe_sync_status(status, palette).to_string(),
+            DirtyState::UncommittedChanges => format!(
+                "{}{}",
+                fetch_prefix,
+                palette
+                    .dirty
+                    .paint("Dirty (Uncommitted changes)".to_string()),
+            ),
+            DirtyState::UntrackedFiles => format!(
+                "{}{}",
+                fetch_prefix,
+                palette.dirty.paint("Dirty (Untracked files)".to_string()),
+            ),
         }
     } else {
-        describe_sync_status(status, palette)
+        describe_sync_status(status, palette).to_string()
     }
 }
 

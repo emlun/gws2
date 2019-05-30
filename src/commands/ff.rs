@@ -5,8 +5,8 @@ use super::error::Error;
 use super::fetch::Fetch;
 use crate::config::data::Project;
 use crate::crate_info::crate_name;
+use crate::data::status::DirtyState;
 use crate::data::status::RepositoryStatus;
-use crate::util::git2::WithAncestors;
 
 pub struct FastForward {
     pub fetch_command: Fetch,
@@ -19,16 +19,14 @@ fn do_ff<'repo>(
     status_report
         .into_iter()
         .map(|mut branch_status| {
-            if branch_status.upstream_name.is_some() {
+            if branch_status.dirty == DirtyState::Clean && branch_status.upstream_name.is_some() {
                 let branch = repo.find_branch(&branch_status.name, git2::BranchType::Local)?;
+                let branch_id = branch.get().peel_to_commit()?.id();
                 let upstream = branch.upstream()?;
                 let upstream_id: git2::Oid = upstream.get().peel_to_commit()?.id();
 
-                if branch.get().peel_to_commit()?.id() != upstream_id {
-                    let can_fast_forward = upstream
-                        .get()
-                        .peel_to_commit()?
-                        .is_descendant_of(&branch.get().peel_to_commit()?);
+                if branch_id != upstream_id {
+                    let can_fast_forward = repo.graph_descendant_of(upstream_id, branch_id)?;
 
                     if can_fast_forward {
                         let reflog_msg = format!(
@@ -41,6 +39,10 @@ fn do_ff<'repo>(
                         branch
                             .into_reference()
                             .set_target(upstream_id, &reflog_msg)?;
+
+                        if branch_status.is_head {
+                            repo.checkout_head(Some(git2::build::CheckoutBuilder::new().force()))?;
+                        }
 
                         branch_status.fast_forwarded = true;
                     }
