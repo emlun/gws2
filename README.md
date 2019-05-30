@@ -1,6 +1,8 @@
 gws2
 ===
 
+[![Build Status](https://travis-ci.org/emlun/gws2.svg?branch=master)](https://travis-ci.org/emlun/gws2)
+
 Rewrite of [gws][gws] in Rust
 
 `gws` is a colorful helper to manage workspaces composed of Git repositories.
