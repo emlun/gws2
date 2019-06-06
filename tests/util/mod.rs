@@ -14,8 +14,15 @@ use gws::config::read::read_workspace_file;
 
 #[derive(Debug)]
 pub enum Error {
+    AssertCmdCargoError(assert_cmd::cargo::CargoError),
     Git2Error(::git2::Error),
     IoError(::std::io::Error),
+}
+
+impl From<assert_cmd::cargo::CargoError> for Error {
+    fn from(e: assert_cmd::cargo::CargoError) -> Error {
+        Error::AssertCmdCargoError(e)
+    }
 }
 
 impl From<::git2::Error> for Error {
