@@ -14,19 +14,19 @@ use gws::config::read::read_workspace_file;
 
 #[derive(Debug)]
 pub enum Error {
-    IoError(::std::io::Error),
     Git2Error(::git2::Error),
-}
-
-impl From<::std::io::Error> for Error {
-    fn from(e: ::std::io::Error) -> Error {
-        Error::IoError(e)
-    }
+    IoError(::std::io::Error),
 }
 
 impl From<::git2::Error> for Error {
     fn from(e: ::git2::Error) -> Error {
         Error::Git2Error(e)
+    }
+}
+
+impl From<::std::io::Error> for Error {
+    fn from(e: ::std::io::Error) -> Error {
+        Error::IoError(e)
     }
 }
 
