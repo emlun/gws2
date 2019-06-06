@@ -1,5 +1,6 @@
 use clap::ArgMatches;
 use std::path::Path;
+use std::path::PathBuf;
 
 use crate::color::palette::Palette;
 use crate::commands::common::exit_codes;
@@ -34,16 +35,16 @@ fn run_completions(matches: ArgMatches) -> i32 {
     exit_codes::OK
 }
 
-fn run_gws(matches: ArgMatches) -> i32 {
-    let working_dir: &Path = match matches.args.get("dir") {
-        Some(chdir_arg) => Path::new(
-            chdir_arg.vals[0]
-                .to_str()
-                .expect("Did not understand <dir> argument"),
-        ),
-        None => Path::new("."),
-    };
+fn find_workspace(current_dir: &Path) -> Option<(&Path, PathBuf)> {
+    let ws_file_path = current_dir.join(".projects.gws");
+    if ws_file_path.exists() {
+        Some((current_dir, ws_file_path))
+    } else {
+        current_dir.parent().and_then(find_workspace)
+    }
+}
 
+pub fn run_gws(matches: ArgMatches) -> i32 {
     let palette = Palette::default();
 
     let subcommand: Command = match &matches.subcommand {
@@ -58,13 +59,21 @@ fn run_gws(matches: ArgMatches) -> i32 {
         },
     };
 
-    let ws_file_path = working_dir.join(".projects.gws");
-    if ws_file_path.exists() {
-        match read_workspace_file(&ws_file_path) {
+    let working_dir: &Path = match matches.args.get("dir") {
+        Some(chdir_arg) => Path::new(
+            chdir_arg.vals[0]
+                .to_str()
+                .expect("Did not understand <dir> argument"),
+        ),
+        None => Path::new("."),
+    };
+
+    match find_workspace(working_dir) {
+        Some((workspace_dir, ws_file_path)) => match read_workspace_file(&ws_file_path) {
             Ok(ws) => {
                 let result = match subcommand {
-                    Command::DirectoryCommand(cmd) => cmd.run(working_dir, &ws, &palette),
-                    Command::RepositoryCommand(cmd) => cmd.run(working_dir, &ws, &palette),
+                    Command::DirectoryCommand(cmd) => cmd.run(workspace_dir, &ws, &palette),
+                    Command::RepositoryCommand(cmd) => cmd.run(workspace_dir, &ws, &palette),
                 };
                 match result {
                     Ok(status) => status,
@@ -75,9 +84,10 @@ fn run_gws(matches: ArgMatches) -> i32 {
                 eprintln!("Failed to parse projects file: {:?}", ws_file_path);
                 exit_codes::BAD_PROJECTS_FILE
             }
+        },
+        None => {
+            eprintln!("Not in a workspace.");
+            exit_codes::NO_PROJECTS_FILE
         }
-    } else {
-        eprintln!("Projects file not found: {:?}", ws_file_path);
-        exit_codes::NO_PROJECTS_FILE
     }
 }

@@ -38,7 +38,7 @@ gws2 hasn't quite yet reached feature parity with [gws][gws].
 - [x] `update` command
 - [ ] Customizable color scheme [#4][iss-theme]
 - [ ] `.ignore.gws` file [#3][iss-ignore]
-- [ ] Run from subdirectory [#5][iss-subdir]
+- [x] Run from subdirectory [#5][iss-subdir]
 
 
 But on the other hand, gws2 already has some new features:
@@ -334,7 +334,7 @@ Other thoughts
   too much checking to prevent data loss. Instead, just look at the status of
   the repositories and perform any needed actions manually on regular basis.
 
-- (NOT YET IMPLEMENTED: [#5][iss-subdir]) You can use the commands from any subfolder of the workspace (as `git` does
+- You can use the commands from any subfolder of the workspace (as `git` does
   for instance).
 
 - The file `.projects.gws` can easily be verisoned to sync the list of
@@ -355,4 +355,3 @@ Other thoughts
 [iss-check]: https://github.com/emlun/gws2/issues/2
 [iss-ignore]: https://github.com/emlun/gws2/issues/3
 [iss-theme]: https://github.com/emlun/gws2/issues/4
-[iss-subdir]: https://github.com/emlun/gws2/issues/5
