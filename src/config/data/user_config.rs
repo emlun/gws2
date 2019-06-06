@@ -9,8 +9,11 @@ pub struct UserConfig {
 }
 
 impl UserConfig {
-    pub fn palette(self) -> Option<Palette> {
-        self.palette.map(|p| p.into())
+    pub fn palette(&self) -> Option<Palette> {
+        match &self.palette {
+            Some(p) => Some(p.make()),
+            None => None,
+        }
     }
 }
 
@@ -26,34 +29,34 @@ pub struct PaletteConfig {
     pub repo_exists: toml::Value,
 }
 
-impl Into<Palette> for PaletteConfig {
-    fn into(self) -> Palette {
+impl PaletteConfig {
+    fn make(&self) -> Palette {
         Palette {
-            branch: ColourConfig::from(self.branch).into(),
-            clean: ColourConfig::from(self.clean).into(),
-            cloning: ColourConfig::from(self.cloning).into(),
-            dirty: ColourConfig::from(self.dirty).into(),
-            error: ColourConfig::from(self.error).into(),
-            missing: ColourConfig::from(self.missing).into(),
-            repo: ColourConfig::from(self.repo).into(),
-            repo_exists: ColourConfig::from(self.repo_exists).into(),
+            branch: ColourConfig::from(&self.branch).make_style(),
+            clean: ColourConfig::from(&self.clean).make_style(),
+            cloning: ColourConfig::from(&self.cloning).make_style(),
+            dirty: ColourConfig::from(&self.dirty).make_style(),
+            error: ColourConfig::from(&self.error).make_style(),
+            missing: ColourConfig::from(&self.missing).make_style(),
+            repo: ColourConfig::from(&self.repo).make_style(),
+            repo_exists: ColourConfig::from(&self.repo_exists).make_style(),
         }
     }
 }
 
-pub enum ColourConfig {
-    Named(String),
+pub enum ColourConfig<'conf> {
+    Named(&'conf str),
     Fixed(u8),
     RGB(u8, u8, u8),
 }
 
-impl From<toml::Value> for ColourConfig {
-    fn from(v: toml::Value) -> Self {
+impl<'conf> From<&'conf toml::Value> for ColourConfig<'conf> {
+    fn from(v: &'conf toml::Value) -> Self {
         match v {
             toml::Value::String(name) => ColourConfig::Named(name),
             toml::Value::Integer(fixed) => {
-                if (0..=255).contains(&fixed) {
-                    ColourConfig::Fixed(fixed as u8)
+                if (0..=255).contains(fixed) {
+                    ColourConfig::Fixed(*fixed as u8)
                 } else {
                     panic!("Palette value out of range [0, 255]: {}", fixed)
                 }
@@ -73,10 +76,10 @@ impl From<toml::Value> for ColourConfig {
     }
 }
 
-impl Into<Style> for ColourConfig {
-    fn into(self) -> Style {
+impl<'conf> ColourConfig<'conf> {
+    fn make_style(&self) -> Style {
         match self {
-            ColourConfig::Named(name) => match name.as_str() {
+            ColourConfig::Named(name) => match *name {
                 "black" => Colour::Black,
                 "red" => Colour::Red,
                 "green" => Colour::Green,
@@ -87,8 +90,8 @@ impl Into<Style> for ColourConfig {
                 "white" => Colour::White,
                 _ => panic!("Unsupported colour name: {}", name),
             },
-            ColourConfig::Fixed(value) => Colour::Fixed(value),
-            ColourConfig::RGB(r, g, b) => Colour::RGB(r, g, b),
+            ColourConfig::Fixed(value) => Colour::Fixed(*value),
+            ColourConfig::RGB(r, g, b) => Colour::RGB(*r, *g, *b),
         }
         .normal()
     }
