@@ -35,15 +35,6 @@ fn run_completions(matches: ArgMatches) -> i32 {
 }
 
 fn run_gws(matches: ArgMatches) -> i32 {
-    let working_dir: &Path = match matches.args.get("dir") {
-        Some(chdir_arg) => Path::new(
-            chdir_arg.vals[0]
-                .to_str()
-                .expect("Did not understand <dir> argument"),
-        ),
-        None => Path::new("."),
-    };
-
     let palette = Palette::default();
 
     let subcommand: Command = match &matches.subcommand {
@@ -56,6 +47,15 @@ fn run_gws(matches: ArgMatches) -> i32 {
             "update" => super::update::make_cli_command(&sc.matches),
             _ => panic!("Unknown subcommand: {}", sc.name),
         },
+    };
+
+    let working_dir: &Path = match matches.args.get("dir") {
+        Some(chdir_arg) => Path::new(
+            chdir_arg.vals[0]
+                .to_str()
+                .expect("Did not understand <dir> argument"),
+        ),
+        None => Path::new("."),
     };
 
     let ws_file_path = working_dir.join(".projects.gws");
