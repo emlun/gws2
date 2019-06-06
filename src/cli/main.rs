@@ -1,4 +1,5 @@
 use clap::ArgMatches;
+use clap::Shell;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -6,8 +7,6 @@ use crate::color::palette::Palette;
 use crate::commands::common::exit_codes;
 use crate::commands::common::Command;
 use crate::config::read::read_workspace_file;
-
-use clap::Shell;
 
 pub fn main() -> i32 {
     let cli = super::build_cli();
