@@ -1,11 +1,14 @@
 use clap::ArgMatches;
 use clap::Shell;
+use directories::ProjectDirs;
 use std::path::Path;
 use std::path::PathBuf;
 
 use crate::color::palette::Palette;
 use crate::commands::common::exit_codes;
 use crate::commands::common::Command;
+use crate::config::data::user_config::UserConfig;
+use crate::config::read::read_config_file;
 use crate::config::read::read_workspace_file;
 
 pub fn main() -> i32 {
@@ -43,8 +46,27 @@ fn find_workspace(current_dir: &Path) -> Option<(&Path, PathBuf)> {
     }
 }
 
+fn find_config_file() -> Option<PathBuf> {
+    ProjectDirs::from("se.emlun.gws", "", "gws")
+        .map(|project_dir| project_dir.config_dir().join("config.toml"))
+        .filter(|f| f.exists())
+}
+
 pub fn run_gws(matches: ArgMatches) -> i32 {
-    let palette = Palette::default();
+    let config: Option<UserConfig> = match find_config_file() {
+        Some(config_path) => match read_config_file(&config_path) {
+            Ok(conf) => Some(conf),
+            Err(e) => {
+                eprintln!("Failed to parse config file: {:?}\n{:?}", config_path, e);
+                return exit_codes::USER_ERROR;
+            }
+        },
+        None => None,
+    };
+
+    let palette = config
+        .and_then(|conf| conf.palette())
+        .unwrap_or_else(Palette::default);
 
     let subcommand: Command = match &matches.subcommand {
         None => super::status::make_cli_command(&matches),
