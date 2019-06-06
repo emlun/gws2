@@ -82,12 +82,12 @@ pub fn run_gws(matches: ArgMatches) -> i32 {
             }
             Err(_) => {
                 eprintln!("Failed to parse projects file: {:?}", ws_file_path);
-                exit_codes::BAD_PROJECTS_FILE
+                exit_codes::USER_ERROR
             }
         },
         None => {
             eprintln!("Not in a workspace.");
-            exit_codes::NO_PROJECTS_FILE
+            exit_codes::USER_ERROR
         }
     }
 }

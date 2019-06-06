@@ -2,10 +2,5 @@ pub type ExitCode = i32;
 
 pub const OK: ExitCode = 0;
 pub const UNKNOWN_ERROR: ExitCode = 1;
-pub const NO_PROJECTS_FILE: ExitCode = 2;
-pub const BAD_PROJECTS_FILE: ExitCode = 3;
-
-pub const STATUS_PROJECT_FAILED: ExitCode = 4;
-
-pub const CLONE_FAILED: ExitCode = 5;
-pub const CLONE_ADD_REMOTE_FAILED: ExitCode = 6;
+pub const INTERNAL_ERROR: ExitCode = 2;
+pub const USER_ERROR: ExitCode = 3;

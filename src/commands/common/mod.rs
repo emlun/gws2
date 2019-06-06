@@ -46,7 +46,7 @@ pub trait RepositoryCommand {
             .map(|(_, project_result)| match project_result {
                 Ok(_) => exit_codes::OK,
                 Err(Error::RepositoryMissing) => exit_codes::OK,
-                Err(_) => exit_codes::STATUS_PROJECT_FAILED,
+                Err(_) => exit_codes::INTERNAL_ERROR,
             })
             .fold(exit_codes::OK, |exit_code, next_code| {
                 if next_code != exit_codes::OK {

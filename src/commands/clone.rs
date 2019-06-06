@@ -71,10 +71,8 @@ impl DirectoryCommand for Clone {
             }
         }
 
-        Ok(if clone_failed {
-            exit_codes::CLONE_FAILED
-        } else if add_remote_failed {
-            exit_codes::CLONE_ADD_REMOTE_FAILED
+        Ok(if clone_failed || add_remote_failed {
+            exit_codes::INTERNAL_ERROR
         } else {
             exit_codes::OK
         })
