@@ -1,4 +1,3 @@
-use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::collections::HashSet;
 
@@ -21,7 +20,7 @@ fn do_fetch_remote<'repo>(
     repo: &'repo git2::Repository,
     remote: &mut git2::Remote,
 ) -> Result<BTreeSet<git2::Branch<'repo>>, Error> {
-    let heads_before: BTreeMap<git2::Branch, git2::Oid> = project.current_upstream_heads(repo)?;
+    let heads_before = project.current_upstream_heads(repo)?;
 
     let refspec_strings: Vec<String> = remote
         .refspecs()
@@ -34,7 +33,7 @@ fn do_fetch_remote<'repo>(
         None,
     )?;
 
-    let heads_after: BTreeMap<git2::Branch, git2::Oid> = project.current_upstream_heads(repo)?;
+    let heads_after = project.current_upstream_heads(repo)?;
 
     let updated_branches: BTreeSet<git2::Branch> = heads_after
         .into_iter()
