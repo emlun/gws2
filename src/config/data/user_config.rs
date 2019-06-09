@@ -45,8 +45,8 @@ impl PaletteConfig {
 }
 
 pub enum ColourConfig<'conf> {
-    Named(&'conf str),
     Fixed(u8),
+    Named(&'conf str),
     RGB(u8, u8, u8),
 }
 
@@ -87,6 +87,7 @@ fn u8_hex(hex: &str) -> u8 {
 impl<'conf> ColourConfig<'conf> {
     fn make_style(&self) -> Style {
         match self {
+            ColourConfig::Fixed(value) => Colour::Fixed(*value),
             ColourConfig::Named(name) => match *name {
                 "black" => Colour::Black,
                 "red" => Colour::Red,
@@ -104,7 +105,6 @@ impl<'conf> ColourConfig<'conf> {
                 }
                 _ => panic!("Unsupported colour name: {}", name),
             },
-            ColourConfig::Fixed(value) => Colour::Fixed(*value),
             ColourConfig::RGB(r, g, b) => Colour::RGB(*r, *g, *b),
         }
         .normal()
