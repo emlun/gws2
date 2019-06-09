@@ -32,14 +32,14 @@ pub struct PaletteConfig {
 impl PaletteConfig {
     fn make(&self) -> Palette {
         Palette {
-            branch: ColourConfig::from(&self.branch).make_style(),
-            clean: ColourConfig::from(&self.clean).make_style(),
-            cloning: ColourConfig::from(&self.cloning).make_style(),
-            dirty: ColourConfig::from(&self.dirty).make_style(),
-            error: ColourConfig::from(&self.error).make_style(),
-            missing: ColourConfig::from(&self.missing).make_style(),
-            repo: ColourConfig::from(&self.repo).make_style(),
-            repo_exists: ColourConfig::from(&self.repo_exists).make_style(),
+            branch: parse_style(&self.branch),
+            clean: parse_style(&self.clean),
+            cloning: parse_style(&self.cloning),
+            dirty: parse_style(&self.dirty),
+            error: parse_style(&self.error),
+            missing: parse_style(&self.missing),
+            repo: parse_style(&self.repo),
+            repo_exists: parse_style(&self.repo_exists),
         }
     }
 }
@@ -48,6 +48,10 @@ pub enum ColourConfig<'conf> {
     Named(&'conf str),
     Fixed(u8),
     RGB(u8, u8, u8),
+}
+
+fn parse_style(v: &toml::Value) -> Style {
+    ColourConfig::from(v).make_style()
 }
 
 impl<'conf> ColourConfig<'conf> {
