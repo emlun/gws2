@@ -18,24 +18,31 @@ pub fn read_workspace_file<P: AsRef<Path>>(file_path: P) -> Result<Workspace, Co
         .and_then(|_| legacy::parse(&contents))
 }
 
-fn read_config_toml(content: &str) -> Result<UserConfig, ConfigError> {
-    Ok(toml::from_str(&content).map_err(|e| {
-        ConfigError::SyntaxError(match e.line_col() {
-            Some((line, col)) => format!(
-                "TOML syntax error at line {}, column {}: {:?}",
-                line, col, e
-            ),
-            None => format!("TOML syntax error at (unknown position): {:?}", e),
-        })
-    })?)
+fn read_config_toml(content: &str) -> Result<UserConfig, toml::de::Error> {
+    toml::from_str(&content)
 }
 
 pub fn read_config_file<P: AsRef<Path>>(file_path: P) -> Result<UserConfig, ConfigError> {
     let mut contents: String = String::new();
-    let mut file = File::open(file_path).map_err(ConfigError::OpenFile)?;
+    let mut file = File::open(&file_path).map_err(ConfigError::OpenFile)?;
     file.read_to_string(&mut contents)
         .map_err(ConfigError::OpenFile)?;
-    read_config_toml(&contents)
+    read_config_toml(&contents).map_err(|e| {
+        ConfigError::SyntaxError(match e.line_col() {
+            Some((line, col)) => format!(
+                r#"TOML syntax error at file {}, line {}, column {}: {:?}"#,
+                file_path
+                    .as_ref()
+                    .as_os_str()
+                    .to_str()
+                    .unwrap_or("(unknown)"),
+                line,
+                col,
+                e
+            ),
+            None => format!("TOML syntax error at (unknown position): {:?}", e),
+        })
+    })
 }
 
 #[cfg(test)]
@@ -50,7 +57,6 @@ mod tests {
 
     use super::read_config_toml;
     use super::read_workspace_file;
-    use super::ConfigError;
 
     #[test]
     fn good_file_is_parsed_correctly() {
@@ -96,7 +102,7 @@ mod tests {
     }
 
     #[test]
-    fn palette_is_parsed_correctly() -> Result<(), ConfigError> {
+    fn palette_is_parsed_correctly() -> Result<(), toml::de::Error> {
         let config_content = r##"
         [palette]
             branch = 13

@@ -24,9 +24,11 @@ impl RunError {
 impl From<ConfigError> for RunError {
     fn from(e: ConfigError) -> Self {
         match e {
-            ConfigError::InvalidConfig(msg) => {
-                RunError::from(exit_codes::USER_ERROR, format!("Invalid config: {}", msg))
-            }
+            ConfigError::InvalidConfig(msg) => RunError::from(
+                exit_codes::USER_ERROR,
+                format!("Failed to parse config file: {}", msg),
+            ),
+            ConfigError::SyntaxError(msg) => RunError::from(exit_codes::USER_ERROR, msg),
             _ => unimplemented!(),
         }
     }
@@ -85,12 +87,7 @@ fn find_config_file(matches: &ArgMatches) -> Option<PathBuf> {
 
 fn run_gws(matches: ArgMatches) -> Result<i32, RunError> {
     let config: Option<UserConfig> = match find_config_file(&matches) {
-        Some(config_path) => Some(read_config_file(&config_path).map_err(|e| {
-            RunError::from(
-                exit_codes::USER_ERROR,
-                format!("Failed to parse config file: {:?}\n{:?}", config_path, e),
-            )
-        })?),
+        Some(config_path) => Some(read_config_file(&config_path)?),
         None => None,
     };
 
