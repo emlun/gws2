@@ -121,7 +121,7 @@ mod tests {
         };
 
         let config = read_config_toml(&config_content)?;
-        assert_eq!(config.palette(), Some(expected));
+        assert_eq!(config.palette(), Ok(Some(expected)));
 
         Ok(())
     }

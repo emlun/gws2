@@ -8,6 +8,7 @@ use crate::color::palette::Palette;
 use crate::commands::common::exit_codes;
 use crate::commands::common::Command;
 use crate::config::data::user_config::UserConfig;
+use crate::config::error::ConfigError;
 use crate::config::read::read_config_file;
 use crate::config::read::read_workspace_file;
 
@@ -18,6 +19,16 @@ struct RunError {
 impl RunError {
     fn from(exit_code: i32, message: String) -> RunError {
         RunError { exit_code, message }
+    }
+}
+impl From<ConfigError> for RunError {
+    fn from(e: ConfigError) -> Self {
+        match e {
+            ConfigError::InvalidConfig(msg) => {
+                RunError::from(exit_codes::USER_ERROR, format!("Invalid config: {}", msg))
+            }
+            _ => unimplemented!(),
+        }
     }
 }
 
@@ -83,9 +94,11 @@ fn run_gws(matches: ArgMatches) -> Result<i32, RunError> {
         None => None,
     };
 
-    let palette = config
-        .and_then(|conf| conf.palette())
-        .unwrap_or_else(Palette::default);
+    let palette = match config {
+        Some(conf) => conf.palette()?,
+        None => None,
+    }
+    .unwrap_or_else(Palette::default);
 
     let subcommand: Command = match &matches.subcommand {
         None => super::status::make_cli_command(&matches),

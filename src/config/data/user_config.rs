@@ -1,3 +1,4 @@
+use super::super::error::ConfigError;
 use crate::color::palette::Palette;
 use ansi_term::Colour;
 use ansi_term::Style;
@@ -9,10 +10,10 @@ pub struct UserConfig {
 }
 
 impl UserConfig {
-    pub fn palette(&self) -> Option<Palette> {
+    pub fn palette(&self) -> Result<Option<Palette>, ConfigError> {
         match &self.palette {
-            Some(p) => Some(p.make()),
-            None => None,
+            Some(p) => Ok(Some(p.make()?)),
+            None => Ok(None),
         }
     }
 }
@@ -30,52 +31,69 @@ pub struct PaletteConfig {
 }
 
 impl PaletteConfig {
-    fn make(&self) -> Palette {
-        Palette {
-            branch: parse_style(&self.branch),
-            clean: parse_style(&self.clean),
-            cloning: parse_style(&self.cloning),
-            dirty: parse_style(&self.dirty),
-            error: parse_style(&self.error),
-            missing: parse_style(&self.missing),
-            repo: parse_style(&self.repo),
-            repo_exists: parse_style(&self.repo_exists),
-        }
+    fn make(&self) -> Result<Palette, ConfigError> {
+        Ok(Palette {
+            branch: parse_style(&self.branch)?,
+            clean: parse_style(&self.clean)?,
+            cloning: parse_style(&self.cloning)?,
+            dirty: parse_style(&self.dirty)?,
+            error: parse_style(&self.error)?,
+            missing: parse_style(&self.missing)?,
+            repo: parse_style(&self.repo)?,
+            repo_exists: parse_style(&self.repo_exists)?,
+        })
     }
 }
 
 pub enum ColourConfig<'conf> {
     Fixed(u8),
+    Hex(&'conf str),
     Named(&'conf str),
     RGB(u8, u8, u8),
 }
 
-fn parse_style(v: &toml::Value) -> Style {
-    ColourConfig::from(v).make_style()
+fn parse_style(v: &toml::Value) -> Result<Style, ConfigError> {
+    ColourConfig::from(v)?.make_style()
 }
 
 impl<'conf> ColourConfig<'conf> {
-    fn from(v: &'conf toml::Value) -> Self {
+    fn from(v: &'conf toml::Value) -> Result<Self, ConfigError> {
         match v {
-            toml::Value::String(name) => ColourConfig::Named(name),
+            toml::Value::String(name) => {
+                if name.len() > 0 && name.chars().nth(0) == Some('#') {
+                    Ok(ColourConfig::Hex(name))
+                } else {
+                    Ok(ColourConfig::Named(name))
+                }
+            }
             toml::Value::Integer(fixed) => {
                 if (0..=255).contains(fixed) {
-                    ColourConfig::Fixed(*fixed as u8)
+                    Ok(ColourConfig::Fixed(*fixed as u8))
                 } else {
-                    panic!("Palette value out of range [0, 255]: {}", fixed)
+                    Err(ConfigError::InvalidConfig(format!(
+                        "Palette value out of range [0, 255]: {}",
+                        fixed
+                    )))
                 }
             }
             toml::Value::Array(ref rgb) if rgb.len() == 3 => match (&rgb[0], &rgb[1], &rgb[2]) {
                 (toml::Value::Integer(r), toml::Value::Integer(g), toml::Value::Integer(b)) => {
                     if (0..=255).contains(r) && (0..=255).contains(g) && (0..=255).contains(b) {
-                        ColourConfig::RGB(*r as u8, *g as u8, *b as u8)
+                        Ok(ColourConfig::RGB(*r as u8, *g as u8, *b as u8))
                     } else {
-                        panic!("RGB value out of range [0, 255]: ({}, {}, {})", r, g, b)
+                        Err(ConfigError::InvalidConfig(format!(
+                            "RGB value out of range [0, 255]: ({}, {}, {})",
+                            r, g, b
+                        )))
                     }
                 }
-                _ => panic!("RGB value must be an array of 3 integers."),
+                _ => Err(ConfigError::InvalidConfig(
+                    "RGB value must be an array of 3 integers.".to_string(),
+                )),
             },
-            _ => panic!("Colour definition must be string, u8 or array of 3 integers."),
+            _ => Err(ConfigError::InvalidConfig(
+                "Colour definition must be string, u8 or array of 3 integers.".to_string(),
+            )),
         }
     }
 }
@@ -85,28 +103,38 @@ fn u8_hex(hex: &str) -> u8 {
 }
 
 impl<'conf> ColourConfig<'conf> {
-    fn make_style(&self) -> Style {
+    fn make_style(&self) -> Result<Style, ConfigError> {
         match self {
-            ColourConfig::Fixed(value) => Colour::Fixed(*value),
-            ColourConfig::Named(name) => match *name {
-                "black" => Colour::Black,
-                "red" => Colour::Red,
-                "green" => Colour::Green,
-                "yellow" => Colour::Yellow,
-                "blue" => Colour::Blue,
-                "purple" => Colour::Purple,
-                "cyan" => Colour::Cyan,
-                "white" => Colour::White,
-                ref hex if hex.len() == 7 && &hex[0..1] == "#" => {
+            ColourConfig::Fixed(value) => Ok(Colour::Fixed(*value)),
+            ColourConfig::Hex(hex) => {
+                if hex.len() == 7 {
                     let r = u8_hex(&hex[1..3]);
                     let g = u8_hex(&hex[3..5]);
                     let b = u8_hex(&hex[5..7]);
-                    Colour::RGB(r, g, b)
+                    Ok(Colour::RGB(r, g, b))
+                } else {
+                    Err(ConfigError::InvalidConfig(format!(
+                        "Invalid hex colour code: {}",
+                        hex
+                    )))
                 }
-                _ => panic!("Unsupported colour name: {}", name),
+            }
+            ColourConfig::Named(name) => match *name {
+                "black" => Ok(Colour::Black),
+                "red" => Ok(Colour::Red),
+                "green" => Ok(Colour::Green),
+                "yellow" => Ok(Colour::Yellow),
+                "blue" => Ok(Colour::Blue),
+                "purple" => Ok(Colour::Purple),
+                "cyan" => Ok(Colour::Cyan),
+                "white" => Ok(Colour::White),
+                _ => Err(ConfigError::InvalidConfig(format!(
+                    "Unsupported colour name: {}",
+                    name
+                ))),
             },
-            ColourConfig::RGB(r, g, b) => Colour::RGB(*r, *g, *b),
+            ColourConfig::RGB(r, g, b) => Ok(Colour::RGB(*r, *g, *b)),
         }
-        .normal()
+        .map(|colour| colour.normal())
     }
 }
