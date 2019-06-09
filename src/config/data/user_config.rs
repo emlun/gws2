@@ -76,6 +76,10 @@ impl<'conf> From<&'conf toml::Value> for ColourConfig<'conf> {
     }
 }
 
+fn u8_hex(hex: &str) -> u8 {
+    u8::from_str_radix(hex, 16).expect(&format!("Invalid hex value: {}", hex))
+}
+
 impl<'conf> ColourConfig<'conf> {
     fn make_style(&self) -> Style {
         match self {
@@ -88,6 +92,12 @@ impl<'conf> ColourConfig<'conf> {
                 "purple" => Colour::Purple,
                 "cyan" => Colour::Cyan,
                 "white" => Colour::White,
+                ref hex if hex.len() == 7 && &hex[0..1] == "#" => {
+                    let r = u8_hex(&hex[1..3]);
+                    let g = u8_hex(&hex[3..5]);
+                    let b = u8_hex(&hex[5..7]);
+                    Colour::RGB(r, g, b)
+                }
                 _ => panic!("Unsupported colour name: {}", name),
             },
             ColourConfig::Fixed(value) => Colour::Fixed(*value),

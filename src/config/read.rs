@@ -97,24 +97,24 @@ mod tests {
 
     #[test]
     fn palette_is_parsed_correctly() -> Result<(), ConfigError> {
-        let config_content = r#"
+        let config_content = r##"
         [palette]
             branch = 13
             clean = 9
             cloning = 14
             dirty = 9
-            error = 9
+            error = "#ff642b"
             missing = [255, 0x64, 0x2b]
             repo = "green"
             repo_exists = 10
-        "#;
+        "##;
 
         let expected = Palette {
             branch: Colour::Fixed(13).normal(),
             clean: Colour::Fixed(9).normal(),
             cloning: Colour::Fixed(14).normal(),
             dirty: Colour::Fixed(9).normal(),
-            error: Colour::Fixed(9).normal(),
+            error: Colour::RGB(0xff, 0x64, 0x2b).normal(),
             missing: Colour::RGB(0xff, 0x64, 0x2b).normal(),
             repo: Colour::Green.normal(),
             repo_exists: Colour::Fixed(10).normal(),

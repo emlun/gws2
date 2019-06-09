@@ -18,6 +18,9 @@ repo_exists = 10
 ## An array of exactly 3 elements in the range [0, 255] defines an RGB colour.
 #missing = [255, 0x64, 0x2b]
 
+## You can also specify an RGB color as hex following a # sign.
+#missing = "#ff642b"
+
 ## Some colors can be specified by names in all lowercase. The available names
 ## are listed here: https://docs.rs/ansi_term/latest/ansi_term/enum.Colour.html
 #repo = "green"
