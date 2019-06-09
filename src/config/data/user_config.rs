@@ -98,8 +98,9 @@ impl<'conf> ColourConfig<'conf> {
     }
 }
 
-fn u8_hex(hex: &str) -> u8 {
-    u8::from_str_radix(hex, 16).expect(&format!("Invalid hex value: {}", hex))
+fn u8_hex(hex: &str) -> Result<u8, ConfigError> {
+    u8::from_str_radix(hex, 16)
+        .map_err(|_| ConfigError::InvalidConfig(format!("Invalid hex value: {}", hex)))
 }
 
 impl<'conf> ColourConfig<'conf> {
@@ -109,9 +110,9 @@ impl<'conf> ColourConfig<'conf> {
             ColourConfig::Hex(hex) => {
                 if hex.len() == 7 {
                     Ok(Colour::RGB(
-                        u8_hex(&hex[1..3]),
-                        u8_hex(&hex[3..5]),
-                        u8_hex(&hex[5..7]),
+                        u8_hex(&hex[1..3])?,
+                        u8_hex(&hex[3..5])?,
+                        u8_hex(&hex[5..7])?,
                     ))
                 } else {
                     Err(ConfigError::InvalidConfig(format!(
