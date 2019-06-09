@@ -18,7 +18,7 @@ pub fn read_workspace_file<P: AsRef<Path>>(file_path: P) -> Result<Workspace, Co
         .and_then(|_| legacy::parse(&contents))
 }
 
-pub fn read_config_toml(content: &str) -> Result<UserConfig, ConfigError> {
+fn read_config_toml(content: &str) -> Result<UserConfig, ConfigError> {
     Ok(toml::from_str(&content).map_err(|e| {
         ConfigError::SyntaxError(match e.line_col() {
             Some((line, col)) => format!(
