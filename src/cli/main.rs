@@ -105,7 +105,7 @@ fn run_gws(matches: ArgMatches) -> Result<i32, RunError> {
             "ff" => super::ff::make_cli_command(&sc.matches),
             "status" => super::status::make_cli_command(&sc.matches),
             "update" => super::update::make_cli_command(&sc.matches),
-            _ => panic!("Unknown subcommand: {}", sc.name),
+            _ => unreachable!(),
         },
     };
 
