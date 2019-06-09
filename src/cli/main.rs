@@ -113,11 +113,10 @@ fn run_gws(matches: ArgMatches) -> Result<i32, RunError> {
     };
 
     let working_dir: &Path = match matches.args.get("dir") {
-        Some(chdir_arg) => Path::new(
-            chdir_arg.vals[0]
-                .to_str()
-                .expect("Did not understand <dir> argument"),
-        ),
+        Some(chdir_arg) => Path::new(chdir_arg.vals[0].to_str().ok_or(RunError::from(
+            exit_codes::USER_ERROR,
+            "Did not understand <dir> argument".to_string(),
+        ))?),
         None => Path::new("."),
     };
 
