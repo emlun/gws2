@@ -314,15 +314,15 @@ This function is really useful for locally ignoring some projects that are not
 needed or not accessible.
 
 
-### Theme file
+Config file
+---
 
-(NOT YET IMPLEMENTED: [#4][iss-theme])
+A config file can be placed at `${USER_CONFIG}/gws/config.toml`, for example
+`~/.config/gws/config.toml` in Linux. See the [directories-rs docs][config-dir]
+for examples for other operating systems.
 
-You can customise the color scheme in a future version, maybe.
-
- 1. `./.git/theme.gws`
- 2. `${HOME}/.theme.gws`
- 3. `${HOME}/.config/gws/theme`
+See `config.toml.example` for exhaustive documentation of the available
+settings.
 
 
 Other thoughts
@@ -350,6 +350,7 @@ Other thoughts
   recursively.
 
 
+[config-dir]: https://docs.rs/directories/latest/directories/struct.ProjectDirs.html#method.config_dir
 [gws]: https://github.com/StreakyCobra/gws
 [iss-check]: https://github.com/emlun/gws2/issues/2
 [iss-ignore]: https://github.com/emlun/gws2/issues/3
