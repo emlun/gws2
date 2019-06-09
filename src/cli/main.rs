@@ -46,14 +46,18 @@ fn find_workspace(current_dir: &Path) -> Option<(&Path, PathBuf)> {
     }
 }
 
-fn find_config_file() -> Option<PathBuf> {
-    ProjectDirs::from("se.emlun.gws", "", "gws")
-        .map(|project_dir| project_dir.config_dir().join("config.toml"))
-        .filter(|f| f.exists())
+fn find_config_file(matches: &ArgMatches) -> Option<PathBuf> {
+    if matches.is_present("no-config") {
+        None
+    } else {
+        ProjectDirs::from("se.emlun.gws", "", "gws")
+            .map(|project_dir| project_dir.config_dir().join("config.toml"))
+            .filter(|f| f.exists())
+    }
 }
 
 pub fn run_gws(matches: ArgMatches) -> i32 {
-    let config: Option<UserConfig> = match find_config_file() {
+    let config: Option<UserConfig> = match find_config_file(&matches) {
         Some(config_path) => match read_config_file(&config_path) {
             Ok(conf) => Some(conf),
             Err(e) => {

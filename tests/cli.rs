@@ -12,6 +12,7 @@ fn status_finds_workspace_in_ancestor_dir() -> Result<(), util::Error> {
         let working_dir = workspace_dir.join("new_commit").join("remote");
         let mut cmd = Command::cargo_bin("gws")?;
         cmd.arg("-C").arg(working_dir.to_str().unwrap());
+        cmd.arg("--no-config");
         cmd.assert().success();
         Ok(())
     })
@@ -22,6 +23,7 @@ fn status_does_not_find_workspace_in_unrelated_dir() -> Result<(), util::Error> 
     let working_dir = TempDir::new("gws-test")?;
     let mut cmd = Command::cargo_bin("gws")?;
     cmd.arg("-C").arg(working_dir.path().to_str().unwrap());
+    cmd.arg("--no-config");
     cmd.assert().failure();
     Ok(())
 }

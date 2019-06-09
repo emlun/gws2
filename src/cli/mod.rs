@@ -29,6 +29,11 @@ pub fn build_cli() -> App<'static, 'static> {
         .about(crate_description())
         .author(crate_author())
         .arg(chdir_arg)
+        .arg(
+            Arg::with_name("no-config")
+                .long("no-config")
+                .help("Don't read any config files"),
+        )
         .subcommand(clone::subcommand_def())
         .subcommand(completions())
         .subcommand(fetch::subcommand_def())
