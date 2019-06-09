@@ -56,7 +56,7 @@ fn find_config_file(matches: &ArgMatches) -> Option<PathBuf> {
     }
 }
 
-pub fn run_gws(matches: ArgMatches) -> i32 {
+fn run_gws(matches: ArgMatches) -> i32 {
     let config: Option<UserConfig> = match find_config_file(&matches) {
         Some(config_path) => match read_config_file(&config_path) {
             Ok(conf) => Some(conf),
