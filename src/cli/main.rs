@@ -11,6 +11,16 @@ use crate::config::data::user_config::UserConfig;
 use crate::config::read::read_config_file;
 use crate::config::read::read_workspace_file;
 
+struct RunError {
+    exit_code: i32,
+    message: String,
+}
+impl RunError {
+    fn from(exit_code: i32, message: String) -> RunError {
+        RunError { exit_code, message }
+    }
+}
+
 pub fn main() -> i32 {
     let cli = super::build_cli();
     let matches = cli.get_matches();
@@ -18,7 +28,13 @@ pub fn main() -> i32 {
     if &matches.subcommand_name() == &Some("completions") {
         run_completions(matches)
     } else {
-        run_gws(matches)
+        match run_gws(matches) {
+            Ok(exit_code) => exit_code,
+            Err(err) => {
+                eprintln!("{}", &err.message);
+                err.exit_code
+            }
+        }
     }
 }
 
@@ -56,15 +72,14 @@ fn find_config_file(matches: &ArgMatches) -> Option<PathBuf> {
     }
 }
 
-fn run_gws(matches: ArgMatches) -> i32 {
+fn run_gws(matches: ArgMatches) -> Result<i32, RunError> {
     let config: Option<UserConfig> = match find_config_file(&matches) {
-        Some(config_path) => match read_config_file(&config_path) {
-            Ok(conf) => Some(conf),
-            Err(e) => {
-                eprintln!("Failed to parse config file: {:?}\n{:?}", config_path, e);
-                return exit_codes::USER_ERROR;
-            }
-        },
+        Some(config_path) => Some(read_config_file(&config_path).map_err(|e| {
+            RunError::from(
+                exit_codes::USER_ERROR,
+                format!("Failed to parse config file: {:?}\n{:?}", config_path, e),
+            )
+        })?),
         None => None,
     };
 
@@ -100,19 +115,18 @@ fn run_gws(matches: ArgMatches) -> i32 {
                     Command::DirectoryCommand(cmd) => cmd.run(workspace_dir, &ws, &palette),
                     Command::RepositoryCommand(cmd) => cmd.run(workspace_dir, &ws, &palette),
                 };
-                match result {
-                    Ok(status) => status,
-                    Err(_) => exit_codes::UNKNOWN_ERROR,
-                }
+                result.map_err(|_| {
+                    RunError::from(exit_codes::UNKNOWN_ERROR, "Unknown error".to_string())
+                })
             }
-            Err(_) => {
-                eprintln!("Failed to parse projects file: {:?}", ws_file_path);
-                exit_codes::USER_ERROR
-            }
+            Err(_) => Err(RunError::from(
+                exit_codes::USER_ERROR,
+                format!("Failed to parse projects file: {:?}", ws_file_path),
+            )),
         },
-        None => {
-            eprintln!("Not in a workspace.");
-            exit_codes::USER_ERROR
-        }
+        None => Err(RunError::from(
+            exit_codes::USER_ERROR,
+            format!("Not in a workspace."),
+        )),
     }
 }
