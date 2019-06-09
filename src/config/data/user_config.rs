@@ -50,7 +50,7 @@ pub enum ColourConfig<'conf> {
     RGB(u8, u8, u8),
 }
 
-impl<'conf> From<&'conf toml::Value> for ColourConfig<'conf> {
+impl<'conf> ColourConfig<'conf> {
     fn from(v: &'conf toml::Value) -> Self {
         match v {
             toml::Value::String(name) => ColourConfig::Named(name),
