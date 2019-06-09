@@ -108,10 +108,11 @@ impl<'conf> ColourConfig<'conf> {
             ColourConfig::Fixed(value) => Ok(Colour::Fixed(*value)),
             ColourConfig::Hex(hex) => {
                 if hex.len() == 7 {
-                    let r = u8_hex(&hex[1..3]);
-                    let g = u8_hex(&hex[3..5]);
-                    let b = u8_hex(&hex[5..7]);
-                    Ok(Colour::RGB(r, g, b))
+                    Ok(Colour::RGB(
+                        u8_hex(&hex[1..3]),
+                        u8_hex(&hex[3..5]),
+                        u8_hex(&hex[5..7]),
+                    ))
                 } else {
                     Err(ConfigError::InvalidConfig(format!(
                         "Invalid hex colour code: {}",
