@@ -1,0 +1,23 @@
+[palette]
+# This section defines the color palette. The section is optional but must
+# define all colours if present. These are the defaults:
+branch = 13
+clean = 10
+cloning = 14
+dirty = 9
+error = 9
+missing = 11
+repo = 12
+repo_exists = 10
+
+## A single integer identifies a color in the terminal's 256-color palette.
+## For details see: https://docs.rs/ansi_term/0.11.0/ansi_term/enum.Colour.html#variant.Fixed
+## or this color chart: https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.svg
+#branch = 13
+
+## An array of exactly 3 elements in the range [0, 255] defines an RGB colour.
+#missing = [255, 0x64, 0x2b]
+
+## Some colors can be specified by names in all lowercase. The available names
+## are listed here: https://docs.rs/ansi_term/latest/ansi_term/enum.Colour.html
+#repo = "green"
