@@ -351,8 +351,8 @@ Other thoughts
 
 
 [gws]: https://github.com/StreakyCobra/gws
-[iss-init]: https://github.com/emlun/gws2/issues/1
 [iss-check]: https://github.com/emlun/gws2/issues/2
 [iss-ignore]: https://github.com/emlun/gws2/issues/3
-[iss-theme]: https://github.com/emlun/gws2/issues/4
+[iss-init]: https://github.com/emlun/gws2/issues/1
 [iss-subdir]: https://github.com/emlun/gws2/issues/5
+[iss-theme]: https://github.com/emlun/gws2/issues/4
