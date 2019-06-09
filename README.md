@@ -321,7 +321,7 @@ A config file can be placed at `${USER_CONFIG}/gws/config.toml`, for example
 `~/.config/gws/config.toml` in Linux. See the [directories-rs docs][config-dir]
 for examples for other operating systems.
 
-See `config.toml.example` for exhaustive documentation of the available
+See `config.example.toml` for exhaustive documentation of the available
 settings.
 
 
