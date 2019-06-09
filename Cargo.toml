@@ -14,7 +14,10 @@ license = "GPL-3.0-or-later"
 [dependencies]
 ansi_term = "0.11"
 clap = { version = "2.31" }
+directories = "2.0"
 git2 = "0.9"
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.5"
 
 [dev-dependencies]
 assert_cmd = "0.11.1"
