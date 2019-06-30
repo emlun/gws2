@@ -2,6 +2,8 @@ use std::collections::BTreeMap;
 
 use super::Remote;
 use crate::commands::error::Error;
+use crate::data::status::BranchMethods;
+use crate::util::iter::CollectOrFirstErr;
 
 #[derive(Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Project {
@@ -36,17 +38,17 @@ impl Project {
         &self,
         repo: &'repo git2::Repository,
     ) -> Result<BTreeMap<String, git2::Oid>, Error> {
-        self.local_branches_internal(repo).map(|branches| {
+        self.local_branches_internal(repo).and_then(|branches| {
             branches
                 .into_iter()
                 .flat_map(|(branch, gupstream)| gupstream.map(|gupstream| (branch, gupstream)))
                 .map(|(branch, gupstream)| {
-                    (
-                        branch.name().ok().unwrap().unwrap().to_string(),
+                    Ok((
+                        branch.branch_name()?.to_string(),
                         gupstream.get().peel_to_commit().unwrap().id(),
-                    )
+                    ))
                 })
-                .collect()
+                .collect_or_first_err()
         })
     }
 }
