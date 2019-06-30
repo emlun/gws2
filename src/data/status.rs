@@ -14,7 +14,7 @@ use crate::config::data::Project;
 pub type WorkspaceStatus<'proj> = BTreeMap<&'proj Project, Result<RepositoryStatus, Error>>;
 pub type RepositoryStatus = BTreeSet<BranchStatus>;
 
-trait BranchMethods<'repo> {
+pub trait BranchMethods<'repo> {
     fn branch_name<'a>(&'a self) -> Result<&'a str, Error>;
     fn is_up_to_date_with_upstream(&'repo self) -> Result<Option<bool>, Error>;
     fn upstream_name(&self) -> Result<Option<String>, Error>;
