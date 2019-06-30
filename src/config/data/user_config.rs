@@ -56,6 +56,14 @@ fn parse_style(v: &toml::Value) -> Result<Style, ConfigError> {
     ColourConfig::from(v)?.make_style()
 }
 
+fn in_range_inclusive(value: &i64, min: i64, max: i64) -> bool {
+    *value >= min && *value <= max
+}
+
+fn is_u8(value: &i64) -> bool {
+    in_range_inclusive(value, 0, 255)
+}
+
 impl<'conf> ColourConfig<'conf> {
     fn from(v: &'conf toml::Value) -> Result<Self, ConfigError> {
         match v {
@@ -67,7 +75,7 @@ impl<'conf> ColourConfig<'conf> {
                 }
             }
             toml::Value::Integer(fixed) => {
-                if (0..=255).contains(fixed) {
+                if is_u8(fixed) {
                     Ok(ColourConfig::Fixed(*fixed as u8))
                 } else {
                     Err(ConfigError::InvalidConfig(format!(
@@ -78,7 +86,7 @@ impl<'conf> ColourConfig<'conf> {
             }
             toml::Value::Array(ref rgb) if rgb.len() == 3 => match (&rgb[0], &rgb[1], &rgb[2]) {
                 (toml::Value::Integer(r), toml::Value::Integer(g), toml::Value::Integer(b)) => {
-                    if (0..=255).contains(r) && (0..=255).contains(g) && (0..=255).contains(b) {
+                    if is_u8(r) && is_u8(g) && is_u8(b) {
                         Ok(ColourConfig::RGB(*r as u8, *g as u8, *b as u8))
                     } else {
                         Err(ConfigError::InvalidConfig(format!(
