@@ -5,6 +5,7 @@ use super::error::Error;
 use super::fetch::Fetch;
 use crate::config::data::Project;
 use crate::crate_info::crate_name;
+use crate::data::status::BranchMethods;
 use crate::data::status::DirtyState;
 use crate::data::status::RepositoryStatus;
 
@@ -32,8 +33,8 @@ fn do_ff<'repo>(
                         let reflog_msg = format!(
                             "{prog_name}: Fast-forward {branch_name} to upstream {upstream_name}",
                             prog_name = crate_name(),
-                            branch_name = branch.name()?.unwrap(),
-                            upstream_name = upstream.name()?.unwrap()
+                            branch_name = branch.branch_name()?,
+                            upstream_name = upstream.branch_name()?
                         );
 
                         branch
