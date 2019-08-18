@@ -3,4 +3,6 @@ cache: cargo
 before_install: rustup component add rustfmt
 script:
   - cargo fmt -- --check
+  - ./tests/add-ssh-key.sh
   - cargo test --verbose
+  - ./tests/remove-ssh-key.sh

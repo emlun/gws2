@@ -357,3 +357,22 @@ Other thoughts
 [iss-init]: https://github.com/emlun/gws2/issues/1
 [iss-subdir]: https://github.com/emlun/gws2/issues/5
 [iss-theme]: https://github.com/emlun/gws2/issues/4
+
+
+## Running the tests
+
+Some of the integration tests attempt to clone a repository from GitHub via SSH.
+If you already have an SSH key set up for GitHub in your keyring, you're all
+good - but if you don't, there's an SSH key bundled in `tests/id_rsa` and
+registered as a deploy key for the public git repository at
+https://github.com/emlun/gws2 . You can use `tests/add-ssh-key.sh` and to add it
+to your agent, and `tests/remove-ssh-key.sh` to remove it. The latter will also
+attempt to deregister the key from `gpg-agent` in case you're using that as your
+SSH agent.
+
+```
+alice $ ./tests/add-ssh-key.sh
+alice $ cargo test
+alice $ cargo test
+alice $ ./tests/remove-ssh-key.sh
+```
