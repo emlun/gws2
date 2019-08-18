@@ -4,6 +4,7 @@ extern crate tempdir;
 
 use std::fs::create_dir_all;
 use std::fs::write;
+use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -429,4 +430,41 @@ where
 
     let workspace = read_workspace_file(workspace_dir.join(".projects.gws")).unwrap();
     Ok(test(&workspace_dir, workspace)?)
+}
+
+pub fn with_bundled_ssh_key_in_agent<T, F>(test: F) -> Box<Fn(&Path, Workspace) -> Result<T, Error>>
+where
+    F: Fn(&Path, Workspace) -> Result<T, Error>,
+    F: 'static,
+{
+    let keyfile_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/id_rsa");
+
+    Box::new(move |path: &Path, workspace: Workspace| {
+        std::process::Command::new("ssh-add")
+            .arg(keyfile_path.to_str().unwrap())
+            .status()?;
+        let result = test(path, workspace);
+        std::process::Command::new("ssh-add")
+            .arg("-d")
+            .arg(keyfile_path.to_str().unwrap())
+            .status()?;
+        try_wipe_key_from_gpg_ssh_agent().ok();
+        result
+    })
+}
+
+fn try_wipe_key_from_gpg_ssh_agent() -> Result<(), Error> {
+    let gpg_agent_keygrip = b"000B8A4DF023522536010F9B4E6546DCB7E01A1C";
+
+    if let Ok(mut gpg_proc) = std::process::Command::new("gpg-connect-agent")
+        .stdin(std::process::Stdio::piped())
+        .spawn()
+    {
+        let sin = gpg_proc.stdin.as_mut().unwrap();
+        sin.write(b"DELETE_KEY --force ")?;
+        sin.write(gpg_agent_keygrip)?;
+        sin.write(b"\n")?;
+        gpg_proc.wait()?;
+    }
+    Ok(())
 }
