@@ -413,3 +413,20 @@ pub fn in_example_workspace<T>(test: fn(&Path, Workspace) -> Result<T, Error>) -
     let workspace = read_workspace_file(workspace_dir.join(".projects.gws")).unwrap();
     Ok(test(&workspace_dir, workspace)?)
 }
+
+pub fn in_workspace_with_projects_file<T, F>(projects_contents: &str, test: F) -> Result<T, Error>
+where
+    F: Fn(&Path, Workspace) -> Result<T, Error>,
+{
+    let tmpdir = TempDir::new("gws-test")?;
+    let workspace_dir = tmpdir.path().join("workspace");
+
+    create_dir_all(&workspace_dir)?;
+    write_projects_file(
+        workspace_dir.join(".projects.gws").as_path(),
+        projects_contents,
+    )?;
+
+    let workspace = read_workspace_file(workspace_dir.join(".projects.gws")).unwrap();
+    Ok(test(&workspace_dir, workspace)?)
+}
