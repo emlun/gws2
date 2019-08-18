@@ -396,6 +396,10 @@ missing_repository_2        | {origin} | {ahead} ahead
         origin = origin_path.to_str().unwrap(),
         ahead = ahead_path.to_str().unwrap(),
     );
+    write_projects_file(path, &content)
+}
+
+pub fn write_projects_file(path: &Path, content: &str) -> Result<(), Error> {
     Ok(write(path, content)?)
 }
 

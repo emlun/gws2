@@ -1,11 +1,11 @@
 use std::collections::HashSet;
 use std::path::Path;
 
-use git2::Repository;
-
 use super::common::exit_codes;
 use super::common::format_message_line;
 use super::common::format_project_header;
+use super::common::get_repobuilder;
+use super::common::update_submodules;
 use super::common::DirectoryCommand;
 use super::error::Error;
 use crate::color::palette::Palette;
@@ -43,11 +43,11 @@ impl DirectoryCommand for Clone {
                     palette.cloning.paint(format_message_line("Cloning…"))
                 );
 
-                match Repository::clone_recurse(
-                    &project.main_remote.url,
-                    working_dir.join(&project.path),
-                ) {
+                match get_repobuilder()
+                    .clone(&project.main_remote.url, &working_dir.join(&project.path))
+                {
                     Ok(repo) => {
+                        update_submodules(&repo)?;
                         for extra_remote in &project.extra_remotes {
                             match repo.remote(&extra_remote.name, &extra_remote.url) {
                                 Ok(_) => {}

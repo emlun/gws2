@@ -240,3 +240,53 @@ pub fn print_status(
         }
     }
 }
+
+pub fn get_repobuilder<'a>() -> git2::build::RepoBuilder<'a> {
+    use git2::CredentialType;
+
+    let mut result = git2::build::RepoBuilder::new();
+    let mut fopts = git2::FetchOptions::new();
+    let mut callbacks = git2::RemoteCallbacks::new();
+
+    callbacks.credentials(
+        |url: &str, username: Option<&str>, allowed: CredentialType| {
+            let cred_helper = git2::CredentialHelper::new(url);
+
+            if allowed.contains(CredentialType::SSH_KEY) {
+                let user: String = username
+                    .map(&str::to_string)
+                    .or_else(|| cred_helper.username.clone())
+                    .unwrap_or("git".to_string());
+                git2::Cred::ssh_key_from_agent(&user)
+            } else if allowed.contains(CredentialType::USER_PASS_PLAINTEXT) {
+                git2::Cred::credential_helper(&git2::Config::open_default()?, url, username)
+            } else {
+                git2::Cred::default()
+            }
+        },
+    );
+    fopts.remote_callbacks(callbacks);
+    result.fetch_options(fopts);
+    result
+}
+
+/// Copied from git2::Repository
+pub fn update_submodules(repo: &git2::Repository) -> Result<(), git2::Error> {
+    fn add_subrepos(
+        repo: &git2::Repository,
+        list: &mut Vec<git2::Repository>,
+    ) -> Result<(), git2::Error> {
+        for mut subm in repo.submodules()? {
+            subm.update(true, None)?;
+            list.push(subm.open()?);
+        }
+        Ok(())
+    }
+
+    let mut repos = Vec::new();
+    add_subrepos(repo, &mut repos)?;
+    while let Some(repo) = repos.pop() {
+        add_subrepos(&repo, &mut repos)?;
+    }
+    Ok(())
+}
