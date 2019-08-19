@@ -3,6 +3,7 @@ extern crate gws;
 extern crate tempdir;
 
 mod util;
+mod util2;
 
 use std::collections::HashSet;
 use std::hash::Hash;
@@ -15,8 +16,8 @@ use gws::commands::update::Update;
 use gws::config::data::Workspace;
 
 use util::in_example_workspace;
-use util::in_workspace_with_projects_file;
 use util::Error;
+use util2::in_workspace_with_projects_file;
 
 pub fn hash_set<I, T>(items: I) -> HashSet<T>
 where
