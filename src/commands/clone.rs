@@ -65,6 +65,9 @@ impl DirectoryCommand for Clone {
                     Err(err) => {
                         clone_failed = true;
                         eprintln!("Failed to clone project {}: {}", project.path, err);
+                        if err.class() == git2::ErrorClass::Net {
+                            eprintln!("Have you tried cloning via SSH, or setting up a git credential helper?");
+                        }
                         println!("{}", palette.error.paint(format_message_line("Error")));
                     }
                 }
