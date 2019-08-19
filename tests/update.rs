@@ -14,6 +14,7 @@ use gws::commands::common::DirectoryCommand;
 use gws::commands::update::Update;
 use gws::config::data::Workspace;
 
+use util::in_example_workspace;
 use util::in_workspace_with_projects_file;
 use util::Error;
 
@@ -23,6 +24,23 @@ where
     T: Eq + Hash,
 {
     items.into_iter().collect()
+}
+
+#[test]
+fn update_creates_repos() -> Result<(), Error> {
+    in_example_workspace(|working_dir, workspace: Workspace| {
+        let command: Update = Update {};
+
+        assert_eq!(false, working_dir.join("missing_repository").exists());
+        assert_eq!(false, working_dir.join("missing_repository_2").exists());
+        command
+            .run(working_dir, &workspace, &Palette::default())
+            .expect("Update command failed");
+        assert!(working_dir.join("missing_repository").exists());
+        assert!(working_dir.join("missing_repository_2").exists());
+
+        Ok(())
+    })
 }
 
 #[test]
