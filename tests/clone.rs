@@ -137,7 +137,7 @@ fn clone_works_with_public_https() -> Result<(), Error> {
 }
 
 #[test]
-fn clone_works_with_public_ssh() -> Result<(), Error> {
+fn clone_works_with_ssh() -> Result<(), Error> {
     let projects_contents = "gws2 | git@github.com:emlun/gws2.git";
 
     in_workspace_with_projects_file(projects_contents, |working_dir, workspace: Workspace| {
