@@ -256,17 +256,15 @@ pub fn get_repobuilder<'a>() -> git2::build::RepoBuilder<'a> {
             cred_helper.config(&git2::Config::open_default()?);
 
             if allowed.contains(CredentialType::SSH_KEY) && !tried_ssh {
+                tried_ssh = true;
                 let user: String = username
                     .map(&str::to_string)
                     .or_else(|| cred_helper.username.clone())
                     .unwrap_or("git".to_string());
-                tried_ssh = true;
                 git2::Cred::ssh_key_from_agent(&user)
             } else if allowed.contains(CredentialType::USER_PASS_PLAINTEXT) && !tried_password {
-                let res =
-                    git2::Cred::credential_helper(&git2::Config::open_default()?, url, username);
                 tried_password = true;
-                res
+                git2::Cred::credential_helper(&git2::Config::open_default()?, url, username)
             } else {
                 git2::Cred::default()
             }
