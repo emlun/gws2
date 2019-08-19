@@ -247,19 +247,26 @@ pub fn get_repobuilder<'a>() -> git2::build::RepoBuilder<'a> {
     let mut result = git2::build::RepoBuilder::new();
     let mut fopts = git2::FetchOptions::new();
     let mut callbacks = git2::RemoteCallbacks::new();
+    let mut tried_ssh = false;
+    let mut tried_password = false;
 
     callbacks.credentials(
-        |url: &str, username: Option<&str>, allowed: CredentialType| {
-            let cred_helper = git2::CredentialHelper::new(url);
+        move |url: &str, username: Option<&str>, allowed: CredentialType| {
+            let mut cred_helper = git2::CredentialHelper::new(url);
+            cred_helper.config(&git2::Config::open_default()?);
 
-            if allowed.contains(CredentialType::SSH_KEY) {
+            if allowed.contains(CredentialType::SSH_KEY) && !tried_ssh {
                 let user: String = username
                     .map(&str::to_string)
                     .or_else(|| cred_helper.username.clone())
                     .unwrap_or("git".to_string());
+                tried_ssh = true;
                 git2::Cred::ssh_key_from_agent(&user)
-            } else if allowed.contains(CredentialType::USER_PASS_PLAINTEXT) {
-                git2::Cred::credential_helper(&git2::Config::open_default()?, url, username)
+            } else if allowed.contains(CredentialType::USER_PASS_PLAINTEXT) && !tried_password {
+                let res =
+                    git2::Cred::credential_helper(&git2::Config::open_default()?, url, username);
+                tried_password = true;
+                res
             } else {
                 git2::Cred::default()
             }
