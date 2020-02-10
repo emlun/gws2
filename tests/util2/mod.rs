@@ -32,7 +32,7 @@ where
 
 pub fn with_bundled_ssh_key_in_agent<T, F>(
     test: F,
-) -> Result<Box<Fn(&Path, Workspace) -> Result<T, Error>>, Error>
+) -> Result<Box<dyn Fn(&Path, Workspace) -> Result<T, Error>>, Error>
 where
     F: Fn(&Path, Workspace) -> Result<T, Error>,
     F: 'static,

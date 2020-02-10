@@ -15,8 +15,8 @@ use crate::data::status::RepositoryStatus;
 use crate::data::status::WorkspaceStatus;
 
 pub enum Command {
-    DirectoryCommand(Box<DirectoryCommand>),
-    RepositoryCommand(Box<RepositoryCommand>),
+    DirectoryCommand(Box<dyn DirectoryCommand>),
+    RepositoryCommand(Box<dyn RepositoryCommand>),
 }
 
 pub trait DirectoryCommand {
