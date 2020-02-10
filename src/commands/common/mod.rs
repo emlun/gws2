@@ -240,3 +240,84 @@ pub fn print_status(
         }
     }
 }
+
+pub fn get_repobuilder<'a>() -> git2::build::RepoBuilder<'a> {
+    use git2::CredentialType;
+
+    let mut result = git2::build::RepoBuilder::new();
+    let mut fopts = git2::FetchOptions::new();
+    let mut callbacks = git2::RemoteCallbacks::new();
+    let mut tried_ssh = false;
+    let mut tried_password = false;
+
+    callbacks.credentials(
+        move |url: &str, username: Option<&str>, allowed: CredentialType| {
+            let mut cred_helper = git2::CredentialHelper::new(url);
+            cred_helper.config(&git2::Config::open_default()?);
+
+            if allowed.contains(CredentialType::SSH_KEY) && !tried_ssh {
+                tried_ssh = true;
+                let user: String = username
+                    .map(&str::to_string)
+                    .or_else(|| cred_helper.username.clone())
+                    .unwrap_or("git".to_string());
+                git2::Cred::ssh_key_from_agent(&user)
+            } else if allowed.contains(CredentialType::USER_PASS_PLAINTEXT) && !tried_password {
+                tried_password = true;
+                git2::Cred::credential_helper(&git2::Config::open_default()?, url, username)
+            } else {
+                git2::Cred::default()
+            }
+        },
+    );
+    fopts.remote_callbacks(callbacks);
+    result.fetch_options(fopts);
+    result
+}
+
+// Copied from git2::Repository
+//
+// Copyright (c) 2014 Alex Crichton
+//
+// Permission is hereby granted, free of charge, to any
+// person obtaining a copy of this software and associated
+// documentation files (the "Software"), to deal in the
+// Software without restriction, including without
+// limitation the rights to use, copy, modify, merge,
+// publish, distribute, sublicense, and/or sell copies of
+// the Software, and to permit persons to whom the Software
+// is furnished to do so, subject to the following
+// conditions:
+//
+// The above copyright notice and this permission notice
+// shall be included in all copies or substantial portions
+// of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF
+// ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+// TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT
+// SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+// IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+// DEALINGS IN THE SOFTWARE.
+pub fn update_submodules(repo: &git2::Repository) -> Result<(), git2::Error> {
+    fn add_subrepos(
+        repo: &git2::Repository,
+        list: &mut Vec<git2::Repository>,
+    ) -> Result<(), git2::Error> {
+        for mut subm in repo.submodules()? {
+            subm.update(true, None)?;
+            list.push(subm.open()?);
+        }
+        Ok(())
+    }
+
+    let mut repos = Vec::new();
+    add_subrepos(repo, &mut repos)?;
+    while let Some(repo) = repos.pop() {
+        add_subrepos(&repo, &mut repos)?;
+    }
+    Ok(())
+}

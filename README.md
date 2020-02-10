@@ -357,3 +357,30 @@ Other thoughts
 [iss-init]: https://github.com/emlun/gws2/issues/1
 [iss-subdir]: https://github.com/emlun/gws2/issues/5
 [iss-theme]: https://github.com/emlun/gws2/issues/4
+
+
+## Running the tests
+
+Some of the integration tests attempt to clone a repository from GitHub via SSH.
+If you already have an SSH key set up for GitHub in your keyring, you're all
+good - but if you don't, there's an SSH key bundled in `tests/id_rsa` and
+registered as a deploy key for the public git repository at
+https://github.com/emlun/gws2 . The tests will automatically try to add it to
+your `ssh-agent` for the tests that need it, and remove it from the agent again
+after the test.
+
+However, if it looks like your SSH agent is `gpg-agent`, then the tests will not
+add the key and will fail instead. This is because `gpg-agent` asks you to set a
+passphrase to protect the imported test key, and also makes it more cumbersome
+to clean up the key after the tests. Therefore, to run the SSH tests, please run
+the standard `ssh-agent` instead. You can do this by, for example, spawning a
+subshell and running `eval $(ssh-agent)` in it:
+
+```
+$ bash
+$ eval $(ssh-agent)
+$ cargo test
+$ cargo test
+$ killall ssh-agent
+$ exit
+```

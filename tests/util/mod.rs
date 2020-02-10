@@ -15,6 +15,7 @@ use gws::config::read::read_workspace_file;
 #[derive(Debug)]
 pub enum Error {
     AssertCmdCargoError(assert_cmd::cargo::CargoError),
+    CustomError(&'static str),
     Git2Error(::git2::Error),
     IoError(::std::io::Error),
 }
@@ -28,6 +29,12 @@ impl From<assert_cmd::cargo::CargoError> for Error {
 impl From<::git2::Error> for Error {
     fn from(e: ::git2::Error) -> Error {
         Error::Git2Error(e)
+    }
+}
+
+impl From<&'static str> for Error {
+    fn from(s: &'static str) -> Error {
+        Error::CustomError(s)
     }
 }
 
@@ -396,6 +403,10 @@ missing_repository_2        | {origin} | {ahead} ahead
         origin = origin_path.to_str().unwrap(),
         ahead = ahead_path.to_str().unwrap(),
     );
+    write_projects_file(path, &content)
+}
+
+pub fn write_projects_file(path: &Path, content: &str) -> Result<(), Error> {
     Ok(write(path, content)?)
 }
 

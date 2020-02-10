@@ -1,6 +1,10 @@
 language: rust
 cache: cargo
 before_install: rustup component add rustfmt
+
+before_script:
+  - eval "$(ssh-agent -s)"
+
 script:
   - cargo fmt -- --check
   - cargo test --verbose
