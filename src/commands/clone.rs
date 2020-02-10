@@ -38,10 +38,7 @@ impl DirectoryCommand for Clone {
                     palette.clean.paint(format_message_line("Already exists"))
                 );
             } else {
-                println!(
-                    "{}",
-                    palette.cloning.paint(format_message_line("Cloning…"))
-                );
+                println!("{}", palette.cloning.paint(format_message_line("Cloning…")));
 
                 match get_repobuilder()
                     .clone(&project.main_remote.url, &working_dir.join(&project.path))
