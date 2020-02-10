@@ -3,8 +3,6 @@
 use std::fs::create_dir_all;
 
 use std::fs::File;
-use std::io::Read;
-use std::io::Write;
 use std::path::Path;
 
 use tempdir::TempDir;
