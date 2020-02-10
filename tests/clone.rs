@@ -18,6 +18,7 @@ use gws::config::data::Workspace;
 use util::in_example_workspace;
 use util::Error;
 use util2::in_workspace_with_projects_file;
+use util2::with_bundled_ssh_key_in_agent;
 
 pub fn hash_set<I, T>(items: I) -> HashSet<T>
 where
@@ -141,34 +142,37 @@ fn clone_works_with_public_https() -> Result<(), Error> {
 fn clone_works_with_ssh() -> Result<(), Error> {
     let projects_contents = "gws2 | git@github.com:emlun/gws2.git";
 
-    in_workspace_with_projects_file(projects_contents, |working_dir, workspace: Workspace| {
-        let command: Clone = Clone {
-            projects: hash_set(vec!["gws2".to_string()]),
-        };
+    in_workspace_with_projects_file(
+        projects_contents,
+        with_bundled_ssh_key_in_agent(|working_dir, workspace: Workspace| {
+            let command: Clone = Clone {
+                projects: hash_set(vec!["gws2".to_string()]),
+            };
 
-        let repo_path: String = workspace
-            .projects
-            .iter()
-            .find(|proj| proj.path == "gws2")
-            .unwrap()
-            .path
-            .clone();
-
-        command
-            .run(working_dir, &workspace, &Palette::default())
-            .expect("Clone command failed");
-
-        assert_eq!(
-            Repository::open(working_dir.join(&repo_path))
-                .expect("Failed to open repo")
-                .remotes()
-                .expect("Failed to get remotes")
+            let repo_path: String = workspace
+                .projects
                 .iter()
-                .map(Option::unwrap)
-                .collect::<HashSet<&str>>(),
-            hash_set(vec!["origin"])
-        );
+                .find(|proj| proj.path == "gws2")
+                .unwrap()
+                .path
+                .clone();
 
-        Ok(())
-    })
+            command
+                .run(working_dir, &workspace, &Palette::default())
+                .expect("Clone command failed");
+
+            assert_eq!(
+                Repository::open(working_dir.join(&repo_path))
+                    .expect("Failed to open repo")
+                    .remotes()
+                    .expect("Failed to get remotes")
+                    .iter()
+                    .map(Option::unwrap)
+                    .collect::<HashSet<&str>>(),
+                hash_set(vec!["origin"])
+            );
+
+            Ok(())
+        })?,
+    )
 }
