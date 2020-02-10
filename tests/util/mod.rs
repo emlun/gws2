@@ -1,13 +1,10 @@
 extern crate git2;
 extern crate gws;
-extern crate tempdir;
 
 use std::fs::create_dir_all;
 use std::fs::write;
 use std::path::Path;
 use std::path::PathBuf;
-
-use tempdir::TempDir;
 
 use gws::config::data::Workspace;
 use gws::config::read::read_workspace_file;
@@ -411,7 +408,7 @@ pub fn write_projects_file(path: &Path, content: &str) -> Result<(), Error> {
 }
 
 pub fn in_example_workspace<T>(test: fn(&Path, Workspace) -> Result<T, Error>) -> Result<T, Error> {
-    let tmpdir = TempDir::new("gws-test")?;
+    let tmpdir = tempfile::tempdir()?;
     let meta_dir = tmpdir.path().join("meta");
     let workspace_dir = tmpdir.path().join("workspace");
 

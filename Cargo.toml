@@ -21,7 +21,7 @@ toml = "0.5"
 
 [dev-dependencies]
 assert_cmd = "0.11.1"
-tempdir = "0.3"
+tempfile = "3.1"
 
 [badges]
 maintenance = { status = "experimental" }

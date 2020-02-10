@@ -5,8 +5,6 @@ use std::fs::create_dir_all;
 use std::fs::File;
 use std::path::Path;
 
-use tempdir::TempDir;
-
 use gws::config::data::Workspace;
 use gws::config::read::read_workspace_file;
 
@@ -17,7 +15,7 @@ pub fn in_workspace_with_projects_file<T, F>(projects_contents: &str, test: F) -
 where
     F: Fn(&Path, Workspace) -> Result<T, Error>,
 {
-    let tmpdir = TempDir::new("gws-test")?;
+    let tmpdir = tempfile::tempdir()?;
     let workspace_dir = tmpdir.path().join("workspace");
 
     create_dir_all(&workspace_dir)?;

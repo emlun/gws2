@@ -1,6 +1,5 @@
 extern crate git2;
 extern crate gws;
-extern crate tempdir;
 
 mod util;
 mod util2;
