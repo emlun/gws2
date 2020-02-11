@@ -68,7 +68,7 @@ impl<'conf> ColourConfig<'conf> {
     fn from(v: &'conf toml::Value) -> Result<Self, ConfigError> {
         match v {
             toml::Value::String(name) => {
-                if !name.is_empty() && name.chars().nth(0) == Some('#') {
+                if !name.is_empty() && name.starts_with('#') {
                     Ok(ColourConfig::Hex(name))
                 } else {
                     Ok(ColourConfig::Named(name))

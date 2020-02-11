@@ -2,7 +2,6 @@ use super::data::user_config::UserConfig;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
-use toml;
 
 use super::data::Workspace;
 use super::error::ConfigError;
