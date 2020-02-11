@@ -84,7 +84,7 @@ pub trait RepositoryCommand {
                 )
             })
             .filter(|(_, status_result)| {
-                self.only_changes() == false
+                !self.only_changes()
                     || status_result
                         .as_ref()
                         .map(|status| {
@@ -94,7 +94,7 @@ pub trait RepositoryCommand {
                         .unwrap_or(false)
             })
             .map(|(project, status)| {
-                for p in palette {
+                if let Some(p) = palette {
                     print_status(project, &status, p);
                 }
                 (project, status)
@@ -260,7 +260,7 @@ pub fn get_repobuilder<'a>() -> git2::build::RepoBuilder<'a> {
                 let user: String = username
                     .map(&str::to_string)
                     .or_else(|| cred_helper.username.clone())
-                    .unwrap_or("git".to_string());
+                    .unwrap_or_else(|| "git".to_string());
                 git2::Cred::ssh_key_from_agent(&user)
             } else if allowed.contains(CredentialType::USER_PASS_PLAINTEXT) && !tried_password {
                 tried_password = true;

@@ -13,7 +13,7 @@ pub struct FastForward {
     pub fetch_command: Fetch,
 }
 
-fn do_ff<'repo>(
+fn do_ff(
     repo: &git2::Repository,
     status_report: RepositoryStatus,
 ) -> Result<RepositoryStatus, Error> {

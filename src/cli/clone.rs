@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 use clap::App;
 use clap::Arg;
 use clap::ArgMatches;
@@ -22,8 +20,8 @@ pub fn make_command(matches: &ArgMatches) -> Clone {
     Clone {
         projects: matches
             .values_of("path")
-            .map(|values| values.into_iter().map(&str::to_string).collect())
-            .unwrap_or(HashSet::new()),
+            .map(|values| values.map(&str::to_string).collect())
+            .unwrap_or_default(),
     }
 }
 

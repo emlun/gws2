@@ -15,7 +15,7 @@ pub type WorkspaceStatus<'proj> = BTreeMap<&'proj Project, Result<RepositoryStat
 pub type RepositoryStatus = BTreeSet<BranchStatus>;
 
 pub trait BranchMethods<'repo> {
-    fn branch_name<'a>(&'a self) -> Result<&'a str, Error>;
+    fn branch_name(&self) -> Result<&str, Error>;
     fn is_up_to_date_with_upstream(&'repo self) -> Result<Option<bool>, Error>;
     fn upstream_name(&self) -> Result<Option<String>, Error>;
 }
@@ -33,7 +33,7 @@ trait StatusMethods {
 }
 
 impl<'repo> BranchMethods<'repo> for Branch<'repo> {
-    fn branch_name<'a>(&'a self) -> Result<&'a str, Error> {
+    fn branch_name(&self) -> Result<&str, Error> {
         self.name()
             .map_err(Error::from)
             .and_then(|name| name.ok_or(Error::NoBranchNameFound))
@@ -104,7 +104,7 @@ impl RepositoryMethods for Repository {
                 BranchStatus {
                     name: b_name.to_string(),
                     upstream_name: match b.upstream_name() {
-                        Ok(Some(s)) => Some(s.to_string()),
+                        Ok(Some(s)) => Some(s),
                         _ => None,
                     },
                     dirty: if is_head_branch {

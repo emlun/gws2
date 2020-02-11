@@ -9,7 +9,7 @@ pub struct MaybeNamedRemote {
     pub name: Option<String>,
 }
 impl MaybeNamedRemote {
-    pub fn to_named(self) -> Result<Remote, String> {
+    pub fn into_named(self) -> Result<Remote, String> {
         Ok(Remote {
             url: self.url,
             name: self
@@ -18,10 +18,10 @@ impl MaybeNamedRemote {
         })
     }
 
-    pub fn to_named_or(self, default_name: &str) -> Remote {
+    pub fn into_named_or(self, default_name: &str) -> Remote {
         Remote {
             url: self.url,
-            name: self.name.unwrap_or(default_name.to_string()),
+            name: self.name.unwrap_or_else(|| default_name.to_string()),
         }
     }
 }

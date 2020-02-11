@@ -49,7 +49,7 @@ fn do_fetch_remote<'repo>(
     Ok(updated_branches)
 }
 
-fn do_fetch<'repo>(project: &Project, repo: &git2::Repository) -> FetchedProject {
+fn do_fetch(project: &Project, repo: &git2::Repository) -> FetchedProject {
     FetchedProject {
         updated_branch_names: project
             .remotes()
@@ -57,7 +57,7 @@ fn do_fetch<'repo>(project: &Project, repo: &git2::Repository) -> FetchedProject
             .flat_map(
                 |remote_config| match repo.find_remote(&remote_config.name) {
                     Ok(mut remote) => do_fetch_remote(project, &repo, &mut remote)
-                        .unwrap_or(BTreeSet::new())
+                        .unwrap_or_default()
                         .into_iter(),
                     Err(_) => BTreeSet::new().into_iter(),
                 },
@@ -66,7 +66,7 @@ fn do_fetch<'repo>(project: &Project, repo: &git2::Repository) -> FetchedProject
     }
 }
 
-fn augment_project_status_report<'proj, 'repo, 'result>(
+fn augment_project_status_report(
     status: RepositoryStatus,
     result: FetchedProject,
 ) -> Result<RepositoryStatus, Error> {

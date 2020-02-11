@@ -38,7 +38,7 @@ pub fn main() -> i32 {
     let cli = super::build_cli();
     let matches = cli.get_matches();
 
-    if &matches.subcommand_name() == &Some("completions") {
+    if matches.subcommand_name() == Some("completions") {
         run_completions(matches)
     } else {
         match run_gws(matches) {
@@ -110,10 +110,12 @@ fn run_gws(matches: ArgMatches) -> Result<i32, RunError> {
     };
 
     let working_dir: &Path = match matches.args.get("dir") {
-        Some(chdir_arg) => Path::new(chdir_arg.vals[0].to_str().ok_or(RunError::from(
-            exit_codes::USER_ERROR,
-            "Did not understand <dir> argument".to_string(),
-        ))?),
+        Some(chdir_arg) => Path::new(chdir_arg.vals[0].to_str().ok_or_else(|| {
+            RunError::from(
+                exit_codes::USER_ERROR,
+                "Did not understand <dir> argument".to_string(),
+            )
+        })?),
         None => Path::new("."),
     };
 
@@ -135,7 +137,7 @@ fn run_gws(matches: ArgMatches) -> Result<i32, RunError> {
         },
         None => Err(RunError::from(
             exit_codes::USER_ERROR,
-            format!("Not in a workspace."),
+            "Not in a workspace.".to_string(),
         )),
     }
 }
