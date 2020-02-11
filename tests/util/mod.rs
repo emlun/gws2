@@ -113,7 +113,7 @@ fn add_commit_to_repo(
     repo_index.write()?;
     let tree = repo.find_tree(tree_id)?;
 
-    let sig = repo.signature()?;
+    let sig = git2::Signature::now("Test", "test@example.org")?;
     let commit = repo.commit(
         branch,
         &sig,
