@@ -1,7 +1,8 @@
 gws2
 ===
 
-[![Build Status](https://travis-ci.org/emlun/gws2.svg?branch=master)](https://travis-ci.org/emlun/gws2)
+[![Build Status](https://github.com/emlun/gws2/workflows/build/badge.svg)](https://github.com/emlun/gws2/actions?query=workflow:build)
+[![Clippy Status](https://github.com/emlun/gws2/workflows/clippy/badge.svg)](https://github.com/emlun/gws2/actions?query=workflow:clippy)
 
 Rewrite of [gws][gws] in Rust
 
