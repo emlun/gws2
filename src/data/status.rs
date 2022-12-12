@@ -54,7 +54,7 @@ impl<'repo> BranchMethods<'repo> for Branch<'repo> {
     }
 
     fn upstream_name(&self) -> Result<Option<String>, Error> {
-        Ok(self.upstream()?.name()?.map(&str::to_string))
+        Ok(self.upstream()?.name()?.map(str::to_string))
     }
 }
 

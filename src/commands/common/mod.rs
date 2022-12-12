@@ -89,7 +89,7 @@ pub trait RepositoryCommand {
                         .as_ref()
                         .map(|status| {
                             status.iter().any(|b| !b.is_clean())
-                                || status.iter().all(|b| b.upstream_name == None)
+                                || status.iter().all(|b| b.upstream_name.is_none())
                         })
                         .unwrap_or(false)
             })
@@ -258,7 +258,7 @@ pub fn get_repobuilder<'a>() -> git2::build::RepoBuilder<'a> {
             if allowed.contains(CredentialType::SSH_KEY) && !tried_ssh {
                 tried_ssh = true;
                 let user: String = username
-                    .map(&str::to_string)
+                    .map(str::to_string)
                     .or_else(|| cred_helper.username.clone())
                     .unwrap_or_else(|| "git".to_string());
                 git2::Cred::ssh_key_from_agent(&user)
