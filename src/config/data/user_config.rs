@@ -49,7 +49,7 @@ pub enum ColourConfig<'conf> {
     Fixed(u8),
     Hex(&'conf str),
     Named(&'conf str),
-    RGB(u8, u8, u8),
+    Rgb(u8, u8, u8),
 }
 
 fn parse_style(v: &toml::Value) -> Result<Style, ConfigError> {
@@ -87,7 +87,7 @@ impl<'conf> ColourConfig<'conf> {
             toml::Value::Array(ref rgb) if rgb.len() == 3 => match (&rgb[0], &rgb[1], &rgb[2]) {
                 (toml::Value::Integer(r), toml::Value::Integer(g), toml::Value::Integer(b)) => {
                     if is_u8(*r) && is_u8(*g) && is_u8(*b) {
-                        Ok(ColourConfig::RGB(*r as u8, *g as u8, *b as u8))
+                        Ok(ColourConfig::Rgb(*r as u8, *g as u8, *b as u8))
                     } else {
                         Err(ConfigError::InvalidConfig(format!(
                             "RGB value out of range [0, 255]: ({}, {}, {})",
@@ -143,7 +143,7 @@ impl<'conf> ColourConfig<'conf> {
                     name
                 ))),
             },
-            ColourConfig::RGB(r, g, b) => Ok(Colour::RGB(*r, *g, *b)),
+            ColourConfig::Rgb(r, g, b) => Ok(Colour::RGB(*r, *g, *b)),
         }
         .map(|colour| colour.normal())
     }

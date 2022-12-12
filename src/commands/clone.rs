@@ -30,7 +30,7 @@ impl DirectoryCommand for Clone {
             .iter()
             .filter(|proj| self.projects.contains(&proj.path))
         {
-            println!("{}", format_project_header(&project, &palette));
+            println!("{}", format_project_header(project, palette));
 
             if working_dir.join(&project.path).exists() {
                 println!(

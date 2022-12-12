@@ -91,7 +91,7 @@ impl RepositoryMethods for Repository {
             DirtyState::Clean
         };
 
-        let branch_stati: Vec<BranchStatus> = self
+        let branch_stati = self
             .branches(Some(BranchType::Local))
             .unwrap()
             .map(Result::unwrap)
@@ -117,10 +117,9 @@ impl RepositoryMethods for Repository {
                     upstream_fetched: false,
                     fast_forwarded: false,
                 }
-            })
-            .collect();
+            });
 
-        Ok(branch_stati.into_iter().collect())
+        Ok(branch_stati.collect())
     }
 }
 

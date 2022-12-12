@@ -197,10 +197,10 @@ fn describe_status(status: &BranchStatus, palette: &Palette) -> String {
 
 fn describe_full(status: &BranchStatus, palette: &Palette) -> String {
     format_branch_line(
-        &palette,
+        palette,
         status.is_head,
         &status.name,
-        &describe_status(status, &palette),
+        &describe_status(status, palette),
     )
 }
 
@@ -214,7 +214,7 @@ pub fn print_status(
     match project_status {
         Ok(status) => {
             for b in status {
-                println!("{}", describe_full(b, &palette));
+                println!("{}", describe_full(b, palette));
             }
         }
         Err(Error::RepositoryMissing) => {
@@ -225,7 +225,7 @@ pub fn print_status(
                     .paint(format_message_line("Missing repository"))
             );
         }
-        Err(Error::Git2Error(err)) => {
+        Err(Error::Git2(err)) => {
             eprintln!("Failed to open repository: {}", err);
             println!("{}", palette.error.paint(format_message_line("Error")));
         }

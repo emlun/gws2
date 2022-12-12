@@ -34,9 +34,9 @@ impl Project {
             .collect())
     }
 
-    pub fn current_upstream_heads<'repo>(
+    pub fn current_upstream_heads(
         &self,
-        repo: &'repo git2::Repository,
+        repo: &git2::Repository,
     ) -> Result<BTreeMap<String, git2::Oid>, Error> {
         self.local_branches_internal(repo).and_then(|branches| {
             branches

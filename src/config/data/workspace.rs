@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use super::Project;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct Workspace {
     pub projects: BTreeSet<Project>,
 }

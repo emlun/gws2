@@ -18,7 +18,7 @@ pub fn read_workspace_file<P: AsRef<Path>>(file_path: P) -> Result<Workspace, Co
 }
 
 fn read_config_toml(content: &str) -> Result<UserConfig, toml::de::Error> {
-    toml::from_str(&content)
+    toml::from_str(content)
 }
 
 pub fn read_config_file<P: AsRef<Path>>(file_path: P) -> Result<UserConfig, ConfigError> {

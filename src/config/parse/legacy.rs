@@ -256,7 +256,8 @@ mod tests {
         let line = "foo | git@github.com:foo/foo.git | git@github.com:bar/foo.git |";
         assert!(
             Project::from_str(line).is_err(),
-            format!("This line should result in an error: {}", line)
+            "This line should result in an error: {}",
+            line
         );
     }
 
@@ -265,7 +266,8 @@ mod tests {
         let line = "foo | git@github.com:foo/foo.git | git@github.com:bar/foo.git | git@github.com:boo/foo.git";
         assert!(
             Project::from_str(line).is_err(),
-            format!("This line should result in an error: {}", line)
+            "This line should result in an error: {}",
+            line
         );
     }
 

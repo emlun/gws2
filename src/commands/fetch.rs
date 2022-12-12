@@ -56,7 +56,7 @@ fn do_fetch(project: &Project, repo: &git2::Repository) -> FetchedProject {
             .into_iter()
             .flat_map(
                 |remote_config| match repo.find_remote(&remote_config.name) {
-                    Ok(mut remote) => do_fetch_remote(project, &repo, &mut remote)
+                    Ok(mut remote) => do_fetch_remote(project, repo, &mut remote)
                         .unwrap_or_default()
                         .into_iter(),
                     Err(_) => BTreeSet::new().into_iter(),
