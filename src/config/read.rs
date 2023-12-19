@@ -105,6 +105,7 @@ mod tests {
             clean: Colour::Fixed(9).normal(),
             cloning: Colour::Fixed(14).normal(),
             dirty: Colour::Fixed(9).normal(),
+            info: Colour::Fixed(242).normal(),
             error: Colour::RGB(0xff, 0x64, 0x2b).normal(),
             missing: Colour::RGB(0xff, 0x64, 0x2b).normal(),
             repo: Colour::Green.normal(),

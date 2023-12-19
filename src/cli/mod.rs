@@ -1,4 +1,4 @@
-// pub mod check;
+pub mod check;
 pub mod clone;
 pub mod fetch;
 pub mod ff;
@@ -34,6 +34,7 @@ pub fn build_cli() -> App<'static, 'static> {
                 .long("no-config")
                 .help("Don't read any config files"),
         )
+        .subcommand(check::subcommand_def())
         .subcommand(clone::subcommand_def())
         .subcommand(completions())
         .subcommand(fetch::subcommand_def())
