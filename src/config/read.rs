@@ -26,22 +26,8 @@ pub fn read_config_file<P: AsRef<Path>>(file_path: P) -> Result<UserConfig, Conf
     let mut file = File::open(&file_path).map_err(ConfigError::OpenFile)?;
     file.read_to_string(&mut contents)
         .map_err(ConfigError::OpenFile)?;
-    read_config_toml(&contents).map_err(|e| {
-        ConfigError::SyntaxError(match e.line_col() {
-            Some((line, col)) => format!(
-                r#"TOML syntax error at file {}, line {}, column {}: {:?}"#,
-                file_path
-                    .as_ref()
-                    .as_os_str()
-                    .to_str()
-                    .unwrap_or("(unknown)"),
-                line,
-                col,
-                e
-            ),
-            None => format!("TOML syntax error at (unknown position): {:?}", e),
-        })
-    })
+    read_config_toml(&contents)
+        .map_err(|e| ConfigError::SyntaxError(format!("Stuff: {}", e.message().to_string())))
 }
 
 #[cfg(test)]
@@ -119,6 +105,7 @@ mod tests {
             clean: Colour::Fixed(9).normal(),
             cloning: Colour::Fixed(14).normal(),
             dirty: Colour::Fixed(9).normal(),
+            info: Colour::Fixed(242).normal(),
             error: Colour::RGB(0xff, 0x64, 0x2b).normal(),
             missing: Colour::RGB(0xff, 0x64, 0x2b).normal(),
             repo: Colour::Green.normal(),

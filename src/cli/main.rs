@@ -100,6 +100,7 @@ fn run_gws(matches: ArgMatches) -> Result<i32, RunError> {
     let subcommand: Command = match &matches.subcommand {
         None => super::status::make_cli_command(&matches),
         Some(sc) => match sc.name.as_ref() {
+            "check" => super::check::make_cli_command(&sc.matches),
             "clone" => super::clone::make_cli_command(&sc.matches),
             "fetch" => super::fetch::make_cli_command(&sc.matches),
             "ff" => super::ff::make_cli_command(&sc.matches),
