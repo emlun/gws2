@@ -13,7 +13,7 @@ license = "GPL-3.0-or-later"
 
 [dependencies]
 ansi_term = "0.12.1"
-clap = { version = "2.31" }
+clap = "2.31"
 directories = "4.0.1"
 git2 = "0.18.2"
 serde = { version = "1.0.150", features = ["derive"] }
